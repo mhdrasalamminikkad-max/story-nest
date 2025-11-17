@@ -37,6 +37,7 @@ export default function ParentDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [storyTypeFilter, setStoryTypeFilter] = useState<string>("all");
   
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -80,6 +81,9 @@ export default function ParentDashboard() {
       // Filter by category
       if (categoryFilter !== "all" && s.category !== categoryFilter) return false;
       
+      // Filter by story type
+      if (storyTypeFilter !== "all" && s.storyType !== storyTypeFilter) return false;
+      
       // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -102,6 +106,7 @@ export default function ParentDashboard() {
       imageUrl: teddyImage,
       language: "english" as const,
       category: "educational" as const,
+      storyType: "lesson" as const,
     },
   });
 
@@ -124,6 +129,7 @@ export default function ParentDashboard() {
         imageUrl: teddyImage,
         language: "english" as const,
         category: "educational" as const,
+        storyType: "lesson" as const,
       });
     },
   });
@@ -147,6 +153,7 @@ export default function ParentDashboard() {
         imageUrl: teddyImage,
         language: "english" as const,
         category: "educational" as const,
+        storyType: "lesson" as const,
       });
     },
   });
@@ -246,6 +253,7 @@ export default function ParentDashboard() {
       imageUrl: story.imageUrl,
       language: story.language as "english" | "malayalam",
       category: story.category as "islamic" | "history" | "moral" | "adventure" | "educational" | "fairy-tale",
+      storyType: story.storyType as "islamic" | "lesson" | "history" | "fairy-tale" | "adventure" | "educational" | "moral" | "mythology" | "science",
       ...(story.voiceoverUrl && { voiceoverUrl: story.voiceoverUrl }),
     });
   };
@@ -338,6 +346,8 @@ export default function ParentDashboard() {
                     summary: "",
                     imageUrl: teddyImage,
                     language: "english" as const,
+                    category: "educational" as const,
+                    storyType: "lesson" as const,
                   });
                 }}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
@@ -429,6 +439,23 @@ export default function ParentDashboard() {
                       <SelectItem value="adventure">Adventure</SelectItem>
                       <SelectItem value="educational">Educational</SelectItem>
                       <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
+                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-story-type-filter">
+                      <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="islamic">Islamic</SelectItem>
+                      <SelectItem value="lesson">Lesson</SelectItem>
+                      <SelectItem value="history">History</SelectItem>
+                      <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                      <SelectItem value="adventure">Adventure</SelectItem>
+                      <SelectItem value="educational">Educational</SelectItem>
+                      <SelectItem value="moral">Moral</SelectItem>
+                      <SelectItem value="mythology">Mythology</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -555,6 +582,8 @@ export default function ParentDashboard() {
             summary: "",
             imageUrl: teddyImage,
             language: "english" as const,
+            category: "educational" as const,
+            storyType: "lesson" as const,
           });
         }
       }}>
@@ -640,6 +669,35 @@ export default function ParentDashboard() {
                         <SelectItem value="adventure">Adventure</SelectItem>
                         <SelectItem value="educational">Educational</SelectItem>
                         <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="storyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Story Type *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-parent-story-type">
+                          <SelectValue placeholder="Select story type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="islamic">Islamic</SelectItem>
+                        <SelectItem value="lesson">Lesson</SelectItem>
+                        <SelectItem value="history">History</SelectItem>
+                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                        <SelectItem value="adventure">Adventure</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="moral">Moral</SelectItem>
+                        <SelectItem value="mythology">Mythology</SelectItem>
+                        <SelectItem value="science">Science</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

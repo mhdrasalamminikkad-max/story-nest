@@ -11,6 +11,7 @@ export const storySchema = z.object({
   voiceoverUrl: z.string().optional(),
   language: z.enum(["english", "malayalam"]),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"]),
+  storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"]),
   status: z.enum(["published", "pending_review", "rejected", "draft"]),
   approvedBy: z.string().optional(),
   rejectionReason: z.string().optional(),
@@ -31,6 +32,7 @@ export const insertStorySchema = storySchema.omit({
   voiceoverUrl: z.string().optional(),
   language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"], { required_error: "Please select a category" }),
+  storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"], { required_error: "Please select a story type" }),
 });
 
 export const reviewStorySchema = z.object({

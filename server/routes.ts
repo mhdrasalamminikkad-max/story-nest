@@ -16,10 +16,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
     try {
-      const publishedStories = await db
-        .select()
-        .from(stories)
-        .where(eq(stories.status, "published"))
+      const { storyType, category, language } = req.query;
+      
+      let query = db.select().from(stories);
+      const conditions = [eq(stories.status, "published")];
+      
+      if (storyType && typeof storyType === 'string') {
+        conditions.push(eq(stories.storyType, storyType));
+      }
+      
+      if (category && typeof category === 'string') {
+        conditions.push(eq(stories.category, category));
+      }
+      
+      if (language && typeof language === 'string') {
+        conditions.push(eq(stories.language, language));
+      }
+      
+      const publishedStories = await query
+        .where(and(...conditions))
         .orderBy(desc(stories.createdAt));
       
       const storiesWithTimestamp = publishedStories.map(s => ({

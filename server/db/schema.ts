@@ -11,6 +11,7 @@ export const stories = pgTable("stories", {
   voiceoverUrl: text("voiceover_url"),
   language: varchar("language", { length: 20 }).notNull().default("english"),
   category: varchar("category", { length: 30 }).notNull().default("educational"),
+  storyType: varchar("story_type", { length: 30 }).notNull().default("lesson"),
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   approvedBy: varchar("approved_by"),
   rejectionReason: text("rejection_reason"),

@@ -68,6 +68,7 @@ export default function AdminPanel() {
       imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
       language: "english" as const,
       category: "educational" as const,
+      storyType: "lesson" as const,
     },
   });
 
@@ -239,6 +240,7 @@ export default function AdminPanel() {
         imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
         language: "english" as const,
         category: "educational" as const,
+        storyType: "lesson" as const,
       });
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
@@ -979,6 +981,8 @@ export default function AdminPanel() {
             summary: "",
             imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
             language: "english" as const,
+            category: "educational" as const,
+            storyType: "lesson" as const,
           });
           if (audioUrl) {
             URL.revokeObjectURL(audioUrl);
@@ -1039,6 +1043,61 @@ export default function AdminPanel() {
                       <SelectContent>
                         <SelectItem value="english">English</SelectItem>
                         <SelectItem value="malayalam">Malayalam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-admin-story-category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="islamic">Islamic</SelectItem>
+                        <SelectItem value="history">History</SelectItem>
+                        <SelectItem value="moral">Moral</SelectItem>
+                        <SelectItem value="adventure">Adventure</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="storyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Story Type *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-admin-story-type">
+                          <SelectValue placeholder="Select story type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="islamic">Islamic</SelectItem>
+                        <SelectItem value="lesson">Lesson</SelectItem>
+                        <SelectItem value="history">History</SelectItem>
+                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                        <SelectItem value="adventure">Adventure</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="moral">Moral</SelectItem>
+                        <SelectItem value="mythology">Mythology</SelectItem>
+                        <SelectItem value="science">Science</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1148,6 +1207,8 @@ export default function AdminPanel() {
                       summary: "",
                       imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
                       language: "english" as const,
+                      category: "educational" as const,
+                      storyType: "lesson" as const,
                     });
                   }}
                   className="rounded-2xl"
