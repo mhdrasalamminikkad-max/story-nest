@@ -66,6 +66,7 @@ export default function AdminPanel() {
       content: "",
       summary: "",
       imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
+      language: "english" as const,
     },
   });
 
@@ -1004,6 +1005,28 @@ export default function AdminPanel() {
                     <FormControl>
                       <Input placeholder="A brief description of the story" className="rounded-2xl" {...field} data-testid="input-admin-story-summary" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Story Language *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-admin-story-language">
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="english">English</SelectItem>
+                        <SelectItem value="malayalam">Malayalam</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
