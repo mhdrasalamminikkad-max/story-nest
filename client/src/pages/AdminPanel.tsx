@@ -67,6 +67,7 @@ export default function AdminPanel() {
       summary: "",
       imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
       language: "english" as const,
+      category: "educational" as const,
     },
   });
 
@@ -231,7 +232,14 @@ export default function AdminPanel() {
         description: "Your story has been published and is now visible to all users." 
       });
       setShowAddStory(false);
-      form.reset();
+      form.reset({
+        title: "",
+        content: "",
+        summary: "",
+        imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
+        language: "english" as const,
+        category: "educational" as const,
+      });
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
@@ -965,7 +973,13 @@ export default function AdminPanel() {
       <Dialog open={showAddStory} onOpenChange={(open) => {
         if (!open) {
           setShowAddStory(false);
-          form.reset();
+          form.reset({
+            title: "",
+            content: "",
+            summary: "",
+            imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
+            language: "english" as const,
+          });
           if (audioUrl) {
             URL.revokeObjectURL(audioUrl);
           }
@@ -1128,7 +1142,13 @@ export default function AdminPanel() {
                   variant="outline"
                   onClick={() => {
                     setShowAddStory(false);
-                    form.reset();
+                    form.reset({
+                      title: "",
+                      content: "",
+                      summary: "",
+                      imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400",
+                      language: "english" as const,
+                    });
                   }}
                   className="rounded-2xl"
                   data-testid="button-cancel-story"

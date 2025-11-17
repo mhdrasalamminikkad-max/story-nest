@@ -36,6 +36,7 @@ export default function ParentDashboard() {
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -76,6 +77,9 @@ export default function ParentDashboard() {
       // Filter by language
       if (languageFilter !== "all" && s.language !== languageFilter) return false;
       
+      // Filter by category
+      if (categoryFilter !== "all" && s.category !== categoryFilter) return false;
+      
       // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -97,6 +101,7 @@ export default function ParentDashboard() {
       summary: "",
       imageUrl: teddyImage,
       language: "english" as const,
+      category: "educational" as const,
     },
   });
 
@@ -112,7 +117,14 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       setShowAddStory(false);
-      form.reset();
+      form.reset({
+        title: "",
+        content: "",
+        summary: "",
+        imageUrl: teddyImage,
+        language: "english" as const,
+        category: "educational" as const,
+      });
     },
   });
 
@@ -128,7 +140,14 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       setEditingStory(null);
-      form.reset();
+      form.reset({
+        title: "",
+        content: "",
+        summary: "",
+        imageUrl: teddyImage,
+        language: "english" as const,
+        category: "educational" as const,
+      });
     },
   });
 
@@ -225,6 +244,8 @@ export default function ParentDashboard() {
       content: story.content,
       summary: story.summary,
       imageUrl: story.imageUrl,
+      language: story.language as "english" | "malayalam",
+      category: story.category as "islamic" | "history" | "moral" | "adventure" | "educational" | "fairy-tale",
       ...(story.voiceoverUrl && { voiceoverUrl: story.voiceoverUrl }),
     });
   };
@@ -316,6 +337,7 @@ export default function ParentDashboard() {
                     content: "",
                     summary: "",
                     imageUrl: teddyImage,
+                    language: "english" as const,
                   });
                 }}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
@@ -393,6 +415,20 @@ export default function ParentDashboard() {
                       <SelectItem value="all">All Languages</SelectItem>
                       <SelectItem value="english">English</SelectItem>
                       <SelectItem value="malayalam">Malayalam</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-category-filter">
+                      <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="islamic">Islamic</SelectItem>
+                      <SelectItem value="history">History</SelectItem>
+                      <SelectItem value="moral">Moral Lessons</SelectItem>
+                      <SelectItem value="adventure">Adventure</SelectItem>
+                      <SelectItem value="educational">Educational</SelectItem>
+                      <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -513,7 +549,13 @@ export default function ParentDashboard() {
         if (!open) {
           setShowAddStory(false);
           setEditingStory(null);
-          form.reset();
+          form.reset({
+            title: "",
+            content: "",
+            summary: "",
+            imageUrl: teddyImage,
+            language: "english" as const,
+          });
         }
       }}>
         <DialogContent className="sm:max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto" data-testid="dialog-add-story">
@@ -572,6 +614,32 @@ export default function ParentDashboard() {
                       <SelectContent>
                         <SelectItem value="english">English</SelectItem>
                         <SelectItem value="malayalam">Malayalam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Story Category *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-story-category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="islamic">Islamic</SelectItem>
+                        <SelectItem value="history">History</SelectItem>
+                        <SelectItem value="moral">Moral Lessons</SelectItem>
+                        <SelectItem value="adventure">Adventure</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

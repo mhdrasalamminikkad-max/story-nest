@@ -10,6 +10,7 @@ export const stories = pgTable("stories", {
   summary: text("summary").notNull(),
   voiceoverUrl: text("voiceover_url"),
   language: varchar("language", { length: 20 }).notNull().default("english"),
+  category: varchar("category", { length: 30 }).notNull().default("educational"),
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   approvedBy: varchar("approved_by"),
   rejectionReason: text("rejection_reason"),
