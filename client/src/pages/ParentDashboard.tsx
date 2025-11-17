@@ -27,6 +27,8 @@ import teddyImage from "@assets/generated_images/Teddy_bear_reading_story_502f26
 import bunnyImage from "@assets/generated_images/Bunny_on_cloud_e358044b.png";
 import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
 import foxImage from "@assets/generated_images/Fox_reading_by_candlelight_2780dc73.png";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { MobileHeader } from "@/components/MobileHeader";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
@@ -300,11 +302,13 @@ export default function ParentDashboard() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden pb-20 md:pb-0">
       <AnimatedBackground />
       
       <div className="relative z-10">
-        <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
+        <MobileHeader title="Dashboard" />
+        
+        <header className="hidden md:block border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
           <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
             <h1 className="font-heading text-xl sm:text-2xl md:text-3xl text-foreground">Parent Dashboard</h1>
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -329,13 +333,78 @@ export default function ParentDashboard() {
           </div>
         </header>
 
-        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-24 sm:pb-32">
+        <main className="container mx-auto px-3 sm:px-4 py-4 md:py-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 sm:mb-8 flex flex-col gap-3 sm:gap-4"
+            className="mb-4 md:mb-6"
           >
-            <div className="flex gap-2 flex-wrap w-full">
+            <div className="md:hidden flex items-center gap-2 mb-4 px-1">
+              {parentSettings && (
+                <Badge variant="secondary" className="px-3 py-1.5 text-sm" data-testid="badge-coin-balance">
+                  <Coins className="w-4 h-4 mr-1.5" />
+                  <span className="font-semibold">{parentSettings.coins}</span>
+                  <span className="ml-1 text-muted-foreground">coins</span>
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="rounded-xl ml-auto"
+                data-testid="button-signout"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+
+            <Card className="md:hidden rounded-2xl mb-4 overflow-hidden">
+              <CardContent className="p-4 space-y-3">
+                <Button
+                  onClick={() => {
+                    setEditingStory(null);
+                    setShowAddStory(true);
+                    form.reset({
+                      title: "",
+                      content: "",
+                      summary: "",
+                      imageUrl: teddyImage,
+                      language: "english" as const,
+                      category: "educational" as const,
+                      storyType: "lesson" as const,
+                    });
+                  }}
+                  className="w-full rounded-xl"
+                  data-testid="button-add-story"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Submit Story for Review
+                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setLocation("/pricing")}
+                    className="rounded-xl"
+                    data-testid="button-view-plans"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Plans
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setLocation("/child-mode")}
+                    className="rounded-xl"
+                    data-testid="button-child-mode"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Child Mode
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="hidden md:flex gap-2 flex-wrap w-full">
               <Button
                 onClick={() => {
                   setEditingStory(null);
@@ -351,19 +420,16 @@ export default function ParentDashboard() {
                   });
                 }}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-add-story"
+                data-testid="button-add-story-desktop"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                <span className="hidden xs:inline">Submit Story for Review</span>
-                <span className="xs:hidden">Submit Story</span>
+                Submit Story for Review
               </Button>
-            </div>
-            <div className="flex gap-2 flex-wrap w-full">
               <Button
                 variant="outline"
                 onClick={() => setLocation("/pricing")}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-view-plans"
+                data-testid="button-view-plans-desktop"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 View Plans
@@ -371,11 +437,10 @@ export default function ParentDashboard() {
               <Button
                 onClick={() => setLocation("/child-mode")}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-child-mode"
+                data-testid="button-child-mode-desktop"
               >
                 <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                <span className="hidden xs:inline">Enter Child Mode</span>
-                <span className="xs:hidden">Child Mode</span>
+                Enter Child Mode
               </Button>
             </div>
           </motion.div>
@@ -843,6 +908,8 @@ export default function ParentDashboard() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      <MobileBottomNav />
     </div>
   );
 }
