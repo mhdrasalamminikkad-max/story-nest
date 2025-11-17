@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -34,6 +34,8 @@ export default function ParentDashboard() {
   const [showAddStory, setShowAddStory] = useState(false);
   const [filterBookmarked, setFilterBookmarked] = useState(false);
   const [editingStory, setEditingStory] = useState<Story | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [languageFilter, setLanguageFilter] = useState<string>("all");
   
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -66,9 +68,26 @@ export default function ParentDashboard() {
     isBookmarked: bookmarks.includes(story.id),
   }));
 
-  const displayedStories = filterBookmarked
-    ? storiesWithBookmarks.filter(s => s.isBookmarked)
-    : storiesWithBookmarks;
+  const displayedStories = storiesWithBookmarks
+    .filter(s => {
+      // Filter by bookmark
+      if (filterBookmarked && !s.isBookmarked) return false;
+      
+      // Filter by language
+      if (languageFilter !== "all" && s.language !== languageFilter) return false;
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          s.title.toLowerCase().includes(query) ||
+          s.summary.toLowerCase().includes(query) ||
+          s.content.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    });
 
   const form = useForm({
     resolver: zodResolver(insertStorySchema),
@@ -342,16 +361,41 @@ export default function ParentDashboard() {
             </TabsList>
 
             <TabsContent value="published">
-              <div className="mb-4">
-                <Button
-                  variant={filterBookmarked ? "default" : "outline"}
-                  onClick={() => setFilterBookmarked(!filterBookmarked)}
-                  className="rounded-2xl"
-                  data-testid="button-filter-bookmarks"
-                >
-                  <BookmarkCheck className="w-4 h-4 mr-2" />
-                  {filterBookmarked ? "Show All" : "Bookmarked Only"}
-                </Button>
+              <div className="mb-4 space-y-3">
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant={filterBookmarked ? "default" : "outline"}
+                    onClick={() => setFilterBookmarked(!filterBookmarked)}
+                    className="rounded-2xl"
+                    data-testid="button-filter-bookmarks"
+                  >
+                    <BookmarkCheck className="w-4 h-4 mr-2" />
+                    {filterBookmarked ? "Show All" : "Bookmarked Only"}
+                  </Button>
+                </div>
+                
+                <div className="flex gap-3 flex-wrap">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search stories..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="rounded-2xl pl-10"
+                      data-testid="input-search-stories"
+                    />
+                  </div>
+                  <Select value={languageFilter} onValueChange={setLanguageFilter}>
+                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-language-filter">
+                      <SelectValue placeholder="Filter by language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Languages</SelectItem>
+                      <SelectItem value="english">English</SelectItem>
+                      <SelectItem value="malayalam">Malayalam</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               {isLoading ? (
                 <div className="text-center py-12">
