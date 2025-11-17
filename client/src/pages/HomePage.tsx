@@ -5,19 +5,28 @@ import { motion } from "framer-motion";
 import { BookOpen, Sparkles, LogIn, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { StoryCard } from "@/components/StoryCard";
+import { HorizontalStoryCarousel } from "@/components/HorizontalStoryCarousel";
+import { CategoryChips } from "@/components/CategoryChips";
+import { MobileHeader } from "@/components/MobileHeader";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useQuery } from "@tanstack/react-query";
 import type { Story } from "@shared/schema";
+import { useState } from "react";
 import teddyImage from "@assets/generated_images/Teddy_bear_reading_story_502f26a8.png";
 import bunnyImage from "@assets/generated_images/Bunny_on_cloud_e358044b.png";
 import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories/preview"],
     enabled: false,
   });
+
+  const categories = ["All", "Bedtime", "Adventure", "Learning", "Fantasy"];
 
   const previewStories: Story[] = stories.length > 0 ? stories.slice(0, 3) : [
     {
@@ -52,12 +61,18 @@ export default function HomePage() {
     },
   ];
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden pb-16 md:pb-0">
       <AnimatedBackground />
       
       <div className="relative z-10">
-        <header className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between flex-wrap gap-2">
+        <MobileHeader showSearch onSearch={handleSearch} />
+        
+        <header className="hidden md:flex container mx-auto px-4 sm:px-6 py-4 sm:py-6 items-center justify-between flex-wrap gap-2">
           <Button
             variant="ghost"
             onClick={() => setLocation("/pricing")}
@@ -69,12 +84,12 @@ export default function HomePage() {
           <ThemeToggle />
         </header>
 
-        <main className="container mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
+        <main className="md:container md:mx-auto md:px-4 sm:px-6 pb-12 sm:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center py-12 sm:py-16 md:py-24"
+            className="hidden md:block text-center py-12 sm:py-16 md:py-24"
           >
             <motion.div
               animate={{ scale: [1, 1.05, 1] }}
@@ -117,12 +132,43 @@ export default function HomePage() {
             </div>
           </motion.div>
 
+          <div className="md:hidden pt-4">
+            <CategoryChips 
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+            
+            <div className="space-y-6">
+              <HorizontalStoryCarousel
+                title="Featured Stories"
+                stories={previewStories}
+                showBookmark={false}
+                onRead={() => setLocation("/auth")}
+              />
+              
+              <HorizontalStoryCarousel
+                title="Bedtime Favorites"
+                stories={previewStories}
+                showBookmark={false}
+                onRead={() => setLocation("/auth")}
+              />
+              
+              <HorizontalStoryCarousel
+                title="Adventure Time"
+                stories={previewStories}
+                showBookmark={false}
+                onRead={() => setLocation("/auth")}
+              />
+            </div>
+          </div>
+
           <motion.section
             id="stories-preview"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-12 sm:mt-16"
+            className="hidden md:block mt-12 sm:mt-16"
           >
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-foreground px-2">
               Featured Stories
@@ -143,13 +189,15 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="mt-16 sm:mt-24 text-center py-6 sm:py-8 border-t border-border"
+            className="hidden md:block mt-16 sm:mt-24 text-center py-6 sm:py-8 border-t border-border"
           >
             <p className="text-sm sm:text-base text-muted-foreground flex flex-wrap items-center justify-center gap-2 px-4">
               Made with <Heart className="w-4 h-4 text-pink-500 fill-pink-500" /> for dreamers and readers.
             </p>
           </motion.footer>
         </main>
+        
+        <MobileBottomNav />
       </div>
     </div>
   );

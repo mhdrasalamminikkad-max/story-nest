@@ -10,9 +10,34 @@ interface StoryCardProps {
   onRead?: (story: Story) => void;
   onToggleBookmark?: (story: Story) => void;
   showBookmark?: boolean;
+  compact?: boolean;
 }
 
-export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true }: StoryCardProps) {
+export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true, compact = false }: StoryCardProps) {
+  if (compact) {
+    return (
+      <div 
+        className="cursor-pointer hover-elevate rounded-2xl overflow-hidden" 
+        onClick={() => onRead?.(story)}
+        data-testid={`card-story-${story.id}`}
+      >
+        <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
+          <img
+            src={story.imageUrl}
+            alt={story.title}
+            className="w-full h-full object-cover"
+            data-testid={`img-story-${story.id}`}
+          />
+        </div>
+        <div className="pt-2">
+          <h3 className="font-medium text-sm text-foreground line-clamp-2" data-testid={`text-story-title-${story.id}`}>
+            {story.title}
+          </h3>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

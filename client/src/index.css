@@ -287,4 +287,19 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* Hide scrollbars for horizontal carousels */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Safe bottom padding for mobile devices with notches */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
