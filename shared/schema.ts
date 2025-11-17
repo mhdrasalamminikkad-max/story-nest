@@ -51,6 +51,8 @@ export const parentSettingsSchema = z.object({
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),
   theme: z.enum(["day", "night"]),
+  isAdmin: z.boolean().default(false),
+  isBlocked: z.boolean().default(false),
   coins: z.number().default(0),
   trialStartedAt: z.number().optional(),
   trialEndsAt: z.number().optional(),

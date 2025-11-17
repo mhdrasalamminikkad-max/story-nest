@@ -26,6 +26,7 @@ export const parentSettings = pgTable("parent_settings", {
   fullscreenLockEnabled: boolean("fullscreen_lock_enabled").notNull(),
   theme: varchar("theme", { length: 10 }).notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
+  isBlocked: boolean("is_blocked").notNull().default(false),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   coins: integer("coins").notNull().default(0),
