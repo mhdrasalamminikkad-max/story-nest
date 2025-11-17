@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { authenticateUser, type AuthRequest } from "./middleware/auth";
+import { authenticateUser, checkNotBlocked, type AuthRequest } from "./middleware/auth";
 import { requireAdmin } from "./middleware/adminAuth";
 import { getSubscriptionInfo, type SubscriptionRequest } from "./middleware/subscription";
 import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema } from "@shared/schema";
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new story (all stories require admin approval)
-  app.post("/api/stories", authenticateUser, async (req: AuthRequest, res) => {
+  app.post("/api/stories", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
       const storyData = insertStorySchema.parse(req.body);
@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit draft story for review
-  app.post("/api/stories/:id/submit", authenticateUser, async (req: AuthRequest, res) => {
+  app.post("/api/stories/:id/submit", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
       const { id } = req.params;
@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Edit story (draft or pending review)
-  app.patch("/api/stories/:id", authenticateUser, async (req: AuthRequest, res) => {
+  app.patch("/api/stories/:id", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
       const { id } = req.params;
@@ -328,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/bookmarks", authenticateUser, async (req: AuthRequest, res) => {
+  app.post("/api/bookmarks", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
       const bookmarkData = insertBookmarkSchema.parse(req.body);
@@ -348,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/bookmarks/:storyId", authenticateUser, async (req: AuthRequest, res) => {
+  app.delete("/api/bookmarks/:storyId", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
       const { storyId } = req.params;
@@ -557,6 +557,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             trialStartedAt: settings.trialStartedAt ? settings.trialStartedAt.getTime() : null,
             subscriptionStatus: settings.subscriptionStatus ?? "trial",
             coins: settings.coins ?? 0,
+            isAdmin: settings.isAdmin ?? false,
+            isBlocked: settings.isBlocked ?? false,
           };
         })
       );
@@ -565,6 +567,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/block", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { userId } = req.params;
+      const { isBlocked } = req.body;
+
+      if (typeof isBlocked !== "boolean") {
+        res.status(400).json({ error: "isBlocked must be a boolean" });
+        return;
+      }
+
+      await db
+        .update(parentSettings)
+        .set({ isBlocked })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json({ success: true, userId, isBlocked });
+    } catch (error) {
+      console.error("Error updating user block status:", error);
+      res.status(500).json({ error: "Failed to update user block status" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/admin", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { userId } = req.params;
+      const { isAdmin } = req.body;
+
+      if (typeof isAdmin !== "boolean") {
+        res.status(400).json({ error: "isAdmin must be a boolean" });
+        return;
+      }
+
+      await db
+        .update(parentSettings)
+        .set({ isAdmin })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json({ success: true, userId, isAdmin });
+    } catch (error) {
+      console.error("Error updating user admin status:", error);
+      res.status(500).json({ error: "Failed to update user admin status" });
     }
   });
 

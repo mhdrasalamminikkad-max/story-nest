@@ -42,6 +42,8 @@ interface AdminUser {
   trialStartedAt: number | null;
   subscriptionStatus: string;
   coins: number;
+  isAdmin: boolean;
+  isBlocked: boolean;
 }
 
 export default function AdminPanel() {
@@ -312,6 +314,60 @@ export default function AdminPanel() {
       });
     },
   });
+
+  const toggleBlockUserMutation = useMutation({
+    mutationFn: async ({ userId, isBlocked }: { userId: string; isBlocked: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${userId}/block`, { isBlocked: !isBlocked });
+      return await res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: variables.isBlocked ? "User unblocked" : "User blocked",
+        description: variables.isBlocked 
+          ? "The user can now access their account." 
+          : "The user has been blocked from accessing their account.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update user block status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleAdminMutation = useMutation({
+    mutationFn: async ({ userId, isAdmin }: { userId: string; isAdmin: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${userId}/admin`, { isAdmin: !isAdmin });
+      return await res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: variables.isAdmin ? "Admin access revoked" : "Admin access granted",
+        description: variables.isAdmin 
+          ? "The user no longer has admin privileges." 
+          : "The user now has admin privileges.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update user admin status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggleBlockUser = (userId: string, isBlocked: boolean) => {
+    toggleBlockUserMutation.mutate({ userId, isBlocked });
+  };
+
+  const handleToggleAdmin = (userId: string, isAdmin: boolean) => {
+    toggleAdminMutation.mutate({ userId, isAdmin });
+  };
 
   const startRecording = async () => {
     try {
@@ -621,8 +677,9 @@ export default function AdminPanel() {
                             <TableHead>Subscription Status</TableHead>
                             <TableHead>Trial Countdown</TableHead>
                             <TableHead>Coins</TableHead>
-                            <TableHead>Reading Time</TableHead>
-                            <TableHead>Theme</TableHead>
+                            <TableHead>Admin</TableHead>
+                            <TableHead>Blocked</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -666,9 +723,37 @@ export default function AdminPanel() {
                                     <span>{user.coins}</span>
                                   </div>
                                 </TableCell>
-                                <TableCell>{user.readingTimeLimit} min</TableCell>
                                 <TableCell>
-                                  <Badge variant="secondary">{user.theme}</Badge>
+                                  <Badge variant={user.isAdmin ? "default" : "secondary"}>
+                                    {user.isAdmin ? "Yes" : "No"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={user.isBlocked ? "destructive" : "secondary"}>
+                                    {user.isBlocked ? "Yes" : "No"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant={user.isBlocked ? "default" : "destructive"}
+                                      onClick={() => handleToggleBlockUser(user.userId, user.isBlocked || false)}
+                                      className="rounded-2xl"
+                                      data-testid={`button-toggle-block-${index}`}
+                                    >
+                                      {user.isBlocked ? "Unblock" : "Block"}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant={user.isAdmin ? "secondary" : "default"}
+                                      onClick={() => handleToggleAdmin(user.userId, user.isAdmin || false)}
+                                      className="rounded-2xl"
+                                      data-testid={`button-toggle-admin-${index}`}
+                                    >
+                                      {user.isAdmin ? "Revoke Admin" : "Grant Admin"}
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             );
