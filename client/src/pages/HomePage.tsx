@@ -23,12 +23,11 @@ export default function HomePage() {
   
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories/preview"],
-    enabled: false,
   });
 
-  const categories = ["All", "Bedtime", "Adventure", "Learning", "Fantasy"];
+  const categories = ["All", "Fairy Tale", "Adventure", "Educational", "Moral", "History"];
 
-  const previewStories: Story[] = stories.length > 0 ? stories.slice(0, 3) : [
+  const previewStories: Story[] = stories.length > 0 ? stories : [
     {
       id: "preview-1",
       userId: "preview",
@@ -36,7 +35,10 @@ export default function HomePage() {
       content: "Once upon a time...",
       imageUrl: teddyImage,
       summary: "A gentle tale about a teddy bear who loves bedtime stories",
+      language: "english" as const,
       status: "published" as const,
+      category: "fairy-tale",
+      storyType: "educational",
       createdAt: Date.now(),
     },
     {
@@ -46,7 +48,10 @@ export default function HomePage() {
       content: "High in the sky...",
       imageUrl: bunnyImage,
       summary: "Join a curious bunny on a magical journey through the clouds",
+      language: "english" as const,
       status: "published" as const,
+      category: "adventure",
+      storyType: "fairy-tale",
       createdAt: Date.now(),
     },
     {
@@ -56,7 +61,10 @@ export default function HomePage() {
       content: "In the forest at night...",
       imageUrl: owlImage,
       summary: "Discover the secrets of the forest with a kind owl friend",
+      language: "english" as const,
       status: "published" as const,
+      category: "educational",
+      storyType: "educational",
       createdAt: Date.now(),
     },
   ];
@@ -64,6 +72,27 @@ export default function HomePage() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+
+  const categoryMap: Record<string, string[]> = {
+    "All": [],
+    "Fairy Tale": ["fairy-tale"],
+    "Adventure": ["adventure"],
+    "Educational": ["educational"],
+    "Moral": ["moral"],
+    "History": ["history"],
+  };
+
+  const filteredStories = previewStories.filter((story) => {
+    const categoryValues = categoryMap[selectedCategory] || [];
+    const matchesCategory = selectedCategory === "All" || 
+      categoryValues.some(cat => story.category.toLowerCase() === cat.toLowerCase());
+    
+    const matchesSearch = !searchQuery || 
+      story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      story.summary.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen relative overflow-hidden pb-16 md:pb-0">
@@ -140,26 +169,45 @@ export default function HomePage() {
             />
             
             <div className="space-y-6">
-              <HorizontalStoryCarousel
-                title="Featured Stories"
-                stories={previewStories}
-                showBookmark={false}
-                onRead={() => setLocation("/auth")}
-              />
-              
-              <HorizontalStoryCarousel
-                title="Bedtime Favorites"
-                stories={previewStories}
-                showBookmark={false}
-                onRead={() => setLocation("/auth")}
-              />
-              
-              <HorizontalStoryCarousel
-                title="Adventure Time"
-                stories={previewStories}
-                showBookmark={false}
-                onRead={() => setLocation("/auth")}
-              />
+              {selectedCategory !== "All" ? (
+                filteredStories.length > 0 && (
+                  <HorizontalStoryCarousel
+                    title={`${selectedCategory} Stories`}
+                    stories={filteredStories}
+                    showBookmark={false}
+                    onRead={() => setLocation("/auth")}
+                  />
+                )
+              ) : (
+                <>
+                  {filteredStories.length > 0 && (
+                    <HorizontalStoryCarousel
+                      title="Featured Stories"
+                      stories={filteredStories}
+                      showBookmark={false}
+                      onRead={() => setLocation("/auth")}
+                    />
+                  )}
+                  
+                  {previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational").length > 0 && (
+                    <HorizontalStoryCarousel
+                      title="Bedtime Favorites"
+                      stories={previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational")}
+                      showBookmark={false}
+                      onRead={() => setLocation("/auth")}
+                    />
+                  )}
+                  
+                  {previewStories.filter(s => s.category === "adventure").length > 0 && (
+                    <HorizontalStoryCarousel
+                      title="Adventure Time"
+                      stories={previewStories.filter(s => s.category === "adventure")}
+                      showBookmark={false}
+                      onRead={() => setLocation("/auth")}
+                    />
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -174,7 +222,7 @@ export default function HomePage() {
               Featured Stories
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {previewStories.map((story) => (
+              {filteredStories.map((story) => (
                 <StoryCard
                   key={story.id}
                   story={story}

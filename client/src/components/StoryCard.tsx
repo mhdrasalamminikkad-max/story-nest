@@ -16,10 +16,11 @@ interface StoryCardProps {
 export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true, compact = false }: StoryCardProps) {
   if (compact) {
     return (
-      <div 
-        className="cursor-pointer hover-elevate rounded-2xl overflow-hidden" 
+      <button 
+        className="cursor-pointer hover-elevate rounded-2xl overflow-hidden text-left w-full" 
         onClick={() => onRead?.(story)}
         data-testid={`card-story-${story.id}`}
+        aria-label={`Read ${story.title}`}
       >
         <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
           <img
@@ -34,7 +35,7 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
             {story.title}
           </h3>
         </div>
-      </div>
+      </button>
     );
   }
 
