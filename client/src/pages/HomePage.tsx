@@ -1,10 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
-import { BookOpen, Sparkles, LogIn, Heart } from "lucide-react";
+import { Sparkles, Play, Clock, TrendingUp, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { StoryCard } from "@/components/StoryCard";
 import { HorizontalStoryCarousel } from "@/components/HorizontalStoryCarousel";
 import { CategoryChips } from "@/components/CategoryChips";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -15,6 +13,8 @@ import { useState } from "react";
 import teddyImage from "@assets/generated_images/Teddy_bear_reading_story_502f26a8.png";
 import bunnyImage from "@assets/generated_images/Bunny_on_cloud_e358044b.png";
 import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
@@ -95,154 +95,137 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-20">
       <AnimatedBackground />
       
       <div className="relative z-10">
         <MobileHeader showSearch onSearch={handleSearch} />
         
-        <header className="hidden md:flex container mx-auto px-4 sm:px-6 py-4 sm:py-6 items-center justify-between flex-wrap gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => setLocation("/pricing")}
-            className="rounded-2xl"
-            data-testid="button-pricing"
-          >
-            Pricing
-          </Button>
-          <ThemeToggle />
-        </header>
-
-        <main className="md:container md:mx-auto md:px-4 sm:px-6 pb-12 sm:pb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="hidden md:block text-center py-12 sm:py-16 md:py-24"
-          >
-            <motion.div
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-block mb-4 sm:mb-6"
-            >
-              <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-primary mx-auto" />
-            </motion.div>
-            
-            <h1 className="font-heading text-3xl sm:text-4xl md:text-6xl lg:text-7xl mb-4 sm:mb-6 text-foreground px-2">
-              StoryNest
-            </h1>
-            
-            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Stories that grow with your child
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
-              <Button
-                size="lg"
-                className="rounded-2xl text-base sm:text-lg w-full sm:w-auto"
-                onClick={() => setLocation("/auth")}
-                data-testid="button-parent-login"
-              >
-                <LogIn className="w-5 h-5 mr-2" />
-                Parent Login / Sign Up
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-2xl text-base sm:text-lg w-full sm:w-auto"
-                onClick={() => {
-                  document.getElementById("stories-preview")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                data-testid="button-explore-stories"
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                Explore Stories
-              </Button>
+        <main className="px-0 pt-2">
+          <div className="px-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="font-heading text-lg font-bold">Welcome to StoryNest</h2>
             </div>
-          </motion.div>
+            <p className="text-sm text-muted-foreground">Magical bedtime stories for your little ones</p>
+          </div>
 
-          <div className="md:hidden pt-4">
+          <div className="px-4 mb-4">
             <CategoryChips 
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
-            
-            <div className="space-y-6">
-              {selectedCategory !== "All" ? (
-                filteredStories.length > 0 && (
-                  <HorizontalStoryCarousel
-                    title={`${selectedCategory} Stories`}
-                    stories={filteredStories}
-                    showBookmark={false}
-                    onRead={() => setLocation("/auth")}
-                  />
-                )
-              ) : (
-                <>
-                  {filteredStories.length > 0 && (
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
+            <div className="px-4">
+              <Card className="bg-gradient-to-r from-primary/20 to-primary/10 border-primary/20 p-4 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-primary font-medium mb-1">NEW FOR YOU</p>
+                    <h3 className="font-heading text-base font-bold mb-1">Fresh Stories Daily</h3>
+                    <p className="text-xs text-muted-foreground">Discover new adventures every day</p>
+                  </div>
+                  <div className="bg-primary/20 rounded-full p-3">
+                    <Play className="w-5 h-5 text-primary" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {selectedCategory !== "All" ? (
+              filteredStories.length > 0 && (
+                <HorizontalStoryCarousel
+                  title={`${selectedCategory} Stories`}
+                  stories={filteredStories}
+                  showBookmark={false}
+                  onRead={() => setLocation("/auth")}
+                />
+              )
+            ) : (
+              <>
+                {filteredStories.length > 0 && (
+                  <div>
+                    <div className="px-4 flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-primary" />
+                        <h3 className="font-heading text-base font-bold">Trending Now</h3>
+                      </div>
+                      <button 
+                        className="text-xs text-primary font-medium"
+                        onClick={() => setLocation("/stories")}
+                        data-testid="button-view-all-trending"
+                      >
+                        View All
+                      </button>
+                    </div>
                     <HorizontalStoryCarousel
-                      title="Featured Stories"
+                      title=""
                       stories={filteredStories}
                       showBookmark={false}
                       onRead={() => setLocation("/auth")}
                     />
-                  )}
-                  
-                  {previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational").length > 0 && (
+                  </div>
+                )}
+                
+                {previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational").length > 0 && (
+                  <div>
+                    <div className="px-4 flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-primary" />
+                        <h3 className="font-heading text-base font-bold">Bedtime Favorites</h3>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">Popular</Badge>
+                    </div>
                     <HorizontalStoryCarousel
-                      title="Bedtime Favorites"
+                      title=""
                       stories={previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational")}
                       showBookmark={false}
                       onRead={() => setLocation("/auth")}
                     />
-                  )}
-                  
-                  {previewStories.filter(s => s.category === "adventure").length > 0 && (
+                  </div>
+                )}
+                
+                {previewStories.filter(s => s.category === "adventure").length > 0 && (
+                  <div>
+                    <div className="px-4 flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-primary" />
+                        <h3 className="font-heading text-base font-bold">Adventure Time</h3>
+                      </div>
+                    </div>
                     <HorizontalStoryCarousel
-                      title="Adventure Time"
+                      title=""
                       stories={previewStories.filter(s => s.category === "adventure")}
                       showBookmark={false}
                       onRead={() => setLocation("/auth")}
                     />
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+                  </div>
+                )}
+              </>
+            )}
 
-          <motion.section
-            id="stories-preview"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="hidden md:block mt-12 sm:mt-16"
-          >
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl text-center mb-6 sm:mb-8 text-foreground px-2">
-              Featured Stories
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {filteredStories.map((story) => (
-                <StoryCard
-                  key={story.id}
-                  story={story}
-                  showBookmark={false}
-                  onRead={() => setLocation("/auth")}
-                />
-              ))}
+            <div className="px-4 pb-8">
+              <Card className="border-dashed border-2 border-primary/30 p-6 rounded-2xl text-center">
+                <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
+                <h3 className="font-heading text-base font-bold mb-2">Unlock All Stories</h3>
+                <p className="text-sm text-muted-foreground mb-4">Sign in to access our full library of magical tales</p>
+                <button
+                  onClick={() => setLocation("/auth")}
+                  className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-xl hover-elevate active-elevate-2"
+                  data-testid="button-unlock-stories"
+                >
+                  Get Started
+                </button>
+              </Card>
             </div>
-          </motion.section>
-
-          <motion.footer
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="hidden md:block mt-16 sm:mt-24 text-center py-6 sm:py-8 border-t border-border"
-          >
-            <p className="text-sm sm:text-base text-muted-foreground flex flex-wrap items-center justify-center gap-2 px-4">
-              Made with <Heart className="w-4 h-4 text-pink-500 fill-pink-500" /> for dreamers and readers.
-            </p>
-          </motion.footer>
+          </motion.div>
         </main>
         
         <MobileBottomNav />
