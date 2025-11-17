@@ -9,6 +9,7 @@ export const storySchema = z.object({
   imageUrl: z.string(),
   summary: z.string(),
   voiceoverUrl: z.string().optional(),
+  language: z.enum(["english", "malayalam"]),
   status: z.enum(["published", "pending_review", "rejected", "draft"]),
   approvedBy: z.string().optional(),
   rejectionReason: z.string().optional(),
@@ -27,6 +28,7 @@ export const insertStorySchema = storySchema.omit({
   status: true
 }).extend({
   voiceoverUrl: z.string().min(1, "Voiceover recording is required"),
+  language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
 });
 
 export const reviewStorySchema = z.object({

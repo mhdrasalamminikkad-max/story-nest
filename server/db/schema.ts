@@ -9,6 +9,7 @@ export const stories = pgTable("stories", {
   imageUrl: text("image_url").notNull(),
   summary: text("summary").notNull(),
   voiceoverUrl: text("voiceover_url"),
+  language: varchar("language", { length: 20 }).notNull().default("english"),
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   approvedBy: varchar("approved_by"),
   rejectionReason: text("rejection_reason"),
