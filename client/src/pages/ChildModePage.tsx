@@ -16,10 +16,14 @@ export default function ChildModePage() {
   const [isReading, setIsReading] = useState(false);
   const [showPINDialog, setShowPINDialog] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const speechSynthesis = window.speechSynthesis;
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Safely access speech synthesis API
+  const getSpeechSynthesis = () => {
+    return typeof window !== 'undefined' ? window.speechSynthesis : null;
+  };
 
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
@@ -106,6 +110,12 @@ export default function ChildModePage() {
   const playAIVoice = () => {
     if (!currentStory) return;
     
+    const speechSynthesis = getSpeechSynthesis();
+    if (!speechSynthesis) {
+      console.error("Speech synthesis not available");
+      return;
+    }
+    
     const utterance = new SpeechSynthesisUtterance(currentStory.content);
     utterance.rate = 0.9;
     utterance.pitch = 1.1;
@@ -121,12 +131,14 @@ export default function ChildModePage() {
   };
 
   const stopReading = () => {
+    const speechSynthesis = getSpeechSynthesis();
+    
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    if (speechSynthesis.speaking) {
+    if (speechSynthesis && speechSynthesis.speaking) {
       speechSynthesis.cancel();
     }
     setIsReading(false);

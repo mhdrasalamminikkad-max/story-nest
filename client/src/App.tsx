@@ -15,6 +15,8 @@ import AdminPanel from "@/pages/AdminPanel";
 import SubscriptionPage from "@/pages/SubscriptionPage";
 import PaymentPage from "@/pages/PaymentPage";
 import Subscription from "@/pages/subscription";
+import StoriesPage from "@/pages/StoriesPage";
+import LibraryPage from "@/pages/LibraryPage";
 import NotFound from "@/pages/not-found";
 import {
   Dialog,
@@ -90,6 +92,8 @@ function Router() {
         <Route path="/pricing" component={SubscriptionPage} />
         <Route path="/payment" component={PaymentPage} />
         <Route path="/subscription" component={Subscription} />
+        <Route path="/stories" component={StoriesPage} />
+        <Route path="/library" component={LibraryPage} />
         <Route component={NotFound} />
       </Switch>
 
