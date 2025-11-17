@@ -10,9 +10,6 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useQuery } from "@tanstack/react-query";
 import type { Story } from "@shared/schema";
 import { useState } from "react";
-import teddyImage from "@assets/generated_images/Teddy_bear_reading_story_502f26a8.png";
-import bunnyImage from "@assets/generated_images/Bunny_on_cloud_e358044b.png";
-import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,47 +24,7 @@ export default function HomePage() {
 
   const categories = ["All", "Fairy Tale", "Adventure", "Educational", "Moral", "History"];
 
-  const previewStories: Story[] = stories.length > 0 ? stories : [
-    {
-      id: "preview-1",
-      userId: "preview",
-      title: "The Sleepy Teddy Bear",
-      content: "Once upon a time...",
-      imageUrl: teddyImage,
-      summary: "A gentle tale about a teddy bear who loves bedtime stories",
-      language: "english" as const,
-      status: "published" as const,
-      category: "fairy-tale",
-      storyType: "educational",
-      createdAt: Date.now(),
-    },
-    {
-      id: "preview-2",
-      userId: "preview",
-      title: "Bunny's Cloud Adventure",
-      content: "High in the sky...",
-      imageUrl: bunnyImage,
-      summary: "Join a curious bunny on a magical journey through the clouds",
-      language: "english" as const,
-      status: "published" as const,
-      category: "adventure",
-      storyType: "fairy-tale",
-      createdAt: Date.now(),
-    },
-    {
-      id: "preview-3",
-      userId: "preview",
-      title: "The Wise Owl's Lantern",
-      content: "In the forest at night...",
-      imageUrl: owlImage,
-      summary: "Discover the secrets of the forest with a kind owl friend",
-      language: "english" as const,
-      status: "published" as const,
-      category: "educational",
-      storyType: "educational",
-      createdAt: Date.now(),
-    },
-  ];
+  const allStories = stories;
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -82,14 +39,14 @@ export default function HomePage() {
     "History": ["history"],
   };
 
-  const filteredStories = previewStories.filter((story) => {
+  const filteredStories = allStories.filter((story) => {
     const categoryValues = categoryMap[selectedCategory] || [];
     const matchesCategory = selectedCategory === "All" || 
       categoryValues.some(cat => story.category.toLowerCase() === cat.toLowerCase());
     
     const matchesSearch = !searchQuery || 
       story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.summary.toLowerCase().includes(searchQuery.toLowerCase());
+      (story.summary && story.summary.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return matchesCategory && matchesSearch;
   });
@@ -169,30 +126,30 @@ export default function HomePage() {
                       title=""
                       stories={filteredStories}
                       showBookmark={false}
-                      onRead={() => setLocation("/auth")}
+                      onRead={(story) => setLocation(`/child-mode?story=${story.id}`)}
                     />
                   </div>
                 )}
                 
-                {previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational").length > 0 && (
+                {allStories.filter(s => s.category === "fairy-tale" || s.category === "educational").length > 0 && (
                   <div>
                     <div className="px-4 flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Clock className="w-5 h-5 text-primary" />
                         <h3 className="font-heading text-base font-bold">Bedtime Favorites</h3>
                       </div>
-                      <Badge variant="secondary" className="text-xs">Popular</Badge>
+                      <Badge variant="secondary" className="text-xs" data-testid="badge-popular">Popular</Badge>
                     </div>
                     <HorizontalStoryCarousel
                       title=""
-                      stories={previewStories.filter(s => s.category === "fairy-tale" || s.category === "educational")}
+                      stories={allStories.filter(s => s.category === "fairy-tale" || s.category === "educational")}
                       showBookmark={false}
-                      onRead={() => setLocation("/auth")}
+                      onRead={(story) => setLocation(`/child-mode?story=${story.id}`)}
                     />
                   </div>
                 )}
                 
-                {previewStories.filter(s => s.category === "adventure").length > 0 && (
+                {allStories.filter(s => s.category === "adventure").length > 0 && (
                   <div>
                     <div className="px-4 flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -202,9 +159,9 @@ export default function HomePage() {
                     </div>
                     <HorizontalStoryCarousel
                       title=""
-                      stories={previewStories.filter(s => s.category === "adventure")}
+                      stories={allStories.filter(s => s.category === "adventure")}
                       showBookmark={false}
-                      onRead={() => setLocation("/auth")}
+                      onRead={(story) => setLocation(`/child-mode?story=${story.id}`)}
                     />
                   </div>
                 )}
