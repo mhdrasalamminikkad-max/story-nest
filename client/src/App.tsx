@@ -17,6 +17,7 @@ import PaymentPage from "@/pages/PaymentPage";
 import Subscription from "@/pages/subscription";
 import StoriesPage from "@/pages/StoriesPage";
 import LibraryPage from "@/pages/LibraryPage";
+import CheckpointsPage from "@/pages/CheckpointsPage";
 import NotFound from "@/pages/not-found";
 import {
   Dialog,
@@ -94,6 +95,7 @@ function Router() {
         <Route path="/subscription" component={Subscription} />
         <Route path="/stories" component={StoriesPage} />
         <Route path="/library" component={LibraryPage} />
+        <Route path="/checkpoints" component={CheckpointsPage} />
         <Route component={NotFound} />
       </Switch>
 

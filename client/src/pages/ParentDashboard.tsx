@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -384,6 +384,15 @@ export default function ParentDashboard() {
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     variant="outline"
+                    onClick={() => setLocation("/checkpoints")}
+                    className="rounded-xl"
+                    data-testid="button-checkpoints"
+                  >
+                    <Target className="w-4 h-4 mr-2" />
+                    Checkpoints
+                  </Button>
+                  <Button
+                    variant="outline"
                     onClick={() => setLocation("/pricing")}
                     className="rounded-xl"
                     data-testid="button-view-plans"
@@ -394,7 +403,7 @@ export default function ParentDashboard() {
                   <Button
                     variant="outline"
                     onClick={() => setLocation("/child-mode")}
-                    className="rounded-xl"
+                    className="rounded-xl col-span-2"
                     data-testid="button-child-mode"
                   >
                     <Play className="w-4 h-4 mr-2" />
@@ -424,6 +433,15 @@ export default function ParentDashboard() {
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Story for Review
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setLocation("/checkpoints")}
+                className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
+                data-testid="button-checkpoints-desktop"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Checkpoints & Rewards
               </Button>
               <Button
                 variant="outline"
