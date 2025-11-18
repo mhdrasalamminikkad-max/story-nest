@@ -12,11 +12,13 @@ import type { Story } from "@shared/schema";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
   
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories/preview"],
@@ -102,7 +104,7 @@ export default function HomePage() {
                   title={`${selectedCategory} Stories`}
                   stories={filteredStories}
                   showBookmark={false}
-                  onRead={() => setLocation("/auth")}
+                  onRead={(story) => user ? setLocation(`/child-mode?story=${story.id}`) : setLocation("/auth")}
                 />
               )
             ) : (
@@ -168,20 +170,22 @@ export default function HomePage() {
               </>
             )}
 
-            <div className="px-4 pb-8">
-              <Card className="border-dashed border-2 border-primary/30 p-6 rounded-2xl text-center">
-                <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
-                <h3 className="font-heading text-base font-bold mb-2">Unlock All Stories</h3>
-                <p className="text-sm text-muted-foreground mb-4">Sign in to access our full library of magical tales</p>
-                <button
-                  onClick={() => setLocation("/auth")}
-                  className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-xl hover-elevate active-elevate-2"
-                  data-testid="button-unlock-stories"
-                >
-                  Get Started
-                </button>
-              </Card>
-            </div>
+            {!user && (
+              <div className="px-4 pb-8">
+                <Card className="border-dashed border-2 border-primary/30 p-6 rounded-2xl text-center">
+                  <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
+                  <h3 className="font-heading text-base font-bold mb-2">Unlock All Stories</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Sign in to access our full library of magical tales</p>
+                  <button
+                    onClick={() => setLocation("/auth")}
+                    className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-xl hover-elevate active-elevate-2"
+                    data-testid="button-unlock-stories"
+                  >
+                    Get Started
+                  </button>
+                </Card>
+              </div>
+            )}
           </motion.div>
         </main>
         

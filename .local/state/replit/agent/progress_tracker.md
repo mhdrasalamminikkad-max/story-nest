@@ -41,3 +41,7 @@
 [x] 41. Application homepage verified with screenshot - StoryNest fully functional
 [x] 42. All previous features and functionality preserved in migration
 [x] 43. Project import to Replit environment COMPLETE - ready for development
+[x] 44. Fixed HomePage navigation - logged-in users now see stories instead of login page
+[x] 45. Updated HomePage to use useAuth hook to check authentication status
+[x] 46. Stories now open directly in child-mode for authenticated users
+[x] 47. Removed "Unlock All Stories" card for logged-in users
