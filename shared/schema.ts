@@ -215,3 +215,66 @@ export const publicCoinPackageSchema = z.object({
 });
 
 export type PublicCoinPackage = z.infer<typeof publicCoinPackageSchema>;
+
+// Checkpoint schema
+export const checkpointSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  goalType: z.enum(["stories_read", "reading_days", "reading_minutes"]),
+  goalTarget: z.number().min(1),
+  rewardTitle: z.string(),
+  rewardDescription: z.string().optional(),
+  status: z.enum(["active", "archived"]),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export const insertCheckpointSchema = checkpointSchema.omit({
+  id: true,
+  userId: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  goalTarget: z.number().min(1, "Goal must be at least 1"),
+  title: z.string().min(1, "Title is required"),
+  rewardTitle: z.string().min(1, "Reward title is required"),
+});
+
+export type Checkpoint = z.infer<typeof checkpointSchema>;
+export type InsertCheckpoint = z.infer<typeof insertCheckpointSchema>;
+
+// Checkpoint progress schema
+export const checkpointProgressSchema = z.object({
+  id: z.string(),
+  checkpointId: z.string(),
+  userId: z.string(),
+  currentProgress: z.number(),
+  completedAt: z.number().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export type CheckpointProgress = z.infer<typeof checkpointProgressSchema>;
+
+// Reading session schema
+export const readingSessionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  storyId: z.string(),
+  readingDate: z.number(),
+  durationMinutes: z.number(),
+  createdAt: z.number(),
+});
+
+export const insertReadingSessionSchema = readingSessionSchema.omit({
+  id: true,
+  userId: true,
+  readingDate: true,
+  createdAt: true,
+});
+
+export type ReadingSession = z.infer<typeof readingSessionSchema>;
+export type InsertReadingSession = z.infer<typeof insertReadingSessionSchema>;

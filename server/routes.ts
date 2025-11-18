@@ -3,11 +3,11 @@ import { createServer, type Server } from "http";
 import { authenticateUser, checkNotBlocked, type AuthRequest } from "./middleware/auth";
 import { requireAdmin } from "./middleware/adminAuth";
 import { getSubscriptionInfo, type SubscriptionRequest } from "./middleware/subscription";
-import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema } from "@shared/schema";
+import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema } from "@shared/schema";
 import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
 import { db } from "./db";
-import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments } from "./db/schema";
+import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions } from "./db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -1481,6 +1481,215 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         error: "Failed to verify payment" 
       });
+    }
+  });
+
+  // CHECKPOINT ROUTES
+  // Get all checkpoints for a parent
+  app.get("/api/checkpoints", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const userCheckpoints = await db
+        .select()
+        .from(checkpoints)
+        .where(and(
+          eq(checkpoints.userId, userId),
+          eq(checkpoints.status, "active")
+        ))
+        .orderBy(desc(checkpoints.createdAt));
+      
+      const checkpointsWithTimestamp = userCheckpoints.map(c => ({
+        ...c,
+        createdAt: c.createdAt.getTime(),
+        updatedAt: c.updatedAt.getTime(),
+      }));
+      res.json(checkpointsWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching checkpoints:", error);
+      res.status(500).json({ error: "Failed to fetch checkpoints" });
+    }
+  });
+
+  // Get checkpoints with progress
+  app.get("/api/checkpoints/with-progress", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const userCheckpoints = await db
+        .select()
+        .from(checkpoints)
+        .where(and(
+          eq(checkpoints.userId, userId),
+          eq(checkpoints.status, "active")
+        ))
+        .orderBy(desc(checkpoints.createdAt));
+      
+      const checkpointsWithProgress = await Promise.all(
+        userCheckpoints.map(async (checkpoint) => {
+          const [progress] = await db
+            .select()
+            .from(checkpointProgress)
+            .where(and(
+              eq(checkpointProgress.checkpointId, checkpoint.id),
+              eq(checkpointProgress.userId, userId)
+            ));
+          
+          return {
+            ...checkpoint,
+            createdAt: checkpoint.createdAt.getTime(),
+            updatedAt: checkpoint.updatedAt.getTime(),
+            currentProgress: progress?.currentProgress || 0,
+            completedAt: progress?.completedAt?.getTime() || null,
+            isCompleted: !!progress?.completedAt,
+          };
+        })
+      );
+      
+      res.json(checkpointsWithProgress);
+    } catch (error) {
+      console.error("Error fetching checkpoints with progress:", error);
+      res.status(500).json({ error: "Failed to fetch checkpoints" });
+    }
+  });
+
+  // Create a checkpoint
+  app.post("/api/checkpoints", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const checkpointData = insertCheckpointSchema.parse(req.body);
+
+      const [newCheckpoint] = await db
+        .insert(checkpoints)
+        .values({
+          id: `checkpoint-${Date.now()}`,
+          userId,
+          ...checkpointData,
+          status: "active",
+        })
+        .returning();
+      
+      // Create initial progress record
+      await db.insert(checkpointProgress).values({
+        id: `progress-${Date.now()}`,
+        checkpointId: newCheckpoint.id,
+        userId,
+        currentProgress: 0,
+      });
+      
+      const checkpointWithTimestamp = {
+        ...newCheckpoint,
+        createdAt: newCheckpoint.createdAt.getTime(),
+        updatedAt: newCheckpoint.updatedAt.getTime(),
+      };
+      res.json(checkpointWithTimestamp);
+    } catch (error) {
+      console.error("Error creating checkpoint:", error);
+      res.status(500).json({ error: "Failed to create checkpoint" });
+    }
+  });
+
+  // Delete a checkpoint
+  app.delete("/api/checkpoints/:id", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { id } = req.params;
+
+      // Archive instead of delete
+      await db
+        .update(checkpoints)
+        .set({ status: "archived" })
+        .where(and(
+          eq(checkpoints.id, id),
+          eq(checkpoints.userId, userId)
+        ));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting checkpoint:", error);
+      res.status(500).json({ error: "Failed to delete checkpoint" });
+    }
+  });
+
+  // Record reading session and update checkpoint progress
+  app.post("/api/reading-sessions", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const sessionData = insertReadingSessionSchema.parse(req.body);
+
+      // Insert reading session
+      const [session] = await db
+        .insert(readingSessions)
+        .values({
+          id: `session-${Date.now()}`,
+          userId,
+          ...sessionData,
+        })
+        .returning();
+
+      // Get all active checkpoints for user
+      const userCheckpoints = await db
+        .select()
+        .from(checkpoints)
+        .where(and(
+          eq(checkpoints.userId, userId),
+          eq(checkpoints.status, "active")
+        ));
+
+      // Update progress for each checkpoint
+      for (const checkpoint of userCheckpoints) {
+        const [progress] = await db
+          .select()
+          .from(checkpointProgress)
+          .where(and(
+            eq(checkpointProgress.checkpointId, checkpoint.id),
+            eq(checkpointProgress.userId, userId)
+          ));
+
+        if (!progress) continue;
+
+        let newProgress = progress.currentProgress;
+        
+        if (checkpoint.goalType === "stories_read") {
+          newProgress += 1;
+        } else if (checkpoint.goalType === "reading_minutes") {
+          newProgress += sessionData.durationMinutes;
+        } else if (checkpoint.goalType === "reading_days") {
+          // Check if user already read today
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const todaySessions = await db
+            .select()
+            .from(readingSessions)
+            .where(and(
+              eq(readingSessions.userId, userId),
+              sql`${readingSessions.readingDate} >= ${today}`
+            ));
+
+          if (todaySessions.length === 1) { // This is the first session today
+            newProgress += 1;
+          }
+        }
+
+        // Check if goal is completed
+        const isCompleted = newProgress >= checkpoint.goalTarget;
+        
+        await db
+          .update(checkpointProgress)
+          .set({
+            currentProgress: newProgress,
+            completedAt: isCompleted && !progress.completedAt ? new Date() : progress.completedAt,
+          })
+          .where(eq(checkpointProgress.id, progress.id));
+      }
+
+      res.json({
+        ...session,
+        readingDate: session.readingDate.getTime(),
+        createdAt: session.createdAt.getTime(),
+      });
+    } catch (error) {
+      console.error("Error recording reading session:", error);
+      res.status(500).json({ error: "Failed to record reading session" });
     }
   });
 

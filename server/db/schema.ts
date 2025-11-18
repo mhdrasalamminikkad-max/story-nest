@@ -106,3 +106,36 @@ export const processedPayments = pgTable("processed_payments", {
   coinsAwarded: integer("coins_awarded").notNull(),
   processedAt: timestamp("processed_at").notNull().default(sql`now()`),
 });
+
+export const checkpoints = pgTable("checkpoints", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  goalType: varchar("goal_type", { length: 30 }).notNull(),
+  goalTarget: integer("goal_target").notNull(),
+  rewardTitle: text("reward_title").notNull(),
+  rewardDescription: text("reward_description"),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
+export const checkpointProgress = pgTable("checkpoint_progress", {
+  id: varchar("id").primaryKey(),
+  checkpointId: varchar("checkpoint_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  currentProgress: integer("current_progress").notNull().default(0),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
+export const readingSessions = pgTable("reading_sessions", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  storyId: varchar("story_id").notNull(),
+  readingDate: timestamp("reading_date").notNull().default(sql`now()`),
+  durationMinutes: integer("duration_minutes").notNull(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
