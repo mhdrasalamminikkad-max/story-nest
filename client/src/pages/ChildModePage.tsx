@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { PINDialog } from "@/components/PINDialog";
+import { RewardsDialog } from "@/components/RewardsDialog";
+import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle } from "lucide-react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ChildModePage() {
@@ -16,6 +18,8 @@ export default function ChildModePage() {
   const [isReading, setIsReading] = useState(false);
   const [showPINDialog, setShowPINDialog] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showRewardsDialog, setShowRewardsDialog] = useState(false);
+  const [newlyEarnedRewards, setNewlyEarnedRewards] = useState<string[]>([]);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,6 +35,24 @@ export default function ChildModePage() {
 
   const { data: settings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
+  });
+
+  const { data: checkpointProgress = [] } = useQuery<CheckpointProgress[]>({
+    queryKey: ["/api/checkpoints/progress"],
+  });
+
+  const trackStoryMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/checkpoints/track-story");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.newlyCompleted && data.newlyCompleted.length > 0) {
+        setNewlyEarnedRewards(data.newlyCompleted.map((c: any) => c.id));
+        setShowRewardsDialog(true);
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/checkpoints/progress"] });
+    },
   });
 
   const currentStory = stories[currentStoryIndex];
@@ -92,6 +114,7 @@ export default function ChildModePage() {
       const audio = new Audio(currentStory.voiceoverUrl);
       audio.onended = () => {
         setIsReading(false);
+        trackStoryMutation.mutate();
       };
       audio.onerror = () => {
         console.error("Error playing voiceover, falling back to AI voice");
@@ -123,6 +146,7 @@ export default function ChildModePage() {
     
     utterance.onend = () => {
       setIsReading(false);
+      trackStoryMutation.mutate();
     };
 
     utteranceRef.current = utterance;
@@ -364,6 +388,13 @@ export default function ChildModePage() {
         onVerify={handleVerifyPIN}
         title="Exit Child Mode"
         description="Enter parent PIN to return to dashboard"
+      />
+
+      <RewardsDialog
+        open={showRewardsDialog}
+        onOpenChange={setShowRewardsDialog}
+        checkpoints={checkpointProgress}
+        newlyEarned={newlyEarnedRewards}
       />
     </div>
   );

@@ -1609,6 +1609,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get checkpoint progress for current user
+  app.get("/api/checkpoints/progress", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+
+      const progressData = await db
+        .select({
+          id: checkpointProgress.id,
+          checkpointId: checkpointProgress.checkpointId,
+          currentProgress: checkpointProgress.currentProgress,
+          isCompleted: checkpointProgress.isCompleted,
+          completedAt: checkpointProgress.completedAt,
+          checkpoint: checkpoints,
+        })
+        .from(checkpointProgress)
+        .innerJoin(checkpoints, eq(checkpointProgress.checkpointId, checkpoints.id))
+        .where(and(
+          eq(checkpointProgress.userId, userId),
+          eq(checkpoints.status, "active")
+        ));
+
+      const progressWithTimestamps = progressData.map(p => ({
+        ...p,
+        completedAt: p.completedAt?.getTime() || null,
+      }));
+
+      res.json(progressWithTimestamps);
+    } catch (error) {
+      console.error("Error fetching checkpoint progress:", error);
+      res.status(500).json({ error: "Failed to fetch checkpoint progress" });
+    }
+  });
+
+  // Track story completion and update checkpoint progress
+  app.post("/api/checkpoints/track-story", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const newlyCompleted = [];
+
+      // Get all active checkpoints for user
+      const userCheckpoints = await db
+        .select()
+        .from(checkpoints)
+        .where(and(
+          eq(checkpoints.userId, userId),
+          eq(checkpoints.status, "active")
+        ));
+
+      // Update progress for each checkpoint
+      for (const checkpoint of userCheckpoints) {
+        const [progress] = await db
+          .select()
+          .from(checkpointProgress)
+          .where(and(
+            eq(checkpointProgress.checkpointId, checkpoint.id),
+            eq(checkpointProgress.userId, userId)
+          ));
+
+        if (!progress || progress.isCompleted) continue;
+
+        let newProgress = progress.currentProgress;
+        
+        if (checkpoint.goalType === "stories_read") {
+          newProgress += 1;
+        }
+
+        // Check if goal is completed
+        const isCompleted = newProgress >= checkpoint.goalTarget;
+
+        // Update progress
+        const [updated] = await db
+          .update(checkpointProgress)
+          .set({
+            currentProgress: newProgress,
+            isCompleted,
+            completedAt: isCompleted ? new Date() : null,
+          })
+          .where(eq(checkpointProgress.id, progress.id))
+          .returning();
+
+        if (isCompleted && !progress.isCompleted) {
+          newlyCompleted.push(updated);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        newlyCompleted,
+      });
+    } catch (error) {
+      console.error("Error tracking story:", error);
+      res.status(500).json({ error: "Failed to track story" });
+    }
+  });
+
   // Record reading session and update checkpoint progress
   app.post("/api/reading-sessions", authenticateUser, async (req: AuthRequest, res) => {
     try {
