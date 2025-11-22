@@ -9,6 +9,9 @@ export const storySchema = z.object({
   imageUrl: z.string(),
   summary: z.string(),
   voiceoverUrl: z.string().optional(),
+  pdfUrl: z.string().optional(),
+  audioUrl: z.string().optional(),
+  audience: z.enum(["parent", "child", "both"]),
   language: z.enum(["english", "malayalam"]),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"]),
   storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"]),
@@ -30,6 +33,9 @@ export const insertStorySchema = storySchema.omit({
   status: true
 }).extend({
   voiceoverUrl: z.string().optional(),
+  pdfUrl: z.string().optional(),
+  audioUrl: z.string().optional(),
+  audience: z.enum(["parent", "child", "both"], { required_error: "Please select an audience" }),
   language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"], { required_error: "Please select a category" }),
   storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"], { required_error: "Please select a story type" }),
