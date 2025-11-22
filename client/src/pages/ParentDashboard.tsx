@@ -45,6 +45,7 @@ export default function ParentDashboard() {
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [voiceoverBase64, setVoiceoverBase64] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   
@@ -140,6 +141,7 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       setShowAddStory(false);
       setAudioUrl(null);
+      setVoiceoverBase64(null);
       setIsRecording(false);
       form.reset({
         title: "",
@@ -170,6 +172,7 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       setEditingStory(null);
       setAudioUrl(null);
+      setVoiceoverBase64(null);
       setIsRecording(false);
       form.reset({
         title: "",
@@ -234,18 +237,21 @@ export default function ParentDashboard() {
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         
-        // Convert blob to base64 data URL for storage
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          (form.setValue as any)('voiceoverUrl', base64data);
-        };
-        reader.readAsDataURL(audioBlob);
+        // Convert blob to base64 data URL for storage (using Promise to ensure it completes)
+        const base64data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(audioBlob);
+        });
+        
+        // Store in component state for immediate access during submission
+        setVoiceoverBase64(base64data);
+        (form.setValue as any)('voiceoverUrl', base64data);
         
         stream.getTracks().forEach(track => track.stop());
       };
@@ -265,10 +271,12 @@ export default function ParentDashboard() {
   };
 
   const deleteRecording = () => {
-    if (audioUrl) {
+    // Only revoke ObjectURLs (blob:), not base64 data URLs
+    if (audioUrl && audioUrl.startsWith('blob:')) {
       URL.revokeObjectURL(audioUrl);
     }
     setAudioUrl(null);
+    setVoiceoverBase64(null);
     (form.setValue as any)('voiceoverUrl', undefined);
   };
 
@@ -399,6 +407,7 @@ export default function ParentDashboard() {
   const handleEditStory = (story: Story) => {
     setEditingStory(story);
     setAudioUrl(story.voiceoverUrl || null);
+    setVoiceoverBase64(story.voiceoverUrl || null);
     
     // Set existing file states
     if (story.pdfUrl) {
@@ -433,10 +442,17 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = (data: any) => {
+    // Use voiceoverBase64 state to ensure we have the latest recording
+    // even if FileReader.onloadend hasn't completed yet
+    const submissionData = {
+      ...data,
+      voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
+    };
+    
     if (editingStory) {
-      updateStoryMutation.mutate({ id: editingStory.id, data });
+      updateStoryMutation.mutate({ id: editingStory.id, data: submissionData });
     } else {
-      addStoryMutation.mutate(data);
+      addStoryMutation.mutate(submissionData);
     }
   };
 
@@ -851,6 +867,7 @@ export default function ParentDashboard() {
           setShowAddStory(false);
           setEditingStory(null);
           setAudioUrl(null);
+          setVoiceoverBase64(null);
           setIsRecording(false);
           form.reset({
             title: "",
