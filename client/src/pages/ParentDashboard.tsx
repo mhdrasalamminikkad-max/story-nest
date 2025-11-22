@@ -440,6 +440,8 @@ export default function ParentDashboard() {
     // even if FileReader.onloadend hasn't completed yet
     const submissionData = {
       ...data,
+      pdfUrl: data.pdfUrl || undefined,
+      audioUrl: data.audioUrl || undefined,
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
     
