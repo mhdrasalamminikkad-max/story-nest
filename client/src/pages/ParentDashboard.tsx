@@ -1061,29 +1061,22 @@ export default function ParentDashboard() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                <span className="font-medium truncate">{pdfFile.name}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate text-sm">{pdfFile.name}</p>
+                                  <p className="text-xs text-green-600 dark:text-green-400">PDF ready to upload</p>
+                                </div>
                               </div>
                               <Button
                                 type="button"
                                 onClick={deletePdfFile}
                                 variant="ghost"
                                 size="sm"
-                                className="rounded-2xl"
+                                className="rounded-2xl flex-shrink-0"
                                 data-testid="button-delete-pdf"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <embed
-                              src={`${pdfFile.data}#toolbar=0`}
-                              type="application/pdf"
-                              className="w-full border rounded-lg bg-white dark:bg-gray-800"
-                              style={{ height: "300px" }}
-                              data-testid="pdf-preview"
-                            />
-                            <p className="text-xs text-green-600 dark:text-green-400">
-                              PDF preview ready
-                            </p>
                           </div>
                         )}
                       </div>
@@ -1128,23 +1121,22 @@ export default function ParentDashboard() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                <span className="font-medium truncate">{audioFile.name}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate text-sm">{audioFile.name}</p>
+                                  <p className="text-xs text-green-600 dark:text-green-400">Audio ready to upload</p>
+                                </div>
                               </div>
                               <Button
                                 type="button"
                                 onClick={deleteAudioFile}
                                 variant="ghost"
                                 size="sm"
-                                className="rounded-2xl"
+                                className="rounded-2xl flex-shrink-0"
                                 data-testid="button-delete-audio"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <audio src={audioFile.data} controls className="w-full" data-testid="audio-preview" />
-                            <p className="text-xs text-green-600 dark:text-green-400">
-                              Audio uploaded successfully
-                            </p>
                           </div>
                         )}
                       </div>
