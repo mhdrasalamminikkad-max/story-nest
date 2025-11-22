@@ -104,11 +104,14 @@ export default function ChildModeReadPage() {
   };
 
   const startReading = () => {
-    if (!currentStory || !currentStory.voiceoverUrl) return;
+    // Prioritize audioUrl over voiceoverUrl
+    const audioSource = currentStory?.audioUrl || currentStory?.voiceoverUrl;
+    
+    if (!currentStory || !audioSource) return;
 
     stopReading();
 
-    const audio = new Audio(currentStory.voiceoverUrl);
+    const audio = new Audio(audioSource);
     
     // Cleanup function to remove all listeners
     const cleanup = () => {
@@ -131,11 +134,11 @@ export default function ChildModeReadPage() {
     
     const handleError = () => {
       cleanup();
-      console.error("Error playing voiceover");
+      console.error("Error playing audio");
       setIsReading(false);
       toast({
         title: "Playback Error",
-        description: "Unable to play the voice recording. Please try another story.",
+        description: "Unable to play the audio. Please try another story.",
         variant: "destructive",
         duration: 4000,
       });
@@ -158,7 +161,7 @@ export default function ChildModeReadPage() {
       setIsReading(false);
       toast({
         title: "Playback Error",
-        description: "Unable to play the voice recording. Please try another story.",
+        description: "Unable to play the audio. Please try another story.",
         variant: "destructive",
         duration: 4000,
       });
@@ -392,7 +395,7 @@ export default function ChildModeReadPage() {
                 <Button
                   className="rounded-full text-lg sm:text-2xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-2xl"
                   onClick={isReading ? stopReading : startReading}
-                  disabled={!currentStory.voiceoverUrl && !isReading}
+                  disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
                   data-testid="button-read-aloud"
                 >
                   {isReading ? (

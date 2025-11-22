@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -29,6 +29,7 @@ import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
 import foxImage from "@assets/generated_images/Fox_reading_by_candlelight_2780dc73.png";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
+import { Progress } from "@/components/ui/progress";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
@@ -46,6 +47,16 @@ export default function ParentDashboard() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
+  // File upload states
+  const [pdfFile, setPdfFile] = useState<{ name: string; data: string } | null>(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState(0);
+  const [audioFile, setAudioFile] = useState<{ name: string; data: string } | null>(null);
+  const [audioUploading, setAudioUploading] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   const { data: stories = [], isLoading } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
@@ -261,9 +272,151 @@ export default function ParentDashboard() {
     (form.setValue as any)('voiceoverUrl', undefined);
   };
 
+  const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF file",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setPdfUploading(true);
+    setPdfProgress(0);
+
+    const reader = new FileReader();
+    
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const progress = (e.loaded / e.total) * 100;
+        setPdfProgress(progress);
+      }
+    };
+
+    reader.onload = () => {
+      const base64data = reader.result as string;
+      setPdfFile({ name: file.name, data: base64data });
+      (form.setValue as any)('pdfUrl', base64data);
+      setPdfUploading(false);
+      setPdfProgress(100);
+      toast({
+        title: "PDF uploaded",
+        description: `${file.name} uploaded successfully`,
+        duration: 4000,
+      });
+    };
+
+    reader.onerror = () => {
+      setPdfUploading(false);
+      setPdfProgress(0);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload PDF file",
+        variant: "destructive",
+        duration: 4000,
+      });
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleAudioFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("audio/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an audio file (MP3, WAV, etc.)",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setAudioUploading(true);
+    setAudioProgress(0);
+
+    const reader = new FileReader();
+    
+    reader.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const progress = (e.loaded / e.total) * 100;
+        setAudioProgress(progress);
+      }
+    };
+
+    reader.onload = () => {
+      const base64data = reader.result as string;
+      setAudioFile({ name: file.name, data: base64data });
+      (form.setValue as any)('audioUrl', base64data);
+      setAudioUploading(false);
+      setAudioProgress(100);
+      toast({
+        title: "Audio uploaded",
+        description: `${file.name} uploaded successfully`,
+        duration: 4000,
+      });
+    };
+
+    reader.onerror = () => {
+      setAudioUploading(false);
+      setAudioProgress(0);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload audio file",
+        variant: "destructive",
+        duration: 4000,
+      });
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const deletePdfFile = () => {
+    setPdfFile(null);
+    setPdfProgress(0);
+    (form.setValue as any)('pdfUrl', '');
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = '';
+    }
+  };
+
+  const deleteAudioFile = () => {
+    setAudioFile(null);
+    setAudioProgress(0);
+    (form.setValue as any)('audioUrl', '');
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
+    }
+  };
+
   const handleEditStory = (story: Story) => {
     setEditingStory(story);
     setAudioUrl(story.voiceoverUrl || null);
+    
+    // Set existing file states
+    if (story.pdfUrl) {
+      setPdfFile({ name: "Existing PDF", data: story.pdfUrl });
+      setPdfProgress(100);
+    } else {
+      setPdfFile(null);
+      setPdfProgress(0);
+    }
+    
+    if (story.audioUrl) {
+      setAudioFile({ name: "Existing Audio", data: story.audioUrl });
+      setAudioProgress(100);
+    } else {
+      setAudioFile(null);
+      setAudioProgress(0);
+    }
+    
     form.reset({
       title: story.title,
       content: story.content,
@@ -860,14 +1013,66 @@ export default function ParentDashboard() {
                 name={"pdfUrl" as any}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>PDF URL (Optional)</FormLabel>
+                    <FormLabel>PDF Document (Optional)</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://example.com/story.pdf" 
-                        className="rounded-2xl" 
-                        {...field} 
-                        data-testid="input-story-pdf" 
-                      />
+                      <div className="space-y-3">
+                        <input
+                          ref={pdfInputRef}
+                          type="file"
+                          accept="application/pdf"
+                          onChange={handlePdfUpload}
+                          className="hidden"
+                          data-testid="input-pdf-file"
+                        />
+                        
+                        {!pdfFile && !pdfUploading && (
+                          <Button
+                            type="button"
+                            onClick={() => pdfInputRef.current?.click()}
+                            variant="outline"
+                            className="rounded-2xl w-full"
+                            data-testid="button-upload-pdf"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload PDF Document
+                          </Button>
+                        )}
+                        
+                        {pdfUploading && (
+                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                              <span className="font-medium">Uploading PDF...</span>
+                            </div>
+                            <Progress value={pdfProgress} className="h-2" />
+                            <p className="text-xs text-muted-foreground">{Math.round(pdfProgress)}%</p>
+                          </div>
+                        )}
+                        
+                        {pdfFile && !pdfUploading && (
+                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-primary" />
+                                <span className="font-medium truncate">{pdfFile.name}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                onClick={deletePdfFile}
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-2xl"
+                                data-testid="button-delete-pdf"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              PDF document ready for story
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -879,14 +1084,67 @@ export default function ParentDashboard() {
                 name={"audioUrl" as any}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Audio URL (Optional)</FormLabel>
+                    <FormLabel>Audio Narration (Optional)</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="https://example.com/narration.mp3" 
-                        className="rounded-2xl" 
-                        {...field} 
-                        data-testid="input-story-audio" 
-                      />
+                      <div className="space-y-3">
+                        <input
+                          ref={audioInputRef}
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleAudioFileUpload}
+                          className="hidden"
+                          data-testid="input-audio-file"
+                        />
+                        
+                        {!audioFile && !audioUploading && (
+                          <Button
+                            type="button"
+                            onClick={() => audioInputRef.current?.click()}
+                            variant="outline"
+                            className="rounded-2xl w-full"
+                            data-testid="button-upload-audio"
+                          >
+                            <FileAudio className="w-4 h-4 mr-2" />
+                            Upload Audio Narration
+                          </Button>
+                        )}
+                        
+                        {audioUploading && (
+                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                              <span className="font-medium">Uploading Audio...</span>
+                            </div>
+                            <Progress value={audioProgress} className="h-2" />
+                            <p className="text-xs text-muted-foreground">{Math.round(audioProgress)}%</p>
+                          </div>
+                        )}
+                        
+                        {audioFile && !audioUploading && (
+                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileAudio className="w-4 h-4 text-primary" />
+                                <span className="font-medium truncate">{audioFile.name}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                onClick={deleteAudioFile}
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-2xl"
+                                data-testid="button-delete-audio"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <audio src={audioFile.data} controls className="w-full" data-testid="audio-preview" />
+                            <p className="text-xs text-muted-foreground">
+                              Audio will play when "Read to Me" is clicked
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
