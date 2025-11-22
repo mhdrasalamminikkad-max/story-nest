@@ -252,6 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .values({
           userId,
           pinHash,
+          childName: settingsData.childName,
           readingTimeLimit: settingsData.readingTimeLimit,
           fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
           theme: settingsData.theme,
@@ -266,6 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // SECURITY: isAdmin is explicitly excluded from updates
             // to prevent privilege escalation
             pinHash,
+            childName: settingsData.childName,
             readingTimeLimit: settingsData.readingTimeLimit,
             fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
             theme: settingsData.theme,
