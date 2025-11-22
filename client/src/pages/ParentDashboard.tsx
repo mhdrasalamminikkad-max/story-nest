@@ -1051,8 +1051,6 @@ export default function ParentDashboard() {
                               <Loader2 className="w-4 h-4 text-primary animate-spin" />
                               <span className="font-medium">Uploading PDF...</span>
                             </div>
-                            <Progress value={pdfProgress} className="h-2" />
-                            <p className="text-xs text-muted-foreground">{Math.round(pdfProgress)}%</p>
                           </div>
                         )}
                         
@@ -1122,8 +1120,6 @@ export default function ParentDashboard() {
                               <Loader2 className="w-4 h-4 text-primary animate-spin" />
                               <span className="font-medium">Uploading Audio...</span>
                             </div>
-                            <Progress value={audioProgress} className="h-2" />
-                            <p className="text-xs text-muted-foreground">{Math.round(audioProgress)}%</p>
                           </div>
                         )}
                         
