@@ -302,38 +302,32 @@ export default function ParentDashboard() {
       return;
     }
 
-    setPdfUploading(true);
-    setPdfProgress(0);
+    // Create blob URL immediately for instant display
+    const blobUrl = URL.createObjectURL(file);
+    setPdfFile({ name: file.name, data: blobUrl });
+    (form.setValue as any)('pdfUrl', blobUrl);
+    
     toast({
-      title: "Uploading PDF...",
-      description: "Processing your file",
-      duration: 2000,
+      title: "PDF uploaded",
+      description: `${file.name} uploaded successfully`,
+      duration: 4000,
     });
 
+    // Upload to Firebase in background
+    setPdfUploading(true);
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadPDFFile(file, userId, (progress) => {
         setPdfProgress(Math.min(progress, 99));
       });
-
-      setPdfFile({ name: file.name, data: downloadURL });
+      // Update with actual Firebase URL once upload completes
       (form.setValue as any)('pdfUrl', downloadURL);
       setPdfUploading(false);
       setPdfProgress(0);
-      toast({
-        title: "PDF uploaded",
-        description: `${file.name} uploaded successfully`,
-        duration: 4000,
-      });
     } catch (error) {
       setPdfUploading(false);
       setPdfProgress(0);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload PDF file",
-        variant: "destructive",
-        duration: 4000,
-      });
+      console.error("Background PDF upload failed:", error);
     }
   };
 
@@ -351,38 +345,32 @@ export default function ParentDashboard() {
       return;
     }
 
-    setAudioUploading(true);
-    setAudioProgress(0);
+    // Create blob URL immediately for instant display
+    const blobUrl = URL.createObjectURL(file);
+    setAudioFile({ name: file.name, data: blobUrl });
+    (form.setValue as any)('audioUrl', blobUrl);
+    
     toast({
-      title: "Uploading audio...",
-      description: "Processing your file",
-      duration: 2000,
+      title: "Audio uploaded",
+      description: `${file.name} uploaded successfully`,
+      duration: 4000,
     });
 
+    // Upload to Firebase in background
+    setAudioUploading(true);
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadAudioFile(file, userId, (progress) => {
         setAudioProgress(Math.min(progress, 99));
       });
-
-      setAudioFile({ name: file.name, data: downloadURL });
+      // Update with actual Firebase URL once upload completes
       (form.setValue as any)('audioUrl', downloadURL);
       setAudioUploading(false);
       setAudioProgress(0);
-      toast({
-        title: "Audio uploaded",
-        description: `${file.name} uploaded successfully`,
-        duration: 4000,
-      });
     } catch (error) {
       setAudioUploading(false);
       setAudioProgress(0);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload audio file",
-        variant: "destructive",
-        duration: 4000,
-      });
+      console.error("Background audio upload failed:", error);
     }
   };
 
