@@ -110,3 +110,8 @@
 [x] 110. Added 5MB file size limit for PDFs and audio files
 [x] 111. Files save directly to database as base64 - instant and reliable
 [x] 112. Workflow restarted - instant base64 upload system deployed
+[x] 113. FIXED critical database schema issue - missing child_name and pdf_url columns
+[x] 114. Ran drizzle-kit push to sync database schema with all missing columns
+[x] 115. Settings page now working - no more "column does not exist" errors
+[x] 116. Workflow restarted successfully - all database errors resolved
+[x] 117. Application running clean with no errors - Settings and PDF upload both fixed
