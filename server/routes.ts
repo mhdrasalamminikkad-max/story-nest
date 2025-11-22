@@ -1621,7 +1621,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: checkpointProgress.id,
           checkpointId: checkpointProgress.checkpointId,
           currentProgress: checkpointProgress.currentProgress,
-          isCompleted: checkpointProgress.isCompleted,
           completedAt: checkpointProgress.completedAt,
           checkpoint: checkpoints,
         })
@@ -1669,7 +1668,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             eq(checkpointProgress.userId, userId)
           ));
 
-        if (!progress || progress.isCompleted) continue;
+        if (!progress || progress.completedAt) continue;
 
         let newProgress = progress.currentProgress;
         
@@ -1685,13 +1684,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .update(checkpointProgress)
           .set({
             currentProgress: newProgress,
-            isCompleted,
             completedAt: isCompleted ? new Date() : null,
           })
           .where(eq(checkpointProgress.id, progress.id))
           .returning();
 
-        if (isCompleted && !progress.isCompleted) {
+        if (isCompleted && !progress.completedAt) {
           newlyCompleted.push(updated);
         }
       }

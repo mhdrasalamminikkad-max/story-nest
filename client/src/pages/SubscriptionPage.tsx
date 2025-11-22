@@ -5,7 +5,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Check, ArrowLeft, Coins, Sparkles } from "lucide-react";
+import { Check, ArrowLeft, Coins, Sparkles, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import type { PublicSubscriptionPlan, PublicCoinPackage } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,15 +40,27 @@ export default function SubscriptionPage() {
       
       <div className="relative z-10">
         <header className="container mx-auto px-4 py-6 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => setLocation(user ? "/dashboard" : "/")}
-            className="rounded-2xl"
-            data-testid="button-back-home"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {user ? "Back to Dashboard" : "Back to Home"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <div 
+              className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              onClick={() => setLocation("/")}
+              data-testid="button-home-logo"
+            >
+              <BookOpen className="w-5 h-5 text-primary" />
+              <h1 className="font-heading text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                StoryNest
+              </h1>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={() => setLocation(user ? "/dashboard" : "/")}
+              className="rounded-2xl"
+              data-testid="button-back-home"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {user ? "Back to Dashboard" : "Back to Home"}
+            </Button>
+          </div>
           <ThemeToggle />
         </header>
 

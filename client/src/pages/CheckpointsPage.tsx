@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Target, Trophy, Trash2, Award } from "lucide-react";
+import { ArrowLeft, Plus, Target, Trophy, Trash2, Award, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -108,15 +108,27 @@ export default function CheckpointsPage() {
       
       <div className="relative z-10">
         <header className="container mx-auto px-4 py-6 flex items-center justify-between gap-4 flex-wrap">
-          <Button
-            variant="ghost"
-            onClick={() => setLocation("/dashboard")}
-            className="rounded-2xl"
-            data-testid="button-back-dashboard"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
+          <div className="flex items-center gap-2">
+            <div 
+              className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              onClick={() => setLocation("/")}
+              data-testid="button-home-logo"
+            >
+              <BookOpen className="w-5 h-5 text-primary" />
+              <h1 className="font-heading text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                StoryNest
+              </h1>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/dashboard")}
+              className="rounded-2xl"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
           <ThemeToggle />
         </header>
 
