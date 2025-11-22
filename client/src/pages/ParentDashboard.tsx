@@ -109,6 +109,9 @@ export default function ParentDashboard() {
       language: "english" as const,
       category: "educational" as const,
       storyType: "lesson" as const,
+      audience: "both" as const,
+      pdfUrl: "",
+      audioUrl: "",
       voiceoverUrl: undefined,
     },
   });
@@ -135,6 +138,9 @@ export default function ParentDashboard() {
         language: "english" as const,
         category: "educational" as const,
         storyType: "lesson" as const,
+        audience: "both" as const,
+        pdfUrl: "",
+        audioUrl: "",
         voiceoverUrl: undefined,
       });
     },
@@ -162,6 +168,9 @@ export default function ParentDashboard() {
         language: "english" as const,
         category: "educational" as const,
         storyType: "lesson" as const,
+        audience: "both" as const,
+        pdfUrl: "",
+        audioUrl: "",
         voiceoverUrl: undefined,
       });
     },
@@ -260,9 +269,12 @@ export default function ParentDashboard() {
       content: story.content,
       summary: story.summary,
       imageUrl: story.imageUrl,
-      language: story.language as "english" | "malayalam",
-      category: story.category as "islamic" | "history" | "moral" | "adventure" | "educational" | "fairy-tale",
-      storyType: story.storyType as "islamic" | "lesson" | "history" | "fairy-tale" | "adventure" | "educational" | "moral" | "mythology" | "science",
+      language: story.language,
+      category: story.category,
+      storyType: story.storyType,
+      audience: story.audience,
+      pdfUrl: story.pdfUrl || "",
+      audioUrl: story.audioUrl || "",
       ...(story.voiceoverUrl && { voiceoverUrl: story.voiceoverUrl }),
     });
   };
@@ -695,6 +707,9 @@ export default function ParentDashboard() {
             language: "english" as const,
             category: "educational" as const,
             storyType: "lesson" as const,
+            audience: "both" as const,
+            pdfUrl: "",
+            audioUrl: "",
             voiceoverUrl: undefined,
           });
         }
@@ -812,6 +827,67 @@ export default function ParentDashboard() {
                         <SelectItem value="science">Science</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="audience"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Audience *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-story-audience">
+                          <SelectValue placeholder="Who can view this story?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="both">Both Parent & Child</SelectItem>
+                        <SelectItem value="parent">Parent Only</SelectItem>
+                        <SelectItem value="child">Child Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={"pdfUrl" as any}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PDF URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/story.pdf" 
+                        className="rounded-2xl" 
+                        {...field} 
+                        data-testid="input-story-pdf" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={"audioUrl" as any}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Audio URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/narration.mp3" 
+                        className="rounded-2xl" 
+                        {...field} 
+                        data-testid="input-story-audio" 
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
