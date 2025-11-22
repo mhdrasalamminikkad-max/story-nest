@@ -12,6 +12,13 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
+// Helper function to filter out blob URLs and only allow Firebase storage URLs
+function filterBlobUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('blob:')) return undefined;
+  return url;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
@@ -165,11 +172,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.userId!;
       const storyData = insertStorySchema.parse(req.body);
 
+      // Filter out blob URLs - only allow Firebase storage URLs
+      const sanitizedData = {
+        ...storyData,
+        pdfUrl: filterBlobUrl(storyData.pdfUrl),
+        audioUrl: filterBlobUrl(storyData.audioUrl),
+        voiceoverUrl: filterBlobUrl(storyData.voiceoverUrl),
+      };
+
       const [story] = await db
         .insert(stories)
         .values({
           id: `story-${Date.now()}`,
-          ...storyData,
+          ...sanitizedData,
           userId,
           status: "pending_review",
           approvedBy: null,
@@ -263,9 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: updates.category,
           storyType: updates.storyType,
           audience: updates.audience,
-          pdfUrl: updates.pdfUrl,
-          audioUrl: updates.audioUrl,
-          voiceoverUrl: updates.voiceoverUrl,
+          pdfUrl: filterBlobUrl(updates.pdfUrl),
+          audioUrl: filterBlobUrl(updates.audioUrl),
+          voiceoverUrl: filterBlobUrl(updates.voiceoverUrl),
         })
         .where(eq(stories.id, id))
         .returning();

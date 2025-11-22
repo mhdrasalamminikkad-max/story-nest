@@ -421,11 +421,28 @@ export default function ParentDashboard() {
     console.log("Form submitted with data:", data);
     console.log("Form errors:", form.formState.errors);
     
-    // Don't filter out URLs - let backend handle them directly
+    // Check if uploads are still in progress
+    if (pdfUploading || audioUploading) {
+      toast({
+        title: "Upload in progress",
+        description: "Please wait for file uploads to complete before submitting",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    
+    // Filter out blob URLs - only allow Firebase download URLs
+    const filterBlobUrl = (url: string | undefined) => {
+      if (!url) return undefined;
+      if (url.startsWith('blob:')) return undefined;
+      return url;
+    };
+    
     const submissionData = {
       ...data,
-      pdfUrl: data.pdfUrl || undefined,
-      audioUrl: data.audioUrl || undefined,
+      pdfUrl: filterBlobUrl(data.pdfUrl),
+      audioUrl: filterBlobUrl(data.audioUrl),
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
     
