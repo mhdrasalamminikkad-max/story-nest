@@ -407,23 +407,36 @@ export default function ParentDashboard() {
       content: story.content,
       summary: story.summary,
       imageUrl: story.imageUrl,
-      language: story.language,
-      category: story.category,
-      storyType: story.storyType,
-      audience: story.audience,
+      language: story.language as any,
+      category: story.category as any,
+      storyType: story.storyType as any,
+      audience: story.audience as any,
       pdfUrl: story.pdfUrl || "",
       audioUrl: story.audioUrl || "",
-      ...(story.voiceoverUrl && { voiceoverUrl: story.voiceoverUrl }),
+      voiceoverUrl: story.voiceoverUrl as any,
     });
   };
 
-  const handleFormSubmit = (data: any) => {
-    // Use voiceoverBase64 state to ensure we have the latest recording
-    // even if FileReader.onloadend hasn't completed yet
+  const handleFormSubmit = async (data: any) => {
+    // Check if uploads are still in progress
+    if (pdfUploading || audioUploading) {
+      toast({
+        title: "Uploads in progress",
+        description: "Please wait for file uploads to complete",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Filter out blob URLs - they're only for preview and won't work when saved
+    const cleanPdfUrl = data.pdfUrl && data.pdfUrl.startsWith('blob:') ? undefined : data.pdfUrl;
+    const cleanAudioUrl = data.audioUrl && data.audioUrl.startsWith('blob:') ? undefined : data.audioUrl;
+    
     const submissionData = {
       ...data,
-      pdfUrl: data.pdfUrl || undefined,
-      audioUrl: data.audioUrl || undefined,
+      pdfUrl: cleanPdfUrl || undefined,
+      audioUrl: cleanAudioUrl || undefined,
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
     
@@ -435,7 +448,7 @@ export default function ParentDashboard() {
       duration: 2000,
     });
     
-    // Submit in background (uploads will continue in background and update URLs)
+    // Submit mutation
     if (editingStory) {
       updateStoryMutation.mutate({ id: editingStory.id, data: submissionData });
     } else {

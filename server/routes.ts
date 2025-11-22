@@ -259,6 +259,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           content: updates.content,
           imageUrl: updates.imageUrl,
           summary: updates.summary,
+          language: updates.language,
+          category: updates.category,
+          storyType: updates.storyType,
+          audience: updates.audience,
+          pdfUrl: updates.pdfUrl,
+          audioUrl: updates.audioUrl,
           voiceoverUrl: updates.voiceoverUrl,
         })
         .where(eq(stories.id, id))
