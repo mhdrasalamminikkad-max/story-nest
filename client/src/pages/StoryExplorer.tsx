@@ -21,7 +21,9 @@ import {
   Compass,
   Heart,
   Zap,
-  Microscope
+  Microscope,
+  Crown,
+  Users
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +31,7 @@ import type { Story } from "@shared/schema";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Badge } from "@/components/ui/badge";
 
-type StepType = "language" | "category" | "type" | "stories";
+type StepType = "language" | "source" | "category" | "type" | "stories";
 
 const languages = [
   { value: "english", label: "English", icon: Globe },
@@ -61,6 +63,7 @@ export default function StoryExplorer() {
   const [, setLocation] = useLocation();
   const [currentStep, setCurrentStep] = useState<StepType>("language");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  const [selectedSource, setSelectedSource] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
 
@@ -77,6 +80,11 @@ export default function StoryExplorer() {
 
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
+    setCurrentStep("source");
+  };
+
+  const handleSourceSelect = (source: string) => {
+    setSelectedSource(source);
     setCurrentStep("category");
   };
 
@@ -91,9 +99,12 @@ export default function StoryExplorer() {
   };
 
   const handleBack = () => {
-    if (currentStep === "category") {
+    if (currentStep === "source") {
       setCurrentStep("language");
       setSelectedLanguage("");
+    } else if (currentStep === "category") {
+      setCurrentStep("source");
+      setSelectedSource("");
     } else if (currentStep === "type") {
       setCurrentStep("category");
       setSelectedCategory("");
@@ -113,6 +124,8 @@ export default function StoryExplorer() {
     switch (currentStep) {
       case "language":
         return <Languages className="w-6 h-6" />;
+      case "source":
+        return <Sparkles className="w-6 h-6" />;
       case "category":
         return <BookMarked className="w-6 h-6" />;
       case "type":
@@ -126,6 +139,8 @@ export default function StoryExplorer() {
     switch (currentStep) {
       case "language":
         return "Choose Your Language";
+      case "source":
+        return "Select Story Source";
       case "category":
         return "Pick a Category";
       case "type":
@@ -188,6 +203,48 @@ export default function StoryExplorer() {
                     </Card>
                   );
                 })}
+              </motion.div>
+            )}
+
+            {currentStep === "source" && (
+              <motion.div
+                key="source"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
+              >
+                <Card
+                  className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                  onClick={() => handleSourceSelect("main")}
+                  data-testid="card-source-main"
+                >
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                      <Crown className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-bold">Main Stories</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Curated collection of official stories
+                    </p>
+                  </div>
+                </Card>
+
+                <Card
+                  className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                  onClick={() => handleSourceSelect("parent")}
+                  data-testid="card-source-parent"
+                >
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                      <Users className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-bold">Parent Added Stories</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Stories created by parents in the community
+                    </p>
+                  </div>
+                </Card>
               </motion.div>
             )}
 
