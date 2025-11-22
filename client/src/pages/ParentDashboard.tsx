@@ -314,9 +314,8 @@ export default function ParentDashboard() {
 
       setPdfFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('pdfUrl', downloadURL);
-      // Clear uploading state first to hide progress bar immediately
       setPdfUploading(false);
-      setTimeout(() => setPdfProgress(0), 100);
+      setPdfProgress(0);
       toast({
         title: "PDF uploaded",
         description: `${file.name} uploaded successfully`,
@@ -324,7 +323,7 @@ export default function ParentDashboard() {
       });
     } catch (error) {
       setPdfUploading(false);
-      setTimeout(() => setPdfProgress(0), 50);
+      setPdfProgress(0);
       toast({
         title: "Upload failed",
         description: "Failed to upload PDF file",
@@ -360,9 +359,8 @@ export default function ParentDashboard() {
 
       setAudioFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('audioUrl', downloadURL);
-      // Clear uploading state first to hide progress bar immediately
       setAudioUploading(false);
-      setTimeout(() => setAudioProgress(0), 100);
+      setAudioProgress(0);
       toast({
         title: "Audio uploaded",
         description: `${file.name} uploaded successfully`,
@@ -370,7 +368,7 @@ export default function ParentDashboard() {
       });
     } catch (error) {
       setAudioUploading(false);
-      setTimeout(() => setAudioProgress(0), 50);
+      setAudioProgress(0);
       toast({
         title: "Upload failed",
         description: "Failed to upload audio file",
