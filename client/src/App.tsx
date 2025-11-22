@@ -10,7 +10,8 @@ import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
 import ChildLockSetupPage from "@/pages/ChildLockSetupPage";
 import ParentDashboard from "@/pages/ParentDashboard";
-import ChildModePage from "@/pages/ChildModePage";
+import ChildModeSelectionPage from "@/pages/ChildModeSelectionPage";
+import ChildModeReadPage from "@/pages/ChildModeReadPage";
 import AdminPanel from "@/pages/AdminPanel";
 import SubscriptionPage from "@/pages/SubscriptionPage";
 import PaymentPage from "@/pages/PaymentPage";
@@ -88,7 +89,8 @@ function Router() {
         <Route path="/auth" component={AuthPage} />
         <Route path="/setup" component={ChildLockSetupPage} />
         <Route path="/dashboard" component={ParentDashboard} />
-        <Route path="/child-mode" component={ChildModePage} />
+        <Route path="/child-mode" component={ChildModeSelectionPage} />
+        <Route path="/child-mode-read" component={ChildModeReadPage} />
         <Route path="/admin" component={AdminPanel} />
         <Route path="/pricing" component={SubscriptionPage} />
         <Route path="/payment" component={PaymentPage} />

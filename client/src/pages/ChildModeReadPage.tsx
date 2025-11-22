@@ -11,7 +11,7 @@ import type { Story, ParentSettings } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ChildModePage() {
+export default function ChildModeReadPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
