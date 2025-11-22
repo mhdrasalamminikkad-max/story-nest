@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -421,15 +421,18 @@ export default function ParentDashboard() {
     console.log("Form submitted with data:", data);
     console.log("Form errors:", form.formState.errors);
     
-    // Check if uploads are still in progress
+    // Wait for uploads to complete if they're in progress
+    // Show loading indicator on button but don't block with toast
     if (pdfUploading || audioUploading) {
-      toast({
-        title: "Upload in progress",
-        description: "Please wait for file uploads to complete before submitting",
-        variant: "destructive",
-        duration: 4000,
+      // Wait in a loop until uploads complete
+      await new Promise<void>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (!pdfUploading && !audioUploading) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
       });
-      return;
     }
     
     // Filter out blob URLs - only allow Firebase download URLs
@@ -1280,8 +1283,16 @@ export default function ParentDashboard() {
                   type="submit" 
                   className="rounded-2xl" 
                   data-testid="button-submit-story"
+                  disabled={pdfUploading || audioUploading}
                 >
-                  {editingStory ? "Save Draft" : "Create Draft"}
+                  {(pdfUploading || audioUploading) ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Uploading files...
+                    </>
+                  ) : (
+                    editingStory ? "Save Draft" : "Create Draft"
+                  )}
                 </Button>
               </DialogFooter>
             </form>
