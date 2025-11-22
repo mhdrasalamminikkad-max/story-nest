@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "postgresql-16"]
+modules = ["nodejs-20", "web"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -8,7 +8,7 @@ channel = "stable-25_05"
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
-run = ["npm", "run", "dev"]
+run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 5000
@@ -25,6 +25,10 @@ externalPort = 4200
 [[ports]]
 localPort = 39211
 externalPort = 5173
+
+[[ports]]
+localPort = 39839
+externalPort = 8081
 
 [[ports]]
 localPort = 40101
