@@ -111,7 +111,9 @@ export default function ChildModeReadPage() {
 
     stopReading();
 
-    const audio = new Audio(audioSource);
+    // Use proxy endpoint for audio to bypass CORS issues
+    const proxyUrl = currentStory.id ? `/api/audio-proxy/${currentStory.id}` : audioSource;
+    const audio = new Audio(proxyUrl);
     audio.crossOrigin = "anonymous";
     
     // Cleanup function to remove all listeners

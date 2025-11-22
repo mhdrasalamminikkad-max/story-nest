@@ -1074,12 +1074,18 @@ export default function ParentDashboard() {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <iframe
-                              src={`${pdfFile.data}#toolbar=0`}
-                              className="w-full border rounded-lg bg-white dark:bg-gray-800"
-                              style={{ height: "300px" }}
-                              data-testid="pdf-preview"
-                            />
+                            {editingStory?.id ? (
+                              <iframe
+                                src={`/api/pdf-proxy/${editingStory.id}#toolbar=0`}
+                                className="w-full border rounded-lg bg-white dark:bg-gray-800"
+                                style={{ height: "300px" }}
+                                data-testid="pdf-preview"
+                              />
+                            ) : (
+                              <div className="w-full border rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center" style={{ height: "300px" }}>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">PDF preview will show after upload</p>
+                              </div>
+                            )}
                             <p className="text-xs text-green-600 dark:text-green-400">
                               PDF uploaded successfully
                             </p>

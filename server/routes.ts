@@ -1989,6 +1989,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PDF proxy endpoint to handle CORS issues with Firebase storage
+  app.get("/api/pdf-proxy/:storyId", async (req, res) => {
+    try {
+      const { storyId } = req.params;
+      
+      const [story] = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.id, storyId));
+      
+      if (!story || !story.pdfUrl) {
+        return res.status(404).json({ error: "PDF not found" });
+      }
+
+      // Fetch the PDF from Firebase
+      const pdfResponse = await fetch(story.pdfUrl);
+      if (!pdfResponse.ok) {
+        return res.status(404).json({ error: "Failed to fetch PDF" });
+      }
+
+      // Set proper headers for PDF display
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      
+      // Stream the PDF
+      const buffer = await pdfResponse.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error("Error serving PDF:", error);
+      res.status(500).json({ error: "Failed to serve PDF" });
+    }
+  });
+
+  // Audio proxy endpoint to handle CORS issues with Firebase storage
+  app.get("/api/audio-proxy/:storyId", async (req, res) => {
+    try {
+      const { storyId } = req.params;
+      
+      const [story] = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.id, storyId));
+      
+      if (!story || (!story.audioUrl && !story.voiceoverUrl)) {
+        return res.status(404).json({ error: "Audio not found" });
+      }
+
+      const audioUrl = story.audioUrl || story.voiceoverUrl;
+      const audioResponse = await fetch(audioUrl!);
+      if (!audioResponse.ok) {
+        return res.status(404).json({ error: "Failed to fetch audio" });
+      }
+
+      // Set proper headers for audio playback
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Accept-Ranges", "bytes");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      
+      // Stream the audio
+      const buffer = await audioResponse.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error("Error serving audio:", error);
+      res.status(500).json({ error: "Failed to serve audio" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
