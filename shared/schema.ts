@@ -48,6 +48,7 @@ export type ReviewStory = z.infer<typeof reviewStorySchema>;
 export const parentSettingsSchema = z.object({
   userId: z.string(),
   pinHash: z.string(),
+  childName: z.string().optional(),
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),
   theme: z.enum(["day", "night"]),
@@ -61,6 +62,7 @@ export const parentSettingsSchema = z.object({
 
 export const insertParentSettingsSchema = z.object({
   pin: z.string().length(4),
+  childName: z.string().min(1, "Please enter your child's name").max(50, "Name is too long").optional(),
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),
   theme: z.enum(["day", "night"]),

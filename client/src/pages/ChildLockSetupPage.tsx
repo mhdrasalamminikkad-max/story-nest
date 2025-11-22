@@ -26,6 +26,7 @@ export default function ChildLockSetupPage() {
     resolver: zodResolver(insertParentSettingsSchema),
     defaultValues: {
       pin: "",
+      childName: "",
       readingTimeLimit: 30,
       fullscreenLockEnabled: true,
       theme: "day" as const,
@@ -108,6 +109,31 @@ export default function ChildLockSetupPage() {
                           </FormControl>
                           <FormDescription>
                             This PIN will be required to exit child mode
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="childName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base">
+                            Child's Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Enter your child's name"
+                              className="rounded-2xl"
+                              {...field}
+                              data-testid="input-child-name"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            This name will appear in welcome messages
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

@@ -22,6 +22,7 @@ export const stories = pgTable("stories", {
 export const parentSettings = pgTable("parent_settings", {
   userId: varchar("user_id").primaryKey(),
   pinHash: text("pin_hash").notNull(),
+  childName: varchar("child_name", { length: 50 }),
   readingTimeLimit: integer("reading_time_limit").notNull(),
   fullscreenLockEnabled: boolean("fullscreen_lock_enabled").notNull(),
   theme: varchar("theme", { length: 10 }).notNull(),

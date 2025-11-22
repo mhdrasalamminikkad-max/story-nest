@@ -10,7 +10,7 @@ import { CategoryChips } from "@/components/CategoryChips";
 import { MobileHeader } from "@/components/MobileHeader";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useQuery } from "@tanstack/react-query";
-import type { Story } from "@shared/schema";
+import type { Story, ParentSettings } from "@shared/schema";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,11 @@ export default function HomePage() {
   
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories/preview"],
+  });
+
+  const { data: parentSettings } = useQuery<ParentSettings>({
+    queryKey: ["/api/parent-settings"],
+    enabled: !!user,
   });
 
   const categories = ["All", "Fairy Tale", "Adventure", "Educational", "Moral", "History"];
@@ -140,7 +145,7 @@ export default function HomePage() {
             >
               <Badge variant="secondary" className="mb-4" data-testid="badge-welcome">
                 <Sparkles className="w-3 h-3 mr-1" />
-                Welcome to StoryNest
+                {parentSettings?.childName ? `Welcome ${parentSettings.childName}` : 'Welcome to StoryNest'}
               </Badge>
               <h2 className="font-heading text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent">
                 Magical Bedtime Stories
@@ -215,7 +220,9 @@ export default function HomePage() {
           <div className="md:hidden px-4 mb-4">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="font-heading text-lg font-bold">Welcome to StoryNest</h2>
+              <h2 className="font-heading text-lg font-bold">
+                {parentSettings?.childName ? `Welcome ${parentSettings.childName}` : 'Welcome to StoryNest'}
+              </h2>
             </div>
             <p className="text-sm text-muted-foreground">Magical bedtime stories for your little ones</p>
           </div>

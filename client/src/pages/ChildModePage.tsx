@@ -308,7 +308,7 @@ export default function ChildModePage() {
 
       <div className="relative z-10 h-screen flex flex-col">
         <header className="p-2 sm:p-3 flex justify-between items-center bg-gradient-to-r from-purple-200/30 via-pink-200/30 to-blue-200/30 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-blue-900/30 backdrop-blur-sm">
-          <div className="flex gap-1.5 sm:gap-2">
+          <div className="flex gap-1.5 sm:gap-2 items-center">
             {stories.length > 1 && (
               <>
                 <Button
@@ -330,6 +330,11 @@ export default function ChildModePage() {
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </>
+            )}
+            {settings?.childName && (
+              <span className="hidden sm:inline font-heading text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent ml-2">
+                {settings.childName}'s Story Time
+              </span>
             )}
           </div>
           <Button
