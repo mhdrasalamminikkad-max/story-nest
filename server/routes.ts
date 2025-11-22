@@ -398,6 +398,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Grant admin access with secret code
+  app.post("/api/admin/grant", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { code } = req.body;
+      
+      // Secret code for granting admin access
+      const ADMIN_SECRET_CODE = "786786";
+      
+      if (code !== ADMIN_SECRET_CODE) {
+        res.status(403).json({ error: "Invalid admin code" });
+        return;
+      }
+
+      // Grant admin access
+      await db
+        .update(parentSettings)
+        .set({ isAdmin: true })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json({ success: true, message: "Admin access granted!" });
+    } catch (error) {
+      console.error("Error granting admin access:", error);
+      res.status(500).json({ error: "Failed to grant admin access" });
+    }
+  });
+
   // Admin: Get pending stories for review
   app.get("/api/admin/pending-stories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
