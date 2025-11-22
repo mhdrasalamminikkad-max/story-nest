@@ -418,6 +418,9 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = async (data: any) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     // Don't filter out URLs - let backend handle them directly
     const submissionData = {
       ...data,
@@ -425,6 +428,8 @@ export default function ParentDashboard() {
       audioUrl: data.audioUrl || undefined,
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
+    
+    console.log("Submitting to backend:", submissionData);
     
     // Close dialog immediately for instant feedback
     setShowAddStory(false);
