@@ -1055,7 +1055,7 @@ export default function ParentDashboard() {
                                   <p className="font-medium truncate text-sm">{pdfFile.name}</p>
                                   {pdfUploading ? (
                                     <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {((pdfProgress / 100) * (pdfFileSize / 1024 / 1024)).toFixed(1)}/{(pdfFileSize / 1024 / 1024).toFixed(1)} MB
+                                      Uploading: {Math.round(pdfProgress)}%
                                     </p>
                                   ) : (
                                     <p className="text-xs text-green-600 dark:text-green-400">PDF ready</p>
@@ -1128,7 +1128,7 @@ export default function ParentDashboard() {
                                   <p className="font-medium truncate text-sm">{audioFile.name}</p>
                                   {audioUploading ? (
                                     <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {((audioProgress / 100) * (audioFileSize / 1024 / 1024)).toFixed(1)}/{(audioFileSize / 1024 / 1024).toFixed(1)} MB
+                                      Uploading: {Math.round(audioProgress)}%
                                     </p>
                                   ) : (
                                     <p className="text-xs text-green-600 dark:text-green-400">Audio ready</p>

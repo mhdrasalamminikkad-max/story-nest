@@ -1,4 +1,4 @@
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { app } from "./firebase";
 
 const storage = getStorage(app);
@@ -10,23 +10,32 @@ export async function uploadFileToStorage(
 ): Promise<string> {
   const storageRef = ref(storage, path);
   
-  if (onProgress) {
-    onProgress(50);
-  }
-  
-  await uploadBytes(storageRef, file);
-  
-  if (onProgress) {
-    onProgress(90);
-  }
-  
-  const downloadURL = await getDownloadURL(storageRef);
-  
-  if (onProgress) {
-    onProgress(100);
-  }
-  
-  return downloadURL;
+  return new Promise((resolve, reject) => {
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        // Real-time progress with actual bytes
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        if (onProgress) {
+          onProgress(Math.round(progress));
+        }
+      },
+      (error) => {
+        reject(error);
+      },
+      async () => {
+        // Upload complete
+        try {
+          const downloadURL = await getDownloadURL(storageRef);
+          resolve(downloadURL);
+        } catch (error) {
+          reject(error);
+        }
+      }
+    );
+  });
 }
 
 export async function uploadPDFFile(
