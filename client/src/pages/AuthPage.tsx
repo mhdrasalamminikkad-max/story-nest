@@ -8,11 +8,22 @@ import { Sparkles } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import type { ParentSettings } from "@shared/schema";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  
+  const { data: parentSettings } = useQuery<ParentSettings>({
+    queryKey: ["/api/parent-settings"],
+    enabled: !!user,
+  });
+  
+  const welcomeText = parentSettings?.childName 
+    ? `Welcome to ${parentSettings.childName}`
+    : "Welcome to StoryNest";
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -81,7 +92,7 @@ export default function AuthPage() {
                 >
                   <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-primary mx-auto" />
                 </motion.div>
-                <CardTitle className="font-heading text-2xl sm:text-3xl">Welcome to StoryNest</CardTitle>
+                <CardTitle className="font-heading text-2xl sm:text-3xl">{welcomeText}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
                   Sign in with Google to access magical bedtime stories
                 </CardDescription>

@@ -6,10 +6,21 @@ import { BookOpen, LogIn, User, Play, Music2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import type { ParentSettings } from "@shared/schema";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  
+  const { data: parentSettings } = useQuery<ParentSettings>({
+    queryKey: ["/api/parent-settings"],
+    enabled: !!user,
+  });
+  
+  const welcomeText = parentSettings?.childName 
+    ? `Welcome to ${parentSettings.childName}`
+    : "Welcome to StoryNest";
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,7 +90,7 @@ export default function HomePage() {
             >
               <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
                 <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Welcome to StoryNest</span>
+                <span className="text-sm font-medium text-primary">{welcomeText}</span>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4 bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Magical Bedtime Stories
