@@ -391,15 +391,15 @@ export default function ParentDashboard() {
       setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     } else {
       setPdfFile(null);
-      setPdfProgress(0);
+      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     }
     
     if (story.audioUrl) {
       setAudioFile({ name: "Existing Audio", data: story.audioUrl });
-      setAudioProgress(100);
+      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     } else {
       setAudioFile(null);
-      setAudioProgress(0);
+      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     }
     
     form.reset({

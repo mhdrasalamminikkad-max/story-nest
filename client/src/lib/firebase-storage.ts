@@ -52,7 +52,7 @@ export async function uploadFileToStorage(
 export async function uploadPDFFile(
   file: File,
   userId: string,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<string> {
   const timestamp = Date.now();
   const fileName = `${userId}/${timestamp}_${file.name}`;
@@ -63,7 +63,7 @@ export async function uploadPDFFile(
 export async function uploadAudioFile(
   file: File,
   userId: string,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<string> {
   const timestamp = Date.now();
   const fileName = `${userId}/${timestamp}_${file.name}`;
@@ -74,7 +74,7 @@ export async function uploadAudioFile(
 export async function uploadVoiceoverBlob(
   blob: Blob,
   userId: string,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<string> {
   const timestamp = Date.now();
   const fileName = `${userId}/${timestamp}_voiceover.webm`;
