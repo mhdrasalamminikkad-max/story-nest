@@ -16,6 +16,7 @@ interface PINDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVerify: (pin: string) => Promise<boolean>;
+  onForgotPin?: () => void;
   title?: string;
   description?: string;
 }
@@ -24,6 +25,7 @@ export function PINDialog({
   open,
   onOpenChange,
   onVerify,
+  onForgotPin,
   title = "Parent Verification Required",
   description = "Please enter your 4-digit PIN to continue",
 }: PINDialogProps) {
@@ -96,7 +98,22 @@ export function PINDialog({
               )}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2">
+            {onForgotPin && (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-2xl"
+                onClick={() => {
+                  setPin("");
+                  setError("");
+                  onForgotPin();
+                }}
+                data-testid="button-forgot-pin"
+              >
+                Forgot PIN?
+              </Button>
+            )}
             <Button
               type="submit"
               className="w-full rounded-2xl"
