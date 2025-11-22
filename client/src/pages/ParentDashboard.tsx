@@ -56,9 +56,11 @@ export default function ParentDashboard() {
   const [pdfFile, setPdfFile] = useState<{ name: string; data: string } | null>(null);
   const [pdfUploading, setPdfUploading] = useState(false);
   const [pdfProgress, setPdfProgress] = useState(0);
+  const [pdfFileSize, setPdfFileSize] = useState<number>(0);
   const [audioFile, setAudioFile] = useState<{ name: string; data: string } | null>(null);
   const [audioUploading, setAudioUploading] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
+  const [audioFileSize, setAudioFileSize] = useState<number>(0);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
@@ -305,13 +307,8 @@ export default function ParentDashboard() {
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setPdfFile({ name: file.name, data: blobUrl });
+    setPdfFileSize(file.size);
     (form.setValue as any)('pdfUrl', blobUrl);
-    
-    toast({
-      title: "PDF uploaded",
-      description: `${file.name} uploaded successfully`,
-      duration: 4000,
-    });
 
     // Upload to Firebase in background
     setPdfUploading(true);
@@ -348,13 +345,8 @@ export default function ParentDashboard() {
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setAudioFile({ name: file.name, data: blobUrl });
+    setAudioFileSize(file.size);
     (form.setValue as any)('audioUrl', blobUrl);
-    
-    toast({
-      title: "Audio uploaded",
-      description: `${file.name} uploaded successfully`,
-      duration: 4000,
-    });
 
     // Upload to Firebase in background
     setAudioUploading(true);
@@ -1061,20 +1053,33 @@ export default function ParentDashboard() {
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium truncate text-sm">{pdfFile.name}</p>
-                                  <p className="text-xs text-green-600 dark:text-green-400">PDF ready to upload</p>
+                                  {pdfUploading ? (
+                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                      Uploading: {((pdfProgress / 100) * (pdfFileSize / 1024 / 1024)).toFixed(1)}/{(pdfFileSize / 1024 / 1024).toFixed(1)} MB
+                                    </p>
+                                  ) : (
+                                    <p className="text-xs text-green-600 dark:text-green-400">PDF ready</p>
+                                  )}
                                 </div>
                               </div>
-                              <Button
-                                type="button"
-                                onClick={deletePdfFile}
-                                variant="ghost"
-                                size="sm"
-                                className="rounded-2xl flex-shrink-0"
-                                data-testid="button-delete-pdf"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              {!pdfUploading && (
+                                <Button
+                                  type="button"
+                                  onClick={deletePdfFile}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="rounded-2xl flex-shrink-0"
+                                  data-testid="button-delete-pdf"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
                             </div>
+                            {pdfUploading && (
+                              <div className="space-y-1">
+                                <Progress value={pdfProgress} className="h-2" />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1121,20 +1126,33 @@ export default function ParentDashboard() {
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium truncate text-sm">{audioFile.name}</p>
-                                  <p className="text-xs text-green-600 dark:text-green-400">Audio ready to upload</p>
+                                  {audioUploading ? (
+                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                      Uploading: {((audioProgress / 100) * (audioFileSize / 1024 / 1024)).toFixed(1)}/{(audioFileSize / 1024 / 1024).toFixed(1)} MB
+                                    </p>
+                                  ) : (
+                                    <p className="text-xs text-green-600 dark:text-green-400">Audio ready</p>
+                                  )}
                                 </div>
                               </div>
-                              <Button
-                                type="button"
-                                onClick={deleteAudioFile}
-                                variant="ghost"
-                                size="sm"
-                                className="rounded-2xl flex-shrink-0"
-                                data-testid="button-delete-audio"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              {!audioUploading && (
+                                <Button
+                                  type="button"
+                                  onClick={deleteAudioFile}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="rounded-2xl flex-shrink-0"
+                                  data-testid="button-delete-audio"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
                             </div>
+                            {audioUploading && (
+                              <div className="space-y-1">
+                                <Progress value={audioProgress} className="h-2" />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

@@ -379,7 +379,7 @@ export default function ChildModeReadPage() {
                 {currentStory.title}
               </motion.h1>
 
-              <div className="flex-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto border-2 sm:border-4 border-purple-200 dark:border-purple-800">
+              <div className="flex-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto border-2 sm:border-4 border-purple-200 dark:border-purple-800 flex flex-col gap-4">
                 <motion.p 
                   className="text-base sm:text-xl md:text-2xl leading-relaxed text-gray-800 dark:text-gray-100 whitespace-pre-wrap font-medium"
                   animate={isReading ? { opacity: [0.9, 1, 0.9] } : {}}
@@ -388,19 +388,17 @@ export default function ChildModeReadPage() {
                 >
                   {currentStory.content}
                 </motion.p>
-              </div>
 
-              {currentStory.pdfUrl && (
-                <div className="mt-4 sm:mt-6 w-full">
+                {currentStory.pdfUrl && (
                   <embed
                     src={`/api/pdf-proxy/${currentStory.id}#toolbar=0`}
                     type="application/pdf"
-                    className="w-full border-2 border-purple-200 dark:border-purple-800 rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-800"
-                    style={{ height: "300px" }}
+                    className="w-full bg-white dark:bg-gray-700 rounded-lg"
+                    style={{ height: "300px", minHeight: "300px" }}
                     data-testid="pdf-viewer"
                   />
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-4 sm:mt-6">
                 {currentStory.imageUrl && (
