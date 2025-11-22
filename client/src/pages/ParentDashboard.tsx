@@ -55,12 +55,10 @@ export default function ParentDashboard() {
   // File upload states
   const [pdfFile, setPdfFile] = useState<{ name: string; data: string } | null>(null);
   const [pdfUploading, setPdfUploading] = useState(false);
-  const [pdfProgress, setPdfProgress] = useState(0);
-  const [pdfFileSize, setPdfFileSize] = useState<number>(0);
+  const [pdfProgress, setPdfProgress] = useState({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
   const [audioFile, setAudioFile] = useState<{ name: string; data: string } | null>(null);
   const [audioUploading, setAudioUploading] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
-  const [audioFileSize, setAudioFileSize] = useState<number>(0);
+  const [audioProgress, setAudioProgress] = useState({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
@@ -307,7 +305,6 @@ export default function ParentDashboard() {
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setPdfFile({ name: file.name, data: blobUrl });
-    setPdfFileSize(file.size);
     (form.setValue as any)('pdfUrl', blobUrl);
 
     // Upload to Firebase in background
@@ -315,15 +312,15 @@ export default function ParentDashboard() {
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadPDFFile(file, userId, (progress) => {
-        setPdfProgress(Math.min(progress, 99));
+        setPdfProgress(progress);
       });
       // Update with actual Firebase URL once upload completes
       (form.setValue as any)('pdfUrl', downloadURL);
       setPdfUploading(false);
-      setPdfProgress(0);
+      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     } catch (error) {
       setPdfUploading(false);
-      setPdfProgress(0);
+      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
       console.error("Background PDF upload failed:", error);
     }
   };
@@ -345,7 +342,6 @@ export default function ParentDashboard() {
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setAudioFile({ name: file.name, data: blobUrl });
-    setAudioFileSize(file.size);
     (form.setValue as any)('audioUrl', blobUrl);
 
     // Upload to Firebase in background
@@ -353,22 +349,22 @@ export default function ParentDashboard() {
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadAudioFile(file, userId, (progress) => {
-        setAudioProgress(Math.min(progress, 99));
+        setAudioProgress(progress);
       });
       // Update with actual Firebase URL once upload completes
       (form.setValue as any)('audioUrl', downloadURL);
       setAudioUploading(false);
-      setAudioProgress(0);
+      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     } catch (error) {
       setAudioUploading(false);
-      setAudioProgress(0);
+      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
       console.error("Background audio upload failed:", error);
     }
   };
 
   const deletePdfFile = () => {
     setPdfFile(null);
-    setPdfProgress(0);
+    setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     (form.setValue as any)('pdfUrl', '');
     if (pdfInputRef.current) {
       pdfInputRef.current.value = '';
@@ -377,7 +373,7 @@ export default function ParentDashboard() {
 
   const deleteAudioFile = () => {
     setAudioFile(null);
-    setAudioProgress(0);
+    setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     (form.setValue as any)('audioUrl', '');
     if (audioInputRef.current) {
       audioInputRef.current.value = '';
@@ -392,7 +388,7 @@ export default function ParentDashboard() {
     // Set existing file states
     if (story.pdfUrl) {
       setPdfFile({ name: "Existing PDF", data: story.pdfUrl });
-      setPdfProgress(100);
+      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     } else {
       setPdfFile(null);
       setPdfProgress(0);
@@ -1055,7 +1051,7 @@ export default function ParentDashboard() {
                                   <p className="font-medium truncate text-sm">{pdfFile.name}</p>
                                   {pdfUploading ? (
                                     <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {Math.round(pdfProgress)}%
+                                      Uploading: {(pdfProgress.bytesTransferred / 1024 / 1024).toFixed(1)}/{(pdfProgress.totalBytes / 1024 / 1024).toFixed(1)} MB
                                     </p>
                                   ) : (
                                     <p className="text-xs text-green-600 dark:text-green-400">PDF ready</p>
@@ -1077,7 +1073,7 @@ export default function ParentDashboard() {
                             </div>
                             {pdfUploading && (
                               <div className="space-y-1">
-                                <Progress value={pdfProgress} className="h-2" />
+                                <Progress value={pdfProgress.percentage} className="h-2" />
                               </div>
                             )}
                           </div>
@@ -1128,7 +1124,7 @@ export default function ParentDashboard() {
                                   <p className="font-medium truncate text-sm">{audioFile.name}</p>
                                   {audioUploading ? (
                                     <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {Math.round(audioProgress)}%
+                                      Uploading: {(audioProgress.bytesTransferred / 1024 / 1024).toFixed(1)}/{(audioProgress.totalBytes / 1024 / 1024).toFixed(1)} MB
                                     </p>
                                   ) : (
                                     <p className="text-xs text-green-600 dark:text-green-400">Audio ready</p>
@@ -1150,7 +1146,7 @@ export default function ParentDashboard() {
                             </div>
                             {audioUploading && (
                               <div className="space-y-1">
-                                <Progress value={audioProgress} className="h-2" />
+                                <Progress value={audioProgress.percentage} className="h-2" />
                               </div>
                             )}
                           </div>

@@ -3,10 +3,16 @@ import { app } from "./firebase";
 
 const storage = getStorage(app);
 
+export interface UploadProgress {
+  bytesTransferred: number;
+  totalBytes: number;
+  percentage: number;
+}
+
 export async function uploadFileToStorage(
   file: Blob | File,
   path: string,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<string> {
   const storageRef = ref(storage, path);
   
@@ -17,12 +23,17 @@ export async function uploadFileToStorage(
       'state_changed',
       (snapshot) => {
         // Real-time progress with actual bytes
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         if (onProgress) {
-          onProgress(Math.round(progress));
+          onProgress({
+            bytesTransferred: snapshot.bytesTransferred,
+            totalBytes: snapshot.totalBytes,
+            percentage: Math.round(percentage)
+          });
         }
       },
       (error) => {
+        console.error("Firebase upload error:", error);
         reject(error);
       },
       async () => {
