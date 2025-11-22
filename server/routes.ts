@@ -783,6 +783,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/users/:userId/add-coins", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { userId } = req.params;
+      const { amount } = req.body;
+
+      if (typeof amount !== "number" || amount <= 0) {
+        res.status(400).json({ error: "amount must be a positive number" });
+        return;
+      }
+
+      const [user] = await db
+        .select({ coins: parentSettings.coins })
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const newCoins = (user.coins ?? 0) + amount;
+
+      await db
+        .update(parentSettings)
+        .set({ coins: newCoins })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json({ success: true, userId, coinsAdded: amount, totalCoins: newCoins });
+    } catch (error) {
+      console.error("Error adding coins:", error);
+      res.status(500).json({ error: "Failed to add coins" });
+    }
+  });
+
   app.delete("/api/admin/stories/:storyId", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { storyId } = req.params;
