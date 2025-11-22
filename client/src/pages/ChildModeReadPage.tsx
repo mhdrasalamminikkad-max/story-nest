@@ -111,9 +111,15 @@ export default function ChildModeReadPage() {
 
     stopReading();
 
-    // Use proxy endpoint for audio to bypass CORS issues
-    const proxyUrl = currentStory.id ? `/api/audio-proxy/${currentStory.id}` : audioSource;
-    const audio = new Audio(proxyUrl);
+    // Determine the audio URL: use proxy for Firebase URLs, direct for data URLs
+    let audioUrl = audioSource;
+    if (audioSource.startsWith('http') || audioSource.startsWith('/')) {
+      // Firebase URL or proxy path - use proxy endpoint
+      audioUrl = currentStory.id ? `/api/audio-proxy/${currentStory.id}` : audioSource;
+    }
+    // Otherwise use as-is (data URLs like base64)
+
+    const audio = new Audio(audioUrl);
     audio.crossOrigin = "anonymous";
     
     // Cleanup function to remove all listeners
@@ -137,7 +143,7 @@ export default function ChildModeReadPage() {
     
     const handleError = () => {
       cleanup();
-      console.error("Error playing audio:", audio.error);
+      console.error("Error playing audio:", audio.error, "URL:", audioUrl);
       setIsReading(false);
       toast({
         title: "Playback Error",
@@ -160,7 +166,7 @@ export default function ChildModeReadPage() {
     
     audio.play().catch((error) => {
       cleanup();
-      console.error("Audio playback failed:", error?.message || error);
+      console.error("Audio playback failed:", error?.message || error, "URL:", audioUrl);
       setIsReading(false);
       toast({
         title: "Playback Error",
