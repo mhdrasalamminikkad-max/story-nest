@@ -2,51 +2,65 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Languages, Users, BookMarked, Layers, Sparkles } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Languages, 
+  BookMarked, 
+  Layers, 
+  Sparkles,
+  Globe,
+  Flag,
+  Star,
+  History,
+  Lightbulb,
+  Map,
+  GraduationCap,
+  Wand2,
+  BookText,
+  Castle,
+  Compass,
+  Heart,
+  Zap,
+  Microscope
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Story } from "@shared/schema";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Badge } from "@/components/ui/badge";
 
-type StepType = "language" | "audience" | "category" | "type" | "stories";
+type StepType = "language" | "category" | "type" | "stories";
 
 const languages = [
-  { value: "english", label: "English", icon: "🌍" },
-  { value: "malayalam", label: "Malayalam", icon: "🇮🇳" },
-];
-
-const audiences = [
-  { value: "main", label: "Main Stories", description: "Stories for children to enjoy", icon: "👶" },
-  { value: "parent", label: "Parent Stories", description: "Stories for parents to read aloud", icon: "👨‍👩‍👧" },
+  { value: "english", label: "English", icon: Globe },
+  { value: "malayalam", label: "Malayalam", icon: Flag },
 ];
 
 const categories = [
-  { value: "islamic", label: "Islamic", icon: "🌙" },
-  { value: "history", label: "History", icon: "📜" },
-  { value: "moral", label: "Moral Lessons", icon: "💡" },
-  { value: "adventure", label: "Adventure", icon: "🗺️" },
-  { value: "educational", label: "Educational", icon: "📚" },
-  { value: "fairy-tale", label: "Fairy Tale", icon: "🧚" },
+  { value: "islamic", label: "Islamic", icon: Star },
+  { value: "history", label: "History", icon: History },
+  { value: "moral", label: "Moral Lessons", icon: Lightbulb },
+  { value: "adventure", label: "Adventure", icon: Map },
+  { value: "educational", label: "Educational", icon: GraduationCap },
+  { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
 ];
 
 const storyTypes = [
-  { value: "islamic", label: "Islamic", icon: "🌙" },
-  { value: "lesson", label: "Lesson", icon: "📖" },
-  { value: "history", label: "History", icon: "🏛️" },
-  { value: "fairy-tale", label: "Fairy Tale", icon: "✨" },
-  { value: "adventure", label: "Adventure", icon: "⛵" },
-  { value: "educational", label: "Educational", icon: "🎓" },
-  { value: "moral", label: "Moral", icon: "❤️" },
-  { value: "mythology", label: "Mythology", icon: "⚡" },
-  { value: "science", label: "Science", icon: "🔬" },
+  { value: "islamic", label: "Islamic", icon: Star },
+  { value: "lesson", label: "Lesson", icon: BookText },
+  { value: "history", label: "History", icon: Castle },
+  { value: "fairy-tale", label: "Fairy Tale", icon: Sparkles },
+  { value: "adventure", label: "Adventure", icon: Compass },
+  { value: "educational", label: "Educational", icon: GraduationCap },
+  { value: "moral", label: "Moral", icon: Heart },
+  { value: "mythology", label: "Mythology", icon: Zap },
+  { value: "science", label: "Science", icon: Microscope },
 ];
 
 export default function StoryExplorer() {
   const [, setLocation] = useLocation();
   const [currentStep, setCurrentStep] = useState<StepType>("language");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [selectedAudience, setSelectedAudience] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
 
@@ -63,11 +77,6 @@ export default function StoryExplorer() {
 
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
-    setCurrentStep("audience");
-  };
-
-  const handleAudienceSelect = (audience: string) => {
-    setSelectedAudience(audience);
     setCurrentStep("category");
   };
 
@@ -82,12 +91,9 @@ export default function StoryExplorer() {
   };
 
   const handleBack = () => {
-    if (currentStep === "audience") {
+    if (currentStep === "category") {
       setCurrentStep("language");
       setSelectedLanguage("");
-    } else if (currentStep === "category") {
-      setCurrentStep("audience");
-      setSelectedAudience("");
     } else if (currentStep === "type") {
       setCurrentStep("category");
       setSelectedCategory("");
@@ -107,8 +113,6 @@ export default function StoryExplorer() {
     switch (currentStep) {
       case "language":
         return <Languages className="w-6 h-6" />;
-      case "audience":
-        return <Users className="w-6 h-6" />;
       case "category":
         return <BookMarked className="w-6 h-6" />;
       case "type":
@@ -122,8 +126,6 @@ export default function StoryExplorer() {
     switch (currentStep) {
       case "language":
         return "Choose Your Language";
-      case "audience":
-        return "Select Story Type";
       case "category":
         return "Pick a Category";
       case "type":
@@ -168,44 +170,24 @@ export default function StoryExplorer() {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
               >
-                {languages.map((lang) => (
-                  <Card
-                    key={lang.value}
-                    className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                    onClick={() => handleLanguageSelect(lang.value)}
-                    data-testid={`card-language-${lang.value}`}
-                  >
-                    <div className="text-center space-y-4">
-                      <div className="text-6xl">{lang.icon}</div>
-                      <h3 className="text-2xl font-bold">{lang.label}</h3>
-                    </div>
-                  </Card>
-                ))}
-              </motion.div>
-            )}
-
-            {currentStep === "audience" && (
-              <motion.div
-                key="audience"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
-              >
-                {audiences.map((aud) => (
-                  <Card
-                    key={aud.value}
-                    className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                    onClick={() => handleAudienceSelect(aud.value)}
-                    data-testid={`card-audience-${aud.value}`}
-                  >
-                    <div className="text-center space-y-4">
-                      <div className="text-6xl">{aud.icon}</div>
-                      <h3 className="text-2xl font-bold">{aud.label}</h3>
-                      <p className="text-sm text-muted-foreground">{aud.description}</p>
-                    </div>
-                  </Card>
-                ))}
+                {languages.map((lang) => {
+                  const IconComponent = lang.icon;
+                  return (
+                    <Card
+                      key={lang.value}
+                      className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => handleLanguageSelect(lang.value)}
+                      data-testid={`card-language-${lang.value}`}
+                    >
+                      <div className="text-center space-y-4">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                          <IconComponent className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="text-2xl font-bold">{lang.label}</h3>
+                      </div>
+                    </Card>
+                  );
+                })}
               </motion.div>
             )}
 
@@ -217,19 +199,24 @@ export default function StoryExplorer() {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
               >
-                {categories.map((cat) => (
-                  <Card
-                    key={cat.value}
-                    className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                    onClick={() => handleCategorySelect(cat.value)}
-                    data-testid={`card-category-${cat.value}`}
-                  >
-                    <div className="text-center space-y-3">
-                      <div className="text-4xl">{cat.icon}</div>
-                      <h3 className="text-lg font-semibold">{cat.label}</h3>
-                    </div>
-                  </Card>
-                ))}
+                {categories.map((cat) => {
+                  const IconComponent = cat.icon;
+                  return (
+                    <Card
+                      key={cat.value}
+                      className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => handleCategorySelect(cat.value)}
+                      data-testid={`card-category-${cat.value}`}
+                    >
+                      <div className="text-center space-y-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                          <IconComponent className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-semibold">{cat.label}</h3>
+                      </div>
+                    </Card>
+                  );
+                })}
               </motion.div>
             )}
 
@@ -241,19 +228,24 @@ export default function StoryExplorer() {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
               >
-                {storyTypes.map((type) => (
-                  <Card
-                    key={type.value}
-                    className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                    onClick={() => handleTypeSelect(type.value)}
-                    data-testid={`card-type-${type.value}`}
-                  >
-                    <div className="text-center space-y-3">
-                      <div className="text-4xl">{type.icon}</div>
-                      <h3 className="text-lg font-semibold">{type.label}</h3>
-                    </div>
-                  </Card>
-                ))}
+                {storyTypes.map((type) => {
+                  const IconComponent = type.icon;
+                  return (
+                    <Card
+                      key={type.value}
+                      className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
+                      onClick={() => handleTypeSelect(type.value)}
+                      data-testid={`card-type-${type.value}`}
+                    >
+                      <div className="text-center space-y-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                          <IconComponent className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-semibold">{type.label}</h3>
+                      </div>
+                    </Card>
+                  );
+                })}
               </motion.div>
             )}
 
@@ -286,7 +278,9 @@ export default function StoryExplorer() {
                 {filteredStories.length === 0 ? (
                   <Card className="p-12 text-center">
                     <div className="space-y-4">
-                      <div className="text-6xl">📚</div>
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                        <BookMarked className="w-8 h-8 text-muted-foreground" />
+                      </div>
                       <h3 className="text-xl font-semibold">No Stories Found</h3>
                       <p className="text-muted-foreground">
                         Try selecting different options or go back to change your filters.

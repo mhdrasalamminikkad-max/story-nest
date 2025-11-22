@@ -140,14 +140,6 @@ export default function HomePage() {
                       Educational
                     </div>
                   </div>
-
-                  <Button
-                    size="lg"
-                    className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg mt-4"
-                    data-testid="button-start-exploring"
-                  >
-                    Start Exploring
-                  </Button>
                 </div>
               </Card>
             </motion.div>
@@ -200,14 +192,6 @@ export default function HomePage() {
                       Music
                     </div>
                   </div>
-
-                  <Button
-                    size="lg"
-                    className="rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-lg mt-4"
-                    data-testid="button-discover-rhymes"
-                  >
-                    Discover Rhymes
-                  </Button>
                 </div>
               </Card>
             </motion.div>
