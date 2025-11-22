@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -44,6 +44,10 @@ export default function ParentDashboard() {
   const [languageFilter, setLanguageFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [storyTypeFilter, setStoryTypeFilter] = useState<string>("all");
+  const [showEditPin, setShowEditPin] = useState(false);
+  const [oldPin, setOldPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmNewPin, setConfirmNewPin] = useState("");
   
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
@@ -222,9 +226,85 @@ export default function ParentDashboard() {
     },
   });
 
+  const updatePinMutation = useMutation({
+    mutationFn: async ({ oldPin, newPin }: { oldPin: string; newPin: string }) => {
+      // First verify old PIN
+      const verifyRes = await apiRequest("POST", "/api/verify-pin", { pin: oldPin });
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyData.valid) {
+        throw new Error("Invalid current PIN");
+      }
+      
+      // Then update to new PIN
+      const updateRes = await apiRequest("POST", "/api/parent-settings", {
+        pin: newPin,
+        childName: parentSettings?.childName ?? "",
+        readingTimeLimit: parentSettings?.readingTimeLimit ?? 30,
+        fullscreenLockEnabled: parentSettings?.fullscreenLockEnabled ?? true,
+        theme: parentSettings?.theme ?? "day",
+      });
+      return await updateRes.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/parent-settings"] });
+      setShowEditPin(false);
+      setOldPin("");
+      setNewPin("");
+      setConfirmNewPin("");
+      toast({
+        title: "PIN Updated",
+        description: "Your child lock PIN has been updated successfully",
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update PIN. Please check your current PIN.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    },
+  });
+
   const handleSignOut = () => {
     fakeAuth.signOut();
     setLocation("/");
+  };
+
+  const handleUpdatePin = () => {
+    if (!oldPin || oldPin.length !== 4) {
+      toast({
+        title: "Invalid PIN",
+        description: "Current PIN must be 4 digits",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    if (!newPin || newPin.length !== 4) {
+      toast({
+        title: "Invalid PIN",
+        description: "New PIN must be 4 digits",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    if (newPin !== confirmNewPin) {
+      toast({
+        title: "PIN Mismatch",
+        description: "New PIN and confirmation PIN do not match",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    updatePinMutation.mutate({ oldPin, newPin });
   };
 
   const startRecording = async () => {
@@ -939,6 +1019,17 @@ export default function ParentDashboard() {
                         Buy More Coins
                       </Button>
                       <div className="border-t pt-6">
+                        <Button
+                          onClick={() => setShowEditPin(true)}
+                          variant="outline"
+                          className="rounded-2xl w-full"
+                          data-testid="button-edit-child-lock"
+                        >
+                          <Lock className="w-4 h-4 mr-2" />
+                          Edit Child Lock PIN
+                        </Button>
+                      </div>
+                      <div className="border-t pt-6">
                         <p className="text-sm text-muted-foreground">
                           Your subscription details and preferences appear here. For more options, visit the Plans page.
                         </p>
@@ -1397,6 +1488,91 @@ export default function ParentDashboard() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditPin} onOpenChange={setShowEditPin}>
+        <DialogContent className="sm:max-w-md rounded-3xl" data-testid="dialog-edit-pin">
+          <DialogHeader>
+            <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="font-heading text-2xl text-center">Edit Child Lock PIN</DialogTitle>
+            <DialogDescription className="text-center">
+              Change your 4-digit parental control PIN
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current PIN</label>
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="Enter current PIN"
+                value={oldPin}
+                onChange={(e) => setOldPin(e.target.value.replace(/\D/g, ""))}
+                className="text-center text-2xl tracking-widest rounded-2xl"
+                data-testid="input-current-pin"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">New PIN</label>
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="Enter new PIN"
+                value={newPin}
+                onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+                className="text-center text-2xl tracking-widest rounded-2xl"
+                data-testid="input-new-pin"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Confirm New PIN</label>
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="Confirm new PIN"
+                value={confirmNewPin}
+                onChange={(e) => setConfirmNewPin(e.target.value.replace(/\D/g, ""))}
+                className="text-center text-2xl tracking-widest rounded-2xl"
+                data-testid="input-confirm-new-pin"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditPin(false);
+                setOldPin("");
+                setNewPin("");
+                setConfirmNewPin("");
+              }}
+              className="rounded-2xl"
+              data-testid="button-cancel-edit-pin"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdatePin}
+              disabled={updatePinMutation.isPending}
+              className="rounded-2xl"
+              data-testid="button-save-new-pin"
+            >
+              {updatePinMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update PIN"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
