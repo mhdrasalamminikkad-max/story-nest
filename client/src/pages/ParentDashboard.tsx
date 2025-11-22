@@ -109,6 +109,7 @@ export default function ParentDashboard() {
       language: "english" as const,
       category: "educational" as const,
       storyType: "lesson" as const,
+      voiceoverUrl: undefined,
     },
   });
 
@@ -124,6 +125,8 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       setShowAddStory(false);
+      setAudioUrl(null);
+      setIsRecording(false);
       form.reset({
         title: "",
         content: "",
@@ -132,6 +135,7 @@ export default function ParentDashboard() {
         language: "english" as const,
         category: "educational" as const,
         storyType: "lesson" as const,
+        voiceoverUrl: undefined,
       });
     },
   });
@@ -148,6 +152,8 @@ export default function ParentDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       setEditingStory(null);
+      setAudioUrl(null);
+      setIsRecording(false);
       form.reset({
         title: "",
         content: "",
@@ -156,6 +162,7 @@ export default function ParentDashboard() {
         language: "english" as const,
         category: "educational" as const,
         storyType: "lesson" as const,
+        voiceoverUrl: undefined,
       });
     },
   });
@@ -365,6 +372,8 @@ export default function ParentDashboard() {
                   onClick={() => {
                     setEditingStory(null);
                     setShowAddStory(true);
+                    setAudioUrl(null);
+                    setIsRecording(false);
                     form.reset({
                       title: "",
                       content: "",
@@ -373,6 +382,7 @@ export default function ParentDashboard() {
                       language: "english" as const,
                       category: "educational" as const,
                       storyType: "lesson" as const,
+                      voiceoverUrl: undefined,
                     });
                   }}
                   className="w-full rounded-xl"
@@ -418,6 +428,8 @@ export default function ParentDashboard() {
                 onClick={() => {
                   setEditingStory(null);
                   setShowAddStory(true);
+                  setAudioUrl(null);
+                  setIsRecording(false);
                   form.reset({
                     title: "",
                     content: "",
@@ -426,6 +438,7 @@ export default function ParentDashboard() {
                     language: "english" as const,
                     category: "educational" as const,
                     storyType: "lesson" as const,
+                    voiceoverUrl: undefined,
                   });
                 }}
                 className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
@@ -659,6 +672,8 @@ export default function ParentDashboard() {
         if (!open) {
           setShowAddStory(false);
           setEditingStory(null);
+          setAudioUrl(null);
+          setIsRecording(false);
           form.reset({
             title: "",
             content: "",
@@ -667,6 +682,7 @@ export default function ParentDashboard() {
             language: "english" as const,
             category: "educational" as const,
             storyType: "lesson" as const,
+            voiceoverUrl: undefined,
           });
         }
       }}>
