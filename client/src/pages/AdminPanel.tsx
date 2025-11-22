@@ -71,6 +71,9 @@ export default function AdminPanel() {
       language: "english" as const,
       category: "educational" as const,
       storyType: "lesson" as const,
+      audience: "both" as const,
+      pdfUrl: "",
+      audioUrl: "",
     },
   });
 
@@ -1068,6 +1071,9 @@ export default function AdminPanel() {
             language: "english" as const,
             category: "educational" as const,
             storyType: "lesson" as const,
+            audience: "both" as const,
+            pdfUrl: "",
+            audioUrl: "",
           });
           if (audioUrl) {
             URL.revokeObjectURL(audioUrl);
@@ -1185,6 +1191,67 @@ export default function AdminPanel() {
                         <SelectItem value="science">Science</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="audience"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Audience *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-2xl" data-testid="select-admin-story-audience">
+                          <SelectValue placeholder="Who can view this story?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="both">Both Parent & Child</SelectItem>
+                        <SelectItem value="parent">Parent Only</SelectItem>
+                        <SelectItem value="child">Child Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={"pdfUrl" as any}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PDF URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/story.pdf" 
+                        className="rounded-2xl" 
+                        {...field} 
+                        data-testid="input-admin-story-pdf" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={"audioUrl" as any}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Audio URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/narration.mp3" 
+                        className="rounded-2xl" 
+                        {...field} 
+                        data-testid="input-admin-story-audio" 
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
