@@ -390,6 +390,18 @@ export default function ChildModeReadPage() {
                 </motion.p>
               </div>
 
+              {currentStory.pdfUrl && (
+                <div className="mt-4 sm:mt-6 w-full">
+                  <embed
+                    src={`/api/pdf-proxy/${currentStory.id}#toolbar=0`}
+                    type="application/pdf"
+                    className="w-full border-2 border-purple-200 dark:border-purple-800 rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-800"
+                    style={{ height: "300px" }}
+                    data-testid="pdf-viewer"
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-4 sm:mt-6">
                 {currentStory.imageUrl && (
                   <motion.img
