@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2 } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -1047,15 +1047,19 @@ export default function ParentDashboard() {
                         
                         {pdfUploading && (
                           <div className="p-4 border-2 rounded-2xl space-y-3">
-                            <span className="font-medium">Uploading PDF...</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">Uploading PDF...</span>
+                              <span className="text-sm text-muted-foreground">{Math.round(pdfProgress)}%</span>
+                            </div>
+                            <Progress value={pdfProgress} className="h-2" />
                           </div>
                         )}
                         
                         {pdfFile && !pdfUploading && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                          <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-primary" />
+                                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <span className="font-medium truncate">{pdfFile.name}</span>
                               </div>
                               <Button
@@ -1069,8 +1073,8 @@ export default function ParentDashboard() {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                              PDF document ready for story
+                            <p className="text-xs text-green-600 dark:text-green-400">
+                              PDF uploaded successfully
                             </p>
                           </div>
                         )}
@@ -1113,15 +1117,19 @@ export default function ParentDashboard() {
                         
                         {audioUploading && (
                           <div className="p-4 border-2 rounded-2xl space-y-3">
-                            <span className="font-medium">Uploading Audio...</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">Uploading Audio...</span>
+                              <span className="text-sm text-muted-foreground">{Math.round(audioProgress)}%</span>
+                            </div>
+                            <Progress value={audioProgress} className="h-2" />
                           </div>
                         )}
                         
                         {audioFile && !audioUploading && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                          <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <FileAudio className="w-4 h-4 text-primary" />
+                                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <span className="font-medium truncate">{audioFile.name}</span>
                               </div>
                               <Button
@@ -1136,8 +1144,8 @@ export default function ParentDashboard() {
                               </Button>
                             </div>
                             <audio src={audioFile.data} controls className="w-full" data-testid="audio-preview" />
-                            <p className="text-xs text-muted-foreground">
-                              Audio will play when "Read to Me" is clicked
+                            <p className="text-xs text-green-600 dark:text-green-400">
+                              Audio uploaded successfully
                             </p>
                           </div>
                         )}
