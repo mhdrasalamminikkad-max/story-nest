@@ -302,26 +302,46 @@ export default function ParentDashboard() {
       return;
     }
 
+    // Check file size (limit to 5MB for base64 storage)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "PDF must be smaller than 5MB",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setPdfFile({ name: file.name, data: blobUrl });
-    (form.setValue as any)('pdfUrl', blobUrl);
 
-    // Upload to Firebase in background
+    // Convert to base64 instantly (no upload needed)
     setPdfUploading(true);
     try {
-      const userId = user?.uid || `temp-${Date.now()}`;
-      const downloadURL = await uploadPDFFile(file, userId, (progress) => {
-        setPdfProgress(progress);
-      });
-      // Update with actual Firebase URL once upload completes
-      (form.setValue as any)('pdfUrl', downloadURL);
-      setPdfUploading(false);
-      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Save base64 string directly to form
+        (form.setValue as any)('pdfUrl', base64String);
+        setPdfUploading(false);
+        console.log("PDF converted to base64 successfully");
+      };
+      reader.onerror = () => {
+        setPdfUploading(false);
+        toast({
+          title: "Upload failed",
+          description: "Could not read PDF file",
+          variant: "destructive",
+          duration: 4000,
+        });
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       setPdfUploading(false);
-      setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
-      console.error("Background PDF upload failed:", error);
+      console.error("PDF conversion failed:", error);
     }
   };
 
@@ -339,26 +359,46 @@ export default function ParentDashboard() {
       return;
     }
 
+    // Check file size (limit to 5MB for base64 storage)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Audio must be smaller than 5MB",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setAudioFile({ name: file.name, data: blobUrl });
-    (form.setValue as any)('audioUrl', blobUrl);
 
-    // Upload to Firebase in background
+    // Convert to base64 instantly (no upload needed)
     setAudioUploading(true);
     try {
-      const userId = user?.uid || `temp-${Date.now()}`;
-      const downloadURL = await uploadAudioFile(file, userId, (progress) => {
-        setAudioProgress(progress);
-      });
-      // Update with actual Firebase URL once upload completes
-      (form.setValue as any)('audioUrl', downloadURL);
-      setAudioUploading(false);
-      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Save base64 string directly to form
+        (form.setValue as any)('audioUrl', base64String);
+        setAudioUploading(false);
+        console.log("Audio converted to base64 successfully");
+      };
+      reader.onerror = () => {
+        setAudioUploading(false);
+        toast({
+          title: "Upload failed",
+          description: "Could not read audio file",
+          variant: "destructive",
+          duration: 4000,
+        });
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       setAudioUploading(false);
-      setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
-      console.error("Background audio upload failed:", error);
+      console.error("Audio conversion failed:", error);
     }
   };
 
