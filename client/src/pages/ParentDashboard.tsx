@@ -314,7 +314,7 @@ export default function ParentDashboard() {
       setPdfFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('pdfUrl', downloadURL);
       setPdfUploading(false);
-      setPdfProgress(100);
+      setPdfProgress(0);
       toast({
         title: "PDF uploaded",
         description: `${file.name} uploaded successfully`,
@@ -358,7 +358,7 @@ export default function ParentDashboard() {
       setAudioFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('audioUrl', downloadURL);
       setAudioUploading(false);
-      setAudioProgress(100);
+      setAudioProgress(0);
       toast({
         title: "Audio uploaded",
         description: `${file.name} uploaded successfully`,
