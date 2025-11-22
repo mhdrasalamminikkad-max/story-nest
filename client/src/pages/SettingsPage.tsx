@@ -12,7 +12,8 @@ import type { ParentSettings } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { ArrowLeft, Lock, User, Clock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const settingsSchema = z.object({
   childName: z.string().min(1, "Child name is required"),
@@ -36,12 +37,26 @@ type PinChangeData = z.infer<typeof pinChangeSchema>;
 export default function SettingsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [showCurrentPin, setShowCurrentPin] = useState(false);
   const [showNewPin, setShowNewPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to sign in to access settings",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setLocation("/auth");
+    }
+  }, [authLoading, user, setLocation, toast]);
+
   const { data: settings, isLoading } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
+    enabled: !!user,
   });
 
   const settingsForm = useForm<SettingsFormData>({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,21 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ChildLockSetupPage() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [readingTime, setReadingTime] = useState(30);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      toast({
+        title: "Please sign in first",
+        description: "You need to sign in before setting up child lock",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setLocation("/auth");
+    }
+  }, [authLoading, user, setLocation, toast]);
 
   const form = useForm({
     resolver: zodResolver(insertParentSettingsSchema),
