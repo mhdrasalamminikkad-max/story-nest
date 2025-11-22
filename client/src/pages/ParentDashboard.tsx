@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2 } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -731,6 +731,10 @@ export default function ParentDashboard() {
               <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm" data-testid="tab-your-stories">
                 Your Stories
               </TabsTrigger>
+              <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm" data-testid="tab-settings">
+                <SettingsIcon className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Settings</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="published">
@@ -908,6 +912,45 @@ export default function ParentDashboard() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="settings">
+              <Card className="rounded-3xl" data-testid="card-settings">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Account Settings</CardTitle>
+                  <CardDescription>Manage your account and preferences</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {parentSettings ? (
+                    <>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-muted-foreground">Current Coins Balance</p>
+                        <p className="text-3xl font-bold text-primary flex items-center gap-2">
+                          <Coins className="w-6 h-6" />
+                          {parentSettings.coins}
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => setLocation("/pricing")}
+                        className="rounded-2xl w-full"
+                        data-testid="button-buy-coins-settings"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Buy More Coins
+                      </Button>
+                      <div className="border-t pt-6">
+                        <p className="text-sm text-muted-foreground">
+                          Your subscription details and preferences appear here. For more options, visit the Plans page.
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Loading settings...</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </main>
