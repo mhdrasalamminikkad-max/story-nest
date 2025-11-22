@@ -21,6 +21,7 @@ export const storySchema = z.object({
   createdAt: z.number(),
   reviewedAt: z.number().optional(),
   isBookmarked: z.boolean().optional(),
+  isCreatorAdmin: z.boolean().optional(),
 });
 
 export const insertStorySchema = storySchema.omit({ 

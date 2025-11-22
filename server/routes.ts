@@ -77,14 +77,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(stories)
         .where(eq(stories.status, "published"))
-        .orderBy(desc(stories.createdAt))
-        .limit(3);
+        .orderBy(desc(stories.createdAt));
       
-      const storiesWithTimestamp = previewStories.map(s => ({
-        ...s,
-        createdAt: s.createdAt.getTime(),
-      }));
-      res.json(storiesWithTimestamp);
+      // Fetch creator admin status for each story
+      const storiesWithCreatorInfo = await Promise.all(
+        previewStories.map(async (s) => {
+          const [creator] = await db
+            .select({ isAdmin: parentSettings.isAdmin })
+            .from(parentSettings)
+            .where(eq(parentSettings.userId, s.userId));
+          
+          return {
+            ...s,
+            createdAt: s.createdAt.getTime(),
+            isCreatorAdmin: creator?.isAdmin || false,
+          };
+        })
+      );
+      
+      res.json(storiesWithCreatorInfo);
     } catch (error) {
       console.error("Error fetching preview stories:", error);
       res.status(500).json({ error: "Failed to fetch stories" });

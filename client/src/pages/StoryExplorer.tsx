@@ -75,6 +75,11 @@ export default function StoryExplorer() {
     if (selectedLanguage && story.language !== selectedLanguage) return false;
     if (selectedCategory && story.category !== selectedCategory) return false;
     if (selectedType && story.storyType !== selectedType) return false;
+    
+    // Filter by source (main stories = admin created, parent stories = parent created)
+    if (selectedSource === "main" && !story.isCreatorAdmin) return false;
+    if (selectedSource === "parent" && story.isCreatorAdmin) return false;
+    
     return true;
   });
 
