@@ -1052,7 +1052,7 @@ export default function ParentDashboard() {
                         )}
                         
                         {pdfUploading && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                          <div className="p-4 border-2 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 space-y-3">
                             <div className="flex items-center justify-between">
                               <span className="font-medium">Uploading PDF...</span>
                               <span className="text-sm text-muted-foreground">{Math.round(pdfProgress)}%</span>
@@ -1080,7 +1080,7 @@ export default function ParentDashboard() {
                               </Button>
                             </div>
                             <p className="text-xs text-green-600 dark:text-green-400">
-                              PDF uploaded successfully
+                              Upload completed
                             </p>
                           </div>
                         )}
@@ -1122,7 +1122,7 @@ export default function ParentDashboard() {
                         )}
                         
                         {audioUploading && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3">
+                          <div className="p-4 border-2 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 space-y-3">
                             <div className="flex items-center justify-between">
                               <span className="font-medium">Uploading Audio...</span>
                               <span className="text-sm text-muted-foreground">{Math.round(audioProgress)}%</span>
@@ -1151,7 +1151,7 @@ export default function ParentDashboard() {
                             </div>
                             <audio src={audioFile.data} controls className="w-full" data-testid="audio-preview" />
                             <p className="text-xs text-green-600 dark:text-green-400">
-                              Audio uploaded successfully
+                              Upload completed
                             </p>
                           </div>
                         )}
