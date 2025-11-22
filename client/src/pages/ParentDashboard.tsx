@@ -308,13 +308,15 @@ export default function ParentDashboard() {
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadPDFFile(file, userId, (progress) => {
-        setPdfProgress(progress);
+        // Only update progress if still uploading
+        setPdfProgress(Math.min(progress, 99));
       });
 
       setPdfFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('pdfUrl', downloadURL);
+      // Clear uploading state first to hide progress bar immediately
       setPdfUploading(false);
-      setPdfProgress(0);
+      setTimeout(() => setPdfProgress(0), 100);
       toast({
         title: "PDF uploaded",
         description: `${file.name} uploaded successfully`,
@@ -322,7 +324,7 @@ export default function ParentDashboard() {
       });
     } catch (error) {
       setPdfUploading(false);
-      setPdfProgress(0);
+      setTimeout(() => setPdfProgress(0), 50);
       toast({
         title: "Upload failed",
         description: "Failed to upload PDF file",
@@ -352,13 +354,15 @@ export default function ParentDashboard() {
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadAudioFile(file, userId, (progress) => {
-        setAudioProgress(progress);
+        // Only update progress if still uploading
+        setAudioProgress(Math.min(progress, 99));
       });
 
       setAudioFile({ name: file.name, data: downloadURL });
       (form.setValue as any)('audioUrl', downloadURL);
+      // Clear uploading state first to hide progress bar immediately
       setAudioUploading(false);
-      setAudioProgress(0);
+      setTimeout(() => setAudioProgress(0), 100);
       toast({
         title: "Audio uploaded",
         description: `${file.name} uploaded successfully`,
@@ -366,7 +370,7 @@ export default function ParentDashboard() {
       });
     } catch (error) {
       setAudioUploading(false);
-      setAudioProgress(0);
+      setTimeout(() => setAudioProgress(0), 50);
       toast({
         title: "Upload failed",
         description: "Failed to upload audio file",
