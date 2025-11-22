@@ -20,14 +20,12 @@ export default function ChildModePage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showRewardsDialog, setShowRewardsDialog] = useState(false);
   const [newlyEarnedRewards, setNewlyEarnedRewards] = useState<string[]>([]);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Safely access speech synthesis API
-  const getSpeechSynthesis = () => {
-    return typeof window !== 'undefined' ? window.speechSynthesis : null;
-  };
+  const handlersRef = useRef<{
+    ended?: () => void;
+    error?: () => void;
+  }>({});
 
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
@@ -106,65 +104,90 @@ export default function ChildModePage() {
   };
 
   const startReading = () => {
-    if (!currentStory) return;
+    if (!currentStory || !currentStory.voiceoverUrl) return;
 
     stopReading();
 
-    if (currentStory.voiceoverUrl) {
-      const audio = new Audio(currentStory.voiceoverUrl);
-      audio.onended = () => {
-        setIsReading(false);
-        trackStoryMutation.mutate();
-      };
-      audio.onerror = () => {
-        console.error("Error playing voiceover, falling back to AI voice");
-        playAIVoice();
-      };
-      audioRef.current = audio;
-      audio.play().catch(() => {
-        playAIVoice();
-      });
-      setIsReading(true);
-    } else {
-      playAIVoice();
-    }
-  };
-
-  const playAIVoice = () => {
-    if (!currentStory) return;
+    const audio = new Audio(currentStory.voiceoverUrl);
     
-    const speechSynthesis = getSpeechSynthesis();
-    if (!speechSynthesis) {
-      console.error("Speech synthesis not available");
-      return;
-    }
+    // Cleanup function to remove all listeners
+    const cleanup = () => {
+      const { ended, error } = handlersRef.current;
+      if (audio && ended) {
+        audio.removeEventListener('ended', ended);
+      }
+      if (audio && error) {
+        audio.removeEventListener('error', error);
+        audio.removeEventListener('stalled', error);
+        audio.removeEventListener('abort', error);
+      }
+    };
     
-    const utterance = new SpeechSynthesisUtterance(currentStory.content);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.1;
-    utterance.volume = 1;
-    
-    utterance.onend = () => {
+    const handleEnded = () => {
+      cleanup();
       setIsReading(false);
       trackStoryMutation.mutate();
     };
+    
+    const handleError = () => {
+      cleanup();
+      console.error("Error playing voiceover");
+      setIsReading(false);
+      toast({
+        title: "Playback Error",
+        description: "Unable to play the voice recording. Please try another story.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    };
 
-    utteranceRef.current = utterance;
-    speechSynthesis.speak(utterance);
+    // Store handler references for proper cleanup
+    handlersRef.current = { ended: handleEnded, error: handleError };
+
+    // Add event listeners
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('stalled', handleError);
+    audio.addEventListener('abort', handleError);
+    
+    audioRef.current = audio;
+    
+    audio.play().catch((error) => {
+      cleanup();
+      console.error("Audio playback failed:", error);
+      setIsReading(false);
+      toast({
+        title: "Playback Error",
+        description: "Unable to play the voice recording. Please try another story.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    });
+    
     setIsReading(true);
   };
 
   const stopReading = () => {
-    const speechSynthesis = getSpeechSynthesis();
-    
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      
+      // Remove ALL event listeners using stored references to prevent memory leaks
+      const { ended, error } = handlersRef.current;
+      if (ended) {
+        audioRef.current.removeEventListener('ended', ended);
+      }
+      if (error) {
+        audioRef.current.removeEventListener('error', error);
+        audioRef.current.removeEventListener('stalled', error);
+        audioRef.current.removeEventListener('abort', error);
+      }
+      
       audioRef.current = null;
     }
-    if (speechSynthesis && speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-    }
+    
+    // Clear handler references
+    handlersRef.current = {};
     setIsReading(false);
   };
 
@@ -189,11 +212,13 @@ export default function ChildModePage() {
   };
 
   const nextStory = () => {
+    if (stories.length === 0) return;
     stopReading();
     setCurrentStoryIndex((prev) => (prev + 1) % stories.length);
   };
 
   const prevStory = () => {
+    if (stories.length === 0) return;
     stopReading();
     setCurrentStoryIndex((prev) => (prev - 1 + stories.length) % stories.length);
   };
@@ -362,6 +387,7 @@ export default function ChildModePage() {
                 <Button
                   className="rounded-full text-lg sm:text-2xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-2xl"
                   onClick={isReading ? stopReading : startReading}
+                  disabled={!currentStory.voiceoverUrl && !isReading}
                   data-testid="button-read-aloud"
                 >
                   {isReading ? (
@@ -372,7 +398,7 @@ export default function ChildModePage() {
                   ) : (
                     <>
                       <Volume2 className="w-8 h-8 mr-3" />
-                      Read to Me
+                      {currentStory.voiceoverUrl ? "Read to Me" : "No Recording"}
                     </>
                   )}
                 </Button>
