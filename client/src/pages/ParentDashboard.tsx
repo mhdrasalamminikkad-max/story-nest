@@ -23,6 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertStorySchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { fakeAuth } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
+import { uploadPDFFile, uploadAudioFile, uploadVoiceoverBlob } from "@/lib/firebase-storage";
 import teddyImage from "@assets/generated_images/Teddy_bear_reading_story_502f26a8.png";
 import bunnyImage from "@assets/generated_images/Bunny_on_cloud_e358044b.png";
 import owlImage from "@assets/generated_images/Owl_with_lantern_4320ef2c.png";
@@ -34,6 +36,7 @@ import { Progress } from "@/components/ui/progress";
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showAddStory, setShowAddStory] = useState(false);
   const [filterBookmarked, setFilterBookmarked] = useState(false);
   const [editingStory, setEditingStory] = useState<Story | null>(null);
@@ -242,16 +245,22 @@ export default function ParentDashboard() {
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         
-        // Convert blob to base64 data URL for storage (using Promise to ensure it completes)
-        const base64data = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(audioBlob);
-        });
-        
-        // Store in component state for immediate access during submission
-        setVoiceoverBase64(base64data);
-        (form.setValue as any)('voiceoverUrl', base64data);
+        // Upload to Firebase Storage and get download URL
+        try {
+          if (user) {
+            const downloadURL = await uploadVoiceoverBlob(audioBlob, user.uid);
+            setVoiceoverBase64(downloadURL);
+            (form.setValue as any)('voiceoverUrl', downloadURL);
+          }
+        } catch (error) {
+          console.error("Error uploading voiceover:", error);
+          toast({
+            title: "Upload failed",
+            description: "Failed to upload voiceover recording",
+            variant: "destructive",
+            duration: 4000,
+          });
+        }
         
         stream.getTracks().forEach(track => track.stop());
       };
@@ -280,7 +289,7 @@ export default function ParentDashboard() {
     (form.setValue as any)('voiceoverUrl', undefined);
   };
 
-  const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -294,22 +303,26 @@ export default function ParentDashboard() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upload files",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
     setPdfUploading(true);
     setPdfProgress(0);
 
-    const reader = new FileReader();
-    
-    reader.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const progress = (e.loaded / e.total) * 100;
+    try {
+      const downloadURL = await uploadPDFFile(file, user.uid, (progress) => {
         setPdfProgress(progress);
-      }
-    };
+      });
 
-    reader.onload = () => {
-      const base64data = reader.result as string;
-      setPdfFile({ name: file.name, data: base64data });
-      (form.setValue as any)('pdfUrl', base64data);
+      setPdfFile({ name: file.name, data: downloadURL });
+      (form.setValue as any)('pdfUrl', downloadURL);
       setPdfUploading(false);
       setPdfProgress(100);
       toast({
@@ -317,9 +330,7 @@ export default function ParentDashboard() {
         description: `${file.name} uploaded successfully`,
         duration: 4000,
       });
-    };
-
-    reader.onerror = () => {
+    } catch (error) {
       setPdfUploading(false);
       setPdfProgress(0);
       toast({
@@ -328,12 +339,10 @@ export default function ParentDashboard() {
         variant: "destructive",
         duration: 4000,
       });
-    };
-
-    reader.readAsDataURL(file);
+    }
   };
 
-  const handleAudioFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAudioFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -347,22 +356,26 @@ export default function ParentDashboard() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upload files",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
     setAudioUploading(true);
     setAudioProgress(0);
 
-    const reader = new FileReader();
-    
-    reader.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const progress = (e.loaded / e.total) * 100;
+    try {
+      const downloadURL = await uploadAudioFile(file, user.uid, (progress) => {
         setAudioProgress(progress);
-      }
-    };
+      });
 
-    reader.onload = () => {
-      const base64data = reader.result as string;
-      setAudioFile({ name: file.name, data: base64data });
-      (form.setValue as any)('audioUrl', base64data);
+      setAudioFile({ name: file.name, data: downloadURL });
+      (form.setValue as any)('audioUrl', downloadURL);
       setAudioUploading(false);
       setAudioProgress(100);
       toast({
@@ -370,9 +383,7 @@ export default function ParentDashboard() {
         description: `${file.name} uploaded successfully`,
         duration: 4000,
       });
-    };
-
-    reader.onerror = () => {
+    } catch (error) {
       setAudioUploading(false);
       setAudioProgress(0);
       toast({
@@ -381,9 +392,7 @@ export default function ParentDashboard() {
         variant: "destructive",
         duration: 4000,
       });
-    };
-
-    reader.readAsDataURL(file);
+    }
   };
 
   const deletePdfFile = () => {
