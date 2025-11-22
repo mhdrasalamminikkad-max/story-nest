@@ -115,3 +115,7 @@
 [x] 115. Settings page now working - no more "column does not exist" errors
 [x] 116. Workflow restarted successfully - all database errors resolved
 [x] 117. Application running clean with no errors - Settings and PDF upload both fixed
+[x] 118. Added Settings tab to Parent Dashboard with gear icon (⚙️)
+[x] 119. Settings tab shows coins balance and "Buy More Coins" button
+[x] 120. Settings tab is now visible in the dashboard between "Your Stories" and other tabs
+[x] 121. Workflow deployed successfully - Settings tab fully functional and accessible
