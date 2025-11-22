@@ -1047,10 +1047,7 @@ export default function ParentDashboard() {
                         
                         {pdfUploading && (
                           <div className="p-4 border-2 rounded-2xl space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                              <span className="font-medium">Uploading PDF...</span>
-                            </div>
+                            <span className="font-medium">Uploading PDF...</span>
                           </div>
                         )}
                         
@@ -1116,10 +1113,7 @@ export default function ParentDashboard() {
                         
                         {audioUploading && (
                           <div className="p-4 border-2 rounded-2xl space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                              <span className="font-medium">Uploading Audio...</span>
-                            </div>
+                            <span className="font-medium">Uploading Audio...</span>
                           </div>
                         )}
                         
