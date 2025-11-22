@@ -1080,7 +1080,7 @@ export default function ParentDashboard() {
                               </Button>
                             </div>
                             <p className="text-xs text-green-600 dark:text-green-400">
-                              Upload completed
+                              PDF uploaded successfully
                             </p>
                           </div>
                         )}
@@ -1151,7 +1151,7 @@ export default function ParentDashboard() {
                             </div>
                             <audio src={audioFile.data} controls className="w-full" data-testid="audio-preview" />
                             <p className="text-xs text-green-600 dark:text-green-400">
-                              Upload completed
+                              Audio uploaded successfully
                             </p>
                           </div>
                         )}
