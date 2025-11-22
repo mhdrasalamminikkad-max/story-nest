@@ -16,11 +16,13 @@ import { insertParentSettingsSchema } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ChildLockSetupPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const [readingTime, setReadingTime] = useState(30);
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(insertParentSettingsSchema),
@@ -35,22 +37,44 @@ export default function ChildLockSetupPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Submitting child lock settings:", data);
       const res = await apiRequest("POST", "/api/parent-settings", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save settings");
+      }
       return await res.json();
     },
     onSuccess: () => {
+      console.log("Settings saved successfully");
+      toast({
+        title: "Success!",
+        description: "Child lock settings saved successfully",
+        duration: 3000,
+      });
       setLocation("/dashboard");
     },
-    onError: () => {
-      console.error("Failed to save settings");
+    onError: (error: Error) => {
+      console.error("Failed to save settings:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save settings. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
     },
   });
 
   const onSubmit = (data: any) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     if (!user) {
+      console.log("No user found, redirecting to auth");
       setLocation("/auth");
       return;
     }
+    
     saveMutation.mutate(data);
   };
 

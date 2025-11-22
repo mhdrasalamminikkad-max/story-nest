@@ -68,8 +68,8 @@ export const parentSettingsSchema = z.object({
 });
 
 export const insertParentSettingsSchema = z.object({
-  pin: z.string().length(4),
-  childName: z.string().min(1, "Please enter your child's name").max(50, "Name is too long").optional(),
+  pin: z.string().length(4, "PIN must be exactly 4 digits"),
+  childName: z.string().min(1, "Please enter your child's name").max(50, "Name is too long"),
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),
   theme: z.enum(["day", "night"]),
