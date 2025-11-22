@@ -1032,7 +1032,7 @@ export default function ParentDashboard() {
                           data-testid="input-pdf-file"
                         />
                         
-                        {!pdfFile && !pdfUploading && (
+                        {!pdfFile && (
                           <Button
                             type="button"
                             onClick={() => pdfInputRef.current?.click()}
@@ -1045,17 +1045,7 @@ export default function ParentDashboard() {
                           </Button>
                         )}
                         
-                        {pdfUploading && (
-                          <div className="p-4 border-2 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium">Uploading PDF...</span>
-                              <span className="text-sm text-muted-foreground">{Math.round(pdfProgress)}%</span>
-                            </div>
-                            <Progress value={pdfProgress} className="h-2" />
-                          </div>
-                        )}
-                        
-                        {pdfFile && !pdfUploading && (
+                        {pdfFile && (
                           <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -1102,7 +1092,7 @@ export default function ParentDashboard() {
                           data-testid="input-audio-file"
                         />
                         
-                        {!audioFile && !audioUploading && (
+                        {!audioFile && (
                           <Button
                             type="button"
                             onClick={() => audioInputRef.current?.click()}
@@ -1115,17 +1105,7 @@ export default function ParentDashboard() {
                           </Button>
                         )}
                         
-                        {audioUploading && (
-                          <div className="p-4 border-2 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium">Uploading Audio...</span>
-                              <span className="text-sm text-muted-foreground">{Math.round(audioProgress)}%</span>
-                            </div>
-                            <Progress value={audioProgress} className="h-2" />
-                          </div>
-                        )}
-                        
-                        {audioFile && !audioUploading && (
+                        {audioFile && (
                           <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
