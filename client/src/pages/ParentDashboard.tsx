@@ -304,11 +304,15 @@ export default function ParentDashboard() {
 
     setPdfUploading(true);
     setPdfProgress(0);
+    toast({
+      title: "Uploading PDF...",
+      description: "Processing your file",
+      duration: 2000,
+    });
 
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadPDFFile(file, userId, (progress) => {
-        // Only update progress if still uploading
         setPdfProgress(Math.min(progress, 99));
       });
 
@@ -349,11 +353,15 @@ export default function ParentDashboard() {
 
     setAudioUploading(true);
     setAudioProgress(0);
+    toast({
+      title: "Uploading audio...",
+      description: "Processing your file",
+      duration: 2000,
+    });
 
     try {
       const userId = user?.uid || `temp-${Date.now()}`;
       const downloadURL = await uploadAudioFile(file, userId, (progress) => {
-        // Only update progress if still uploading
         setAudioProgress(Math.min(progress, 99));
       });
 
