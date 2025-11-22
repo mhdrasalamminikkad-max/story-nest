@@ -112,6 +112,7 @@ export default function ChildModeReadPage() {
     stopReading();
 
     const audio = new Audio(audioSource);
+    audio.crossOrigin = "anonymous";
     
     // Cleanup function to remove all listeners
     const cleanup = () => {
@@ -134,7 +135,7 @@ export default function ChildModeReadPage() {
     
     const handleError = () => {
       cleanup();
-      console.error("Error playing audio");
+      console.error("Error playing audio:", audio.error);
       setIsReading(false);
       toast({
         title: "Playback Error",
@@ -157,7 +158,7 @@ export default function ChildModeReadPage() {
     
     audio.play().catch((error) => {
       cleanup();
-      console.error("Audio playback failed:", error);
+      console.error("Audio playback failed:", error?.message || error);
       setIsReading(false);
       toast({
         title: "Playback Error",
