@@ -2009,14 +2009,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Failed to fetch PDF" });
       }
 
-      // Set proper headers for PDF display
+      // Get the PDF buffer
+      const buffer = await pdfResponse.arrayBuffer();
+      const bufferData = Buffer.from(buffer);
+
+      // Set proper headers for PDF display with CORS
       res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Length", bufferData.length);
       res.setHeader("Content-Disposition", "inline");
       res.setHeader("Cache-Control", "public, max-age=3600");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
       
-      // Stream the PDF
-      const buffer = await pdfResponse.arrayBuffer();
-      res.send(Buffer.from(buffer));
+      // Send the PDF buffer
+      res.end(bufferData);
     } catch (error) {
       console.error("Error serving PDF:", error);
       res.status(500).json({ error: "Failed to serve PDF" });
@@ -2043,14 +2050,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Failed to fetch audio" });
       }
 
-      // Set proper headers for audio playback
+      // Get the audio buffer
+      const buffer = await audioResponse.arrayBuffer();
+      const bufferData = Buffer.from(buffer);
+
+      // Set proper headers for audio playback with CORS
       res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Content-Length", bufferData.length);
       res.setHeader("Accept-Ranges", "bytes");
       res.setHeader("Cache-Control", "public, max-age=3600");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
       
-      // Stream the audio
-      const buffer = await audioResponse.arrayBuffer();
-      res.send(Buffer.from(buffer));
+      // Send the audio buffer
+      res.end(bufferData);
     } catch (error) {
       console.error("Error serving audio:", error);
       res.status(500).json({ error: "Failed to serve audio" });
