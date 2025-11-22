@@ -20,6 +20,7 @@ import StoriesPage from "@/pages/StoriesPage";
 import LibraryPage from "@/pages/LibraryPage";
 import CheckpointsPage from "@/pages/CheckpointsPage";
 import StoryExplorer from "@/pages/StoryExplorer";
+import SettingsPage from "@/pages/SettingsPage";
 import RhymesPage from "@/pages/RhymesPage";
 import NotFound from "@/pages/not-found";
 import {
@@ -91,6 +92,7 @@ function Router() {
         <Route path="/auth" component={AuthPage} />
         <Route path="/setup" component={ChildLockSetupPage} />
         <Route path="/dashboard" component={ParentDashboard} />
+        <Route path="/settings" component={SettingsPage} />
         <Route path="/child-mode" component={ChildModeSelectionPage} />
         <Route path="/child-mode-read" component={ChildModeReadPage} />
         <Route path="/admin" component={AdminPanel} />

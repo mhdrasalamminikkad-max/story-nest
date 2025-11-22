@@ -17,7 +17,7 @@ import { useState } from "react";
 const settingsSchema = z.object({
   childName: z.string().min(1, "Child name is required"),
   readingTimeLimit: z.coerce.number().min(5, "Must be at least 5 minutes").max(120, "Must be 120 minutes or less"),
-  theme: z.enum(["light", "dark"]),
+  theme: z.enum(["day", "night"]),
   fullscreenLockEnabled: z.boolean(),
 });
 
@@ -49,14 +49,19 @@ export default function SettingsPage() {
     defaultValues: {
       childName: settings?.childName || "",
       readingTimeLimit: settings?.readingTimeLimit || 30,
-      theme: settings?.theme || "light",
+      theme: (settings?.theme as "day" | "night") || "day",
       fullscreenLockEnabled: settings?.fullscreenLockEnabled || false,
     },
-    values: {
-      childName: settings?.childName || "",
-      readingTimeLimit: settings?.readingTimeLimit || 30,
-      theme: settings?.theme || "light",
-      fullscreenLockEnabled: settings?.fullscreenLockEnabled || false,
+    values: settings ? {
+      childName: settings.childName || "",
+      readingTimeLimit: settings.readingTimeLimit || 30,
+      theme: (settings.theme as "day" | "night") || "day",
+      fullscreenLockEnabled: settings.fullscreenLockEnabled || false,
+    } : {
+      childName: "",
+      readingTimeLimit: 30,
+      theme: "day",
+      fullscreenLockEnabled: false,
     },
   });
 
@@ -209,8 +214,8 @@ export default function SettingsPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="light">Light Mode</SelectItem>
-                          <SelectItem value="dark">Dark Mode</SelectItem>
+                          <SelectItem value="day">Day Mode</SelectItem>
+                          <SelectItem value="night">Night Mode</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
