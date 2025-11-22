@@ -425,6 +425,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update parent settings
+  app.patch("/api/parent-settings", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const updates = req.body;
+
+      // Only allow updating specific fields
+      const allowedFields = ["childName", "readingTimeLimit", "theme", "fullscreenLockEnabled"];
+      const updateData: any = {};
+      
+      for (const field of allowedFields) {
+        if (field in updates) {
+          updateData[field] = updates[field];
+        }
+      }
+
+      const [updated] = await db
+        .update(parentSettings)
+        .set(updateData)
+        .where(eq(parentSettings.userId, userId))
+        .returning();
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating parent settings:", error);
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  // Change PIN endpoint
+  app.post("/api/change-pin", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { currentPin, newPin } = req.body;
+
+      // Validate PIN format
+      if (!currentPin || !newPin || currentPin.length !== 4 || newPin.length !== 4) {
+        res.status(400).json({ error: "Invalid PIN format" });
+        return;
+      }
+
+      // Get current settings
+      const [settings] = await db
+        .select()
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+
+      if (!settings) {
+        res.status(404).json({ error: "Settings not found" });
+        return;
+      }
+
+      // Verify current PIN
+      if (!verifyPIN(currentPin, settings.pinHash)) {
+        res.status(403).json({ error: "Current PIN is incorrect" });
+        return;
+      }
+
+      // Hash new PIN and update
+      const newPinHash = hashPIN(newPin);
+      await db
+        .update(parentSettings)
+        .set({ pinHash: newPinHash })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json({ success: true, message: "PIN changed successfully" });
+    } catch (error) {
+      console.error("Error changing PIN:", error);
+      res.status(500).json({ error: "Failed to change PIN" });
+    }
+  });
+
   // Admin: Get pending stories for review
   app.get("/api/admin/pending-stories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
