@@ -418,25 +418,11 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = async (data: any) => {
-    // Check if uploads are still in progress
-    if (pdfUploading || audioUploading) {
-      toast({
-        title: "Uploads in progress",
-        description: "Please wait for file uploads to complete",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    // Filter out blob URLs - they're only for preview and won't work when saved
-    const cleanPdfUrl = data.pdfUrl && data.pdfUrl.startsWith('blob:') ? undefined : data.pdfUrl;
-    const cleanAudioUrl = data.audioUrl && data.audioUrl.startsWith('blob:') ? undefined : data.audioUrl;
-    
+    // Don't filter out URLs - let backend handle them directly
     const submissionData = {
       ...data,
-      pdfUrl: cleanPdfUrl || undefined,
-      audioUrl: cleanAudioUrl || undefined,
+      pdfUrl: data.pdfUrl || undefined,
+      audioUrl: data.audioUrl || undefined,
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
     
@@ -1056,39 +1042,26 @@ export default function ParentDashboard() {
                         )}
                         
                         {pdfFile && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                          <div className="p-4 border-2 rounded-2xl bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium truncate text-sm">{pdfFile.name}</p>
-                                  {pdfUploading ? (
-                                    <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {(pdfProgress.bytesTransferred / 1024 / 1024).toFixed(1)}/{(pdfProgress.totalBytes / 1024 / 1024).toFixed(1)} MB
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs text-green-600 dark:text-green-400">PDF ready</p>
-                                  )}
+                                  <p className="text-xs text-green-600 dark:text-green-400">PDF ready</p>
                                 </div>
                               </div>
-                              {!pdfUploading && (
-                                <Button
-                                  type="button"
-                                  onClick={deletePdfFile}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="rounded-2xl flex-shrink-0"
-                                  data-testid="button-delete-pdf"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
+                              <Button
+                                type="button"
+                                onClick={deletePdfFile}
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-2xl flex-shrink-0"
+                                data-testid="button-delete-pdf"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
-                            {pdfUploading && (
-                              <div className="space-y-1">
-                                <Progress value={pdfProgress.percentage} className="h-2" />
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>
@@ -1129,39 +1102,26 @@ export default function ParentDashboard() {
                         )}
                         
                         {audioFile && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                          <div className="p-4 border-2 rounded-2xl bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium truncate text-sm">{audioFile.name}</p>
-                                  {audioUploading ? (
-                                    <p className="text-xs text-green-600 dark:text-green-400">
-                                      Uploading: {(audioProgress.bytesTransferred / 1024 / 1024).toFixed(1)}/{(audioProgress.totalBytes / 1024 / 1024).toFixed(1)} MB
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs text-green-600 dark:text-green-400">Audio ready</p>
-                                  )}
+                                  <p className="text-xs text-green-600 dark:text-green-400">Audio ready</p>
                                 </div>
                               </div>
-                              {!audioUploading && (
-                                <Button
-                                  type="button"
-                                  onClick={deleteAudioFile}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="rounded-2xl flex-shrink-0"
-                                  data-testid="button-delete-audio"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
+                              <Button
+                                type="button"
+                                onClick={deleteAudioFile}
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-2xl flex-shrink-0"
+                                data-testid="button-delete-audio"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
-                            {audioUploading && (
-                              <div className="space-y-1">
-                                <Progress value={audioProgress.percentage} className="h-2" />
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>
