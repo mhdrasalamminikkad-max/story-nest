@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -317,7 +317,20 @@ export default function ParentDashboard() {
         
         <header className="hidden md:block border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
           <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
-            <h1 className="font-heading text-xl sm:text-2xl md:text-3xl text-foreground">Parent Dashboard</h1>
+            <div className="flex items-center gap-4">
+              <div 
+                className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+                onClick={() => setLocation("/")}
+                data-testid="button-home-logo"
+              >
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <h1 className="font-heading text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  StoryNest
+                </h1>
+              </div>
+              <div className="h-6 w-px bg-border" />
+              <h2 className="font-heading text-lg sm:text-xl text-foreground">Parent Dashboard</h2>
+            </div>
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               {parentSettings && (
                 <Badge variant="secondary" className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm" data-testid="badge-coin-balance">
