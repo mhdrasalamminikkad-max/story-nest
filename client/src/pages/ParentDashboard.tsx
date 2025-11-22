@@ -1063,6 +1063,12 @@ export default function ParentDashboard() {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
+                            <iframe
+                              src={`${pdfFile.data}#toolbar=0`}
+                              className="w-full border rounded-lg bg-white dark:bg-gray-800"
+                              style={{ height: "300px" }}
+                              data-testid="pdf-preview"
+                            />
                             <p className="text-xs text-green-600 dark:text-green-400">
                               PDF uploaded successfully
                             </p>
