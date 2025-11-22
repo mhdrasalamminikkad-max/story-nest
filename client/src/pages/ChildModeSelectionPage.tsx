@@ -167,6 +167,7 @@ export default function ChildModeSelectionPage() {
                       src={story.imageUrl}
                       alt={story.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                       data-testid={`img-story-${index}`}
                     />
                     <div className="absolute top-2 right-2">

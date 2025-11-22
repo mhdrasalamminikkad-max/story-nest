@@ -1269,7 +1269,7 @@ export default function ParentDashboard() {
                             }`}
                             data-testid={`button-image-${option.label.toLowerCase()}`}
                           >
-                            <img src={option.url} alt={option.label} className="w-full aspect-[4/3] object-cover" />
+                            <img src={option.url} alt={option.label} className="w-full aspect-[4/3] object-cover" loading="lazy" />
                             <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors" />
                           </button>
                         ))}

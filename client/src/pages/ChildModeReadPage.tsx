@@ -4,7 +4,7 @@ import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
@@ -406,10 +406,20 @@ export default function ChildModeReadPage() {
                   ) : (
                     <>
                       <Volume2 className="w-8 h-8 mr-3" />
-                      {currentStory.voiceoverUrl ? "Read to Me" : "No Recording"}
+                      {(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}
                     </>
                   )}
                 </Button>
+                {currentStory.pdfUrl && (
+                  <Button
+                    className="rounded-full text-lg sm:text-2xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 shadow-2xl"
+                    onClick={() => window.open(currentStory.pdfUrl, '_blank')}
+                    data-testid="button-view-pdf"
+                  >
+                    <FileText className="w-8 h-8 mr-3" />
+                    View PDF
+                  </Button>
+                )}
               </div>
             </motion.div>
           </AnimatePresence>

@@ -27,6 +27,7 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
             src={story.imageUrl}
             alt={story.title}
             className="w-full h-full object-cover"
+            loading="lazy"
             data-testid={`img-story-${story.id}`}
           />
         </div>
@@ -52,6 +53,7 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
             src={story.imageUrl}
             alt={story.title}
             className="w-full h-full object-cover"
+            loading="lazy"
             data-testid={`img-story-${story.id}`}
           />
           {showBookmark && (

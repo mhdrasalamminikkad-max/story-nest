@@ -305,6 +305,7 @@ export default function StoryExplorer() {
                               src={story.imageUrl}
                               alt={story.title}
                               className="w-full h-full object-cover"
+                              loading="lazy"
                             />
                           )}
                         </div>

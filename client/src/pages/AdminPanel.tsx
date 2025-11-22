@@ -562,6 +562,7 @@ export default function AdminPanel() {
                                   src={story.imageUrl} 
                                   alt={story.title}
                                   className="w-24 h-24 rounded-lg object-cover"
+                                  loading="lazy"
                                 />
                               </div>
                             </CardHeader>
