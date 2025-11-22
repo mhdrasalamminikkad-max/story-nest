@@ -247,11 +247,10 @@ export default function ParentDashboard() {
         
         // Upload to Firebase Storage and get download URL
         try {
-          if (user) {
-            const downloadURL = await uploadVoiceoverBlob(audioBlob, user.uid);
-            setVoiceoverBase64(downloadURL);
-            (form.setValue as any)('voiceoverUrl', downloadURL);
-          }
+          const userId = user?.uid || `temp-${Date.now()}`;
+          const downloadURL = await uploadVoiceoverBlob(audioBlob, userId);
+          setVoiceoverBase64(downloadURL);
+          (form.setValue as any)('voiceoverUrl', downloadURL);
         } catch (error) {
           console.error("Error uploading voiceover:", error);
           toast({
@@ -303,21 +302,12 @@ export default function ParentDashboard() {
       return;
     }
 
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upload files",
-        variant: "destructive",
-        duration: 4000,
-      });
-      return;
-    }
-
     setPdfUploading(true);
     setPdfProgress(0);
 
     try {
-      const downloadURL = await uploadPDFFile(file, user.uid, (progress) => {
+      const userId = user?.uid || `temp-${Date.now()}`;
+      const downloadURL = await uploadPDFFile(file, userId, (progress) => {
         setPdfProgress(progress);
       });
 
@@ -356,21 +346,12 @@ export default function ParentDashboard() {
       return;
     }
 
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upload files",
-        variant: "destructive",
-        duration: 4000,
-      });
-      return;
-    }
-
     setAudioUploading(true);
     setAudioProgress(0);
 
     try {
-      const downloadURL = await uploadAudioFile(file, user.uid, (progress) => {
+      const userId = user?.uid || `temp-${Date.now()}`;
+      const downloadURL = await uploadAudioFile(file, userId, (progress) => {
         setAudioProgress(progress);
       });
 
