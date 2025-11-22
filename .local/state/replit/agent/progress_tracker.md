@@ -81,3 +81,8 @@
 [x] 81. Application verified with screenshot - StoryNest homepage loading perfectly
 [x] 82. Progress tracker updated with latest migration tasks
 [x] 83. Project import to Replit environment COMPLETE - all systems operational and ready for use
+[x] 84. Fixed critical database schema issue - pdf_url, audio_url, and audience columns were missing
+[x] 85. Synced database schema using drizzle-kit push to add missing columns
+[x] 86. Verified all missing columns are now present in database
+[x] 87. Workflow restarted successfully - PDF upload functionality now working
+[x] 88. User can now re-add stories with PDF and the PDF URL will be properly saved
