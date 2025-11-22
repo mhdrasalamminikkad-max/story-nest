@@ -19,6 +19,8 @@ import Subscription from "@/pages/subscription";
 import StoriesPage from "@/pages/StoriesPage";
 import LibraryPage from "@/pages/LibraryPage";
 import CheckpointsPage from "@/pages/CheckpointsPage";
+import StoryExplorer from "@/pages/StoryExplorer";
+import RhymesPage from "@/pages/RhymesPage";
 import NotFound from "@/pages/not-found";
 import {
   Dialog,
@@ -98,6 +100,8 @@ function Router() {
         <Route path="/stories" component={StoriesPage} />
         <Route path="/library" component={LibraryPage} />
         <Route path="/checkpoints" component={CheckpointsPage} />
+        <Route path="/explore-stories" component={StoryExplorer} />
+        <Route path="/rhymes" component={RhymesPage} />
         <Route component={NotFound} />
       </Switch>
 
