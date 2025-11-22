@@ -18,7 +18,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { storyType, category, language } = req.query;
       
-      let query = db.select().from(stories);
+      let query = db.select({
+        id: stories.id,
+        userId: stories.userId,
+        title: stories.title,
+        content: stories.content,
+        imageUrl: stories.imageUrl,
+        summary: stories.summary,
+        voiceoverUrl: stories.voiceoverUrl,
+        pdfUrl: stories.pdfUrl,
+        audioUrl: stories.audioUrl,
+        audience: stories.audience,
+        language: stories.language,
+        category: stories.category,
+        storyType: stories.storyType,
+        status: stories.status,
+        approvedBy: stories.approvedBy,
+        rejectionReason: stories.rejectionReason,
+        createdAt: stories.createdAt,
+        reviewedAt: stories.reviewedAt,
+      }).from(stories);
       const conditions = [eq(stories.status, "published")];
       
       if (storyType && typeof storyType === 'string') {
@@ -54,7 +73,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.userId!;
       const userStories = await db
-        .select()
+        .select({
+          id: stories.id,
+          userId: stories.userId,
+          title: stories.title,
+          content: stories.content,
+          imageUrl: stories.imageUrl,
+          summary: stories.summary,
+          voiceoverUrl: stories.voiceoverUrl,
+          pdfUrl: stories.pdfUrl,
+          audioUrl: stories.audioUrl,
+          audience: stories.audience,
+          language: stories.language,
+          category: stories.category,
+          storyType: stories.storyType,
+          status: stories.status,
+          approvedBy: stories.approvedBy,
+          rejectionReason: stories.rejectionReason,
+          createdAt: stories.createdAt,
+          reviewedAt: stories.reviewedAt,
+        })
         .from(stories)
         .where(eq(stories.userId, userId))
         .orderBy(desc(stories.createdAt));
@@ -74,7 +112,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stories/preview", async (req, res) => {
     try {
       const previewStories = await db
-        .select()
+        .select({
+          id: stories.id,
+          userId: stories.userId,
+          title: stories.title,
+          content: stories.content,
+          imageUrl: stories.imageUrl,
+          summary: stories.summary,
+          voiceoverUrl: stories.voiceoverUrl,
+          pdfUrl: stories.pdfUrl,
+          audioUrl: stories.audioUrl,
+          audience: stories.audience,
+          language: stories.language,
+          category: stories.category,
+          storyType: stories.storyType,
+          status: stories.status,
+          approvedBy: stories.approvedBy,
+          rejectionReason: stories.rejectionReason,
+          createdAt: stories.createdAt,
+          reviewedAt: stories.reviewedAt,
+        })
         .from(stories)
         .where(eq(stories.status, "published"))
         .orderBy(desc(stories.createdAt));
