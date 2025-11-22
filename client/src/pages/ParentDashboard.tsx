@@ -450,6 +450,15 @@ export default function ParentDashboard() {
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
     
+    // Close dialog immediately for instant feedback
+    setShowAddStory(false);
+    toast({
+      title: editingStory ? "Saving story..." : "Creating story...",
+      description: "Your story is being saved in the background",
+      duration: 2000,
+    });
+    
+    // Submit in background
     if (editingStory) {
       updateStoryMutation.mutate({ id: editingStory.id, data: submissionData });
     } else {
@@ -1272,12 +1281,9 @@ export default function ParentDashboard() {
                 <Button 
                   type="submit" 
                   className="rounded-2xl" 
-                  disabled={addStoryMutation.isPending || updateStoryMutation.isPending} 
                   data-testid="button-submit-story"
                 >
-                  {editingStory 
-                    ? (updateStoryMutation.isPending ? "Saving..." : "Save Draft")
-                    : (addStoryMutation.isPending ? "Creating..." : "Create Draft")}
+                  {editingStory ? "Save Draft" : "Create Draft"}
                 </Button>
               </DialogFooter>
             </form>
