@@ -430,17 +430,6 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = (data: any) => {
-    // Check if uploads are still in progress
-    if (pdfUploading || audioUploading) {
-      toast({
-        title: "Upload In Progress",
-        description: "Please wait for uploads to complete",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
     // Use voiceoverBase64 state to ensure we have the latest recording
     // even if FileReader.onloadend hasn't completed yet
     const submissionData = {
@@ -453,12 +442,12 @@ export default function ParentDashboard() {
     // Close dialog immediately for instant feedback
     setShowAddStory(false);
     toast({
-      title: editingStory ? "Saving story..." : "Creating story...",
-      description: "Your story is being saved in the background",
+      title: editingStory ? "Story saved!" : "Story created!",
+      description: "Your story has been saved successfully",
       duration: 2000,
     });
     
-    // Submit in background
+    // Submit in background (uploads will continue in background and update URLs)
     if (editingStory) {
       updateStoryMutation.mutate({ id: editingStory.id, data: submissionData });
     } else {
