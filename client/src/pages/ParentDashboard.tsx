@@ -430,6 +430,17 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = (data: any) => {
+    // Check if uploads are still in progress
+    if (pdfUploading || audioUploading) {
+      toast({
+        title: "Upload In Progress",
+        description: "Please wait for uploads to complete",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     // Use voiceoverBase64 state to ensure we have the latest recording
     // even if FileReader.onloadend hasn't completed yet
     const submissionData = {
