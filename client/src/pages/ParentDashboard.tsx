@@ -36,7 +36,7 @@ import { Progress } from "@/components/ui/progress";
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [showAddStory, setShowAddStory] = useState(false);
   const [filterBookmarked, setFilterBookmarked] = useState(false);
   const [editingStory, setEditingStory] = useState<Story | null>(null);
@@ -943,6 +943,23 @@ export default function ParentDashboard() {
                           Your subscription details and preferences appear here. For more options, visit the Plans page.
                         </p>
                       </div>
+                      <Button 
+                        onClick={async () => {
+                          await signOut();
+                          setLocation("/");
+                          toast({
+                            title: "Signed out",
+                            description: "You have been signed out successfully",
+                            duration: 2000,
+                          });
+                        }}
+                        variant="destructive"
+                        className="rounded-2xl w-full"
+                        data-testid="button-sign-out-settings"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
                     </>
                   ) : (
                     <div className="text-center py-12">
