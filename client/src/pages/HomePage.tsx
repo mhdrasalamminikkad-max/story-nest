@@ -170,9 +170,15 @@ export default function HomePage() {
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
-                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl">
-                      <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
-                    </div>
+                    <motion.div 
+                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    >
+                      <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
+                        <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                      </motion.div>
+                    </motion.div>
                   </motion.div>
                   
                   <div className="space-y-4">
@@ -185,11 +191,15 @@ export default function HomePage() {
                   </div>
 
                   <motion.div className="flex flex-wrap gap-3 justify-center pt-4">
-                    {["Fairy Tales", "Adventures", "Educational"].map((tag) => (
+                    {["Fairy Tales", "Adventures", "Educational"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full text-sm font-bold text-primary dark:text-primary/80 border border-primary/30"
-                        whileHover={{ scale: 1.1 }}
+                        className="px-5 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full text-sm font-bold text-primary dark:text-primary/80 border border-primary/30 cursor-pointer"
+                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(139, 92, 246, 0.6)" }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
                       >
                         {tag}
                       </motion.div>
@@ -242,9 +252,15 @@ export default function HomePage() {
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity, delay: 1 }}
                     />
-                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center shadow-2xl">
-                      <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
-                    </div>
+                    <motion.div 
+                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center shadow-2xl"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+                    >
+                      <motion.div animate={{ rotate: [0, -360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
+                        <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                      </motion.div>
+                    </motion.div>
                   </motion.div>
                   
                   <div className="space-y-4">
@@ -257,11 +273,15 @@ export default function HomePage() {
                   </div>
 
                   <motion.div className="flex flex-wrap gap-3 justify-center pt-4">
-                    {["Nursery Rhymes", "Songs", "Music"].map((tag) => (
+                    {["Nursery Rhymes", "Songs", "Music"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-full text-sm font-bold text-secondary dark:text-secondary/80 border border-secondary/30"
-                        whileHover={{ scale: 1.1 }}
+                        className="px-5 py-2 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-full text-sm font-bold text-secondary dark:text-secondary/80 border border-secondary/30 cursor-pointer"
+                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(249, 115, 22, 0.6)" }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
                       >
                         {tag}
                       </motion.div>
