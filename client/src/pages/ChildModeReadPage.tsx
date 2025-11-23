@@ -388,13 +388,14 @@ export default function ChildModeReadPage() {
                 </motion.p>
 
                 {currentStory.pdfUrl && (
-                  <embed
-                    src={`/api/pdf-proxy/${currentStory.id}#toolbar=0`}
-                    type="application/pdf"
-                    className="w-full bg-white dark:bg-gray-700 rounded-lg"
-                    style={{ height: "300px", minHeight: "300px" }}
-                    data-testid="pdf-viewer"
-                  />
+                  <div className="w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden" style={{ height: "400px" }}>
+                    <iframe
+                      src={`/api/pdf-proxy/${currentStory.id}#toolbar=0&navpanes=0&scrollbar=0`}
+                      className="w-full h-full border-0"
+                      title="Story PDF"
+                      data-testid="pdf-viewer"
+                    />
+                  </div>
                 )}
               </div>
 
