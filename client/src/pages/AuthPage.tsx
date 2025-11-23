@@ -53,7 +53,7 @@ export default function AuthPage() {
         }
       }
     } catch (error) {
-      console.error("Error signing in:", error);
+      // Sign in failed - user likely closed the popup
     } finally {
       setLoading(false);
     }
