@@ -2011,7 +2011,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PDF proxy endpoint to handle CORS issues with Firebase storage
+  // PDF proxy endpoint to serve PDFs (supports both base64 and URLs)
   app.get("/api/pdf-proxy/:storyId", async (req, res) => {
     try {
       const { storyId } = req.params;
@@ -2025,15 +2025,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "PDF not found" });
       }
 
-      // Fetch the PDF from Firebase
-      const pdfResponse = await fetch(story.pdfUrl);
-      if (!pdfResponse.ok) {
-        return res.status(404).json({ error: "Failed to fetch PDF" });
-      }
+      let bufferData: Buffer;
 
-      // Get the PDF buffer
-      const buffer = await pdfResponse.arrayBuffer();
-      const bufferData = Buffer.from(buffer);
+      // Check if PDF is base64 encoded (starts with data:application/pdf;base64,)
+      if (story.pdfUrl.startsWith('data:application/pdf;base64,')) {
+        // Extract base64 data and convert to buffer
+        const base64Data = story.pdfUrl.split(',')[1];
+        bufferData = Buffer.from(base64Data, 'base64');
+      } else {
+        // Fetch the PDF from URL (Firebase or external)
+        const pdfResponse = await fetch(story.pdfUrl);
+        if (!pdfResponse.ok) {
+          return res.status(404).json({ error: "Failed to fetch PDF" });
+        }
+        const buffer = await pdfResponse.arrayBuffer();
+        bufferData = Buffer.from(buffer);
+      }
 
       // Set proper headers for PDF display with CORS
       res.setHeader("Content-Type", "application/pdf");

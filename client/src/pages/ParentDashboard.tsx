@@ -339,7 +339,6 @@ export default function ParentDashboard() {
           setVoiceoverBase64(downloadURL);
           (form.setValue as any)('voiceoverUrl', downloadURL);
         } catch (error) {
-          console.error("Error uploading voiceover:", error);
           toast({
             title: "Upload failed",
             description: "Failed to upload voiceover recording",
@@ -354,7 +353,12 @@ export default function ParentDashboard() {
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
-      console.error("Error accessing microphone:", error);
+      toast({
+        title: "Microphone access denied",
+        description: "Could not access your microphone",
+        variant: "destructive",
+        duration: 4000,
+      });
     }
   };
 
@@ -414,7 +418,6 @@ export default function ParentDashboard() {
         // Save base64 string directly to form
         (form.setValue as any)('pdfUrl', base64String);
         setPdfUploading(false);
-        console.log("PDF converted to base64 successfully");
       };
       reader.onerror = () => {
         setPdfUploading(false);
@@ -428,7 +431,12 @@ export default function ParentDashboard() {
       reader.readAsDataURL(file);
     } catch (error) {
       setPdfUploading(false);
-      console.error("PDF conversion failed:", error);
+      toast({
+        title: "PDF conversion failed",
+        description: "Could not process PDF file",
+        variant: "destructive",
+        duration: 4000,
+      });
     }
   };
 
@@ -471,7 +479,6 @@ export default function ParentDashboard() {
         // Save base64 string directly to form
         (form.setValue as any)('audioUrl', base64String);
         setAudioUploading(false);
-        console.log("Audio converted to base64 successfully");
       };
       reader.onerror = () => {
         setAudioUploading(false);
@@ -485,7 +492,12 @@ export default function ParentDashboard() {
       reader.readAsDataURL(file);
     } catch (error) {
       setAudioUploading(false);
-      console.error("Audio conversion failed:", error);
+      toast({
+        title: "Audio conversion failed",
+        description: "Could not process audio file",
+        variant: "destructive",
+        duration: 4000,
+      });
     }
   };
 
@@ -545,9 +557,6 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = async (data: any) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form errors:", form.formState.errors);
-    
     // Wait for uploads to complete if they're in progress
     // Show loading indicator on button but don't block with toast
     if (pdfUploading || audioUploading) {
@@ -575,8 +584,6 @@ export default function ParentDashboard() {
       audioUrl: filterBlobUrl(data.audioUrl),
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
-    
-    console.log("Submitting to backend:", submissionData);
     
     // Close dialog immediately for instant feedback
     setShowAddStory(false);
