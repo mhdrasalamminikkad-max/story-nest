@@ -942,27 +942,32 @@ export default function ParentDashboard() {
                       onToggleBookmark={(story) => toggleBookmarkMutation.mutate(story.id)}
                     />
                   ))}
-                </div>
+                </motion.div>
               )}
             </TabsContent>
 
             <TabsContent value="yours">
               {loadingSubmissions ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">Loading your stories...</p>
+                <div className="text-center py-16">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}>
+                    <Loader2 className="w-8 h-8 text-primary mx-auto mb-4" />
+                  </motion.div>
+                  <p className="text-muted-foreground font-semibold">Loading your stories...</p>
                 </div>
               ) : mySubmissions.length === 0 ? (
-                <Card className="rounded-3xl border-2 text-center py-12">
-                  <CardContent className="pt-6">
-                    <p className="text-muted-foreground mb-4">
-                      You haven't submitted any stories yet
-                    </p>
-                    <Button onClick={() => setShowAddStory(true)} className="rounded-2xl">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Submit Your First Story
-                    </Button>
-                  </CardContent>
-                </Card>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 text-center py-16 shadow-lg">
+                    <CardContent className="pt-8">
+                      <p className="text-xl font-semibold text-foreground mb-6">
+                        You haven't submitted any stories yet
+                      </p>
+                      <Button onClick={() => setShowAddStory(true)} className="rounded-2xl bg-gradient-to-r from-primary to-secondary hover:shadow-lg font-bold">
+                        <Plus className="w-5 h-5 mr-2" />
+                        Submit Your First Story
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ) : (
                 <div className="space-y-4">
                   {mySubmissions.map((story) => (
