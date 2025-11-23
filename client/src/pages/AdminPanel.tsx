@@ -130,49 +130,7 @@ export default function AdminPanel() {
     enabled: adminCheck?.isAdmin || false,
   });
 
-  if (checkingAdmin) {
-    return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
-        <AnimatedBackground />
-        <div className="relative z-10">
-          <p className="text-muted-foreground">Checking permissions...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!adminCheck?.isAdmin) {
-    return (
-      <div className="min-h-screen relative overflow-hidden">
-        <AnimatedBackground />
-        <div className="relative z-10">
-          <header className="container mx-auto px-4 py-6 flex items-center justify-between gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/dashboard")}
-              className="rounded-2xl"
-              data-testid="button-back-dashboard"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <ThemeToggle />
-          </header>
-          <main className="container mx-auto px-4 flex items-center justify-center min-h-[calc(100vh-100px)]">
-            <Card className="max-w-md">
-              <CardHeader>
-                <CardTitle>Access Denied</CardTitle>
-                <CardDescription>
-                  You do not have permission to access the admin panel.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
+  // All mutations must be defined here, before any conditional returns
   const deleteStoryMutation = useMutation({
     mutationFn: async (storyId: string) => {
       const res = await apiRequest("DELETE", `/api/admin/stories/${storyId}`);
@@ -437,6 +395,50 @@ export default function AdminPanel() {
       day: "numeric",
     });
   };
+
+  // Check admin status AFTER all hooks are defined
+  if (checkingAdmin) {
+    return (
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <AnimatedBackground />
+        <div className="relative z-10">
+          <p className="text-muted-foreground">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adminCheck?.isAdmin) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <AnimatedBackground />
+        <div className="relative z-10">
+          <header className="container mx-auto px-4 py-6 flex items-center justify-between gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/dashboard")}
+              className="rounded-2xl"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <ThemeToggle />
+          </header>
+          <main className="container mx-auto px-4 flex items-center justify-center min-h-[calc(100vh-100px)]">
+            <Card className="max-w-md">
+              <CardHeader>
+                <CardTitle>Access Denied</CardTitle>
+                <CardDescription>
+                  You do not have permission to access the admin panel.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
