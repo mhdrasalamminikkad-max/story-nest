@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
+import { PDFViewer } from "@/components/PDFViewer";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle, FileText } from "lucide-react";
 import { useLocation } from "wouter";
@@ -388,15 +389,7 @@ export default function ChildModeReadPage() {
                 </motion.p>
 
                 {currentStory.pdfUrl && (
-                  <div className="w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden" style={{ height: "400px" }}>
-                    <iframe
-                      src={`https://docs.google.com/gvjs?id=${btoa(`/api/pdf-proxy/${currentStory.id}`)}&embedded=true`}
-                      className="w-full h-full border-0"
-                      title="Story PDF"
-                      data-testid="pdf-viewer"
-                      sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
-                    />
-                  </div>
+                  <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="400px" />
                 )}
               </div>
 
