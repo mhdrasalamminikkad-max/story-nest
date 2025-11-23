@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
-import { Star, Sparkles, BookOpen, Play, Heart, Music, Zap } from "lucide-react";
+import { Star, Sparkles, BookOpen, Play, Heart, Music, Wand2, Circle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PINDialog } from "@/components/PINDialog";
@@ -48,40 +48,45 @@ export default function ChildModeSelectionPage() {
     "islamic": "bg-teal-500/20 text-teal-700 dark:text-teal-300 border-teal-300/50 dark:border-teal-600/50",
   };
 
-  const floatingElements = Array.from({ length: 40 }, (_, i) => ({
+  const floatingElements = Array.from({ length: 60 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
-    delay: Math.random() * 3,
-    duration: 4 + Math.random() * 4,
-    size: Math.random() * 10 + 4,
-    type: ['star', 'heart', 'sparkles', 'music'][i % 4],
+    delay: Math.random() * 4,
+    duration: 5 + Math.random() * 6,
+    size: Math.random() * 12 + 3,
+    type: ['star', 'heart', 'sparkles', 'music', 'circle', 'wand'][i % 6],
   }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 dark:from-purple-900 dark:via-pink-900 dark:to-blue-900 relative overflow-hidden">
-      {/* ULTRA-BEAUTIFUL ANIMATED BACKGROUND ORBS */}
+      {/* MEGA ANIMATED BACKGROUND ORBS */}
       <motion.div className="fixed inset-0 pointer-events-none">
-        {/* Large drifting gradient orbs */}
+        {/* Massive outer orbs */}
         <motion.div 
-          className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl"
-          animate={{ x: [0, 80, 0], y: [0, 60, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-600/40 via-pink-600/40 to-transparent rounded-full blur-3xl filter"
+          animate={{ x: [0, 100, 0], y: [0, 80, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-3xl"
-          animate={{ x: [0, -80, 0], y: [0, -60, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -bottom-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-600/40 via-cyan-600/40 to-transparent rounded-full blur-3xl"
+          animate={{ x: [0, -100, 0], y: [0, -80, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
         <motion.div 
-          className="absolute top-1/3 left-1/2 w-80 h-80 bg-gradient-to-br from-yellow-400/25 to-orange-400/25 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-br from-yellow-500/30 via-orange-500/30 to-transparent rounded-full blur-3xl"
+          animate={{ scale: [1, 1.4, 1], rotate: [0, 360] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute top-1/4 right-1/4 w-72 h-72 bg-gradient-to-br from-pink-600/35 to-purple-600/35 rounded-full blur-3xl"
+          animate={{ x: [0, 50, 0], y: [0, -50, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
       </motion.div>
 
-      {/* ULTRA-ANIMATED FLOATING ELEMENTS */}
-      <div className="fixed inset-0 pointer-events-none">
+      {/* MEGA ANIMATED FLOATING ELEMENTS */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {floatingElements.map((elem) => (
           <motion.div
             key={elem.id}
@@ -91,11 +96,11 @@ export default function ChildModeSelectionPage() {
               top: `${elem.y}%`,
             }}
             animate={{
-              y: [0, -40, 0],
-              x: [0, 30, 0],
+              y: [0, -60, 0],
+              x: [0, Math.random() > 0.5 ? 40 : -40, 0],
               rotate: [0, 360],
-              scale: [0.8, 1.3, 0.8],
-              opacity: [0.2, 0.8, 0.2],
+              scale: [0.6, 1.5, 0.6],
+              opacity: [0.1, 1, 0.1],
             }}
             transition={{
               duration: elem.duration,
@@ -105,133 +110,176 @@ export default function ChildModeSelectionPage() {
             }}
           >
             {elem.type === 'star' && (
-              <Star className="text-yellow-400 dark:text-yellow-300 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+              <motion.div animate={{ filter: [`drop-shadow(0 0 4px rgba(253, 224, 71, 0.4))`, `drop-shadow(0 0 12px rgba(253, 224, 71, 0.8))`, `drop-shadow(0 0 4px rgba(253, 224, 71, 0.4))`] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Star className="text-yellow-400 dark:text-yellow-300" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+              </motion.div>
             )}
             {elem.type === 'heart' && (
-              <Heart className="text-pink-500 dark:text-pink-400 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+              <motion.div animate={{ filter: [`drop-shadow(0 0 4px rgba(236, 72, 153, 0.4))`, `drop-shadow(0 0 12px rgba(236, 72, 153, 0.8))`, `drop-shadow(0 0 4px rgba(236, 72, 153, 0.4))`] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Heart className="text-pink-500 dark:text-pink-400" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+              </motion.div>
             )}
             {elem.type === 'sparkles' && (
-              <Sparkles className="text-purple-500 dark:text-purple-400 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} />
+              <Sparkles className="text-purple-500 dark:text-purple-400" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} />
             )}
             {elem.type === 'music' && (
-              <Music className="text-blue-500 dark:text-blue-400 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} />
+              <Music className="text-blue-500 dark:text-blue-400" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} />
+            )}
+            {elem.type === 'circle' && (
+              <motion.div animate={{ filter: [`drop-shadow(0 0 4px rgba(168, 85, 247, 0.4))`, `drop-shadow(0 0 12px rgba(168, 85, 247, 0.8))`, `drop-shadow(0 0 4px rgba(168, 85, 247, 0.4))`] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Circle className="text-purple-500 dark:text-purple-400" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+              </motion.div>
+            )}
+            {elem.type === 'wand' && (
+              <Wand2 className="text-indigo-500 dark:text-indigo-400" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} />
             )}
           </motion.div>
         ))}
       </div>
 
-      {/* ULTRA-BEAUTIFUL EXIT BUTTON */}
+      {/* SUPER ANIMATED EXIT BUTTON */}
       <div className="fixed top-6 right-6 z-50">
         <motion.button
           onClick={() => setShowPINDialog(true)}
-          className="bg-gradient-to-br from-red-500 to-red-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold text-lg flex items-center gap-3 border-2 border-white/40"
-          whileHover={{ scale: 1.1, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.6)" }}
-          whileTap={{ scale: 0.95 }}
+          className="relative bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white px-7 py-3 rounded-full shadow-2xl font-bold text-lg flex items-center gap-3 border-3 border-white/50 overflow-hidden"
+          whileHover={{ scale: 1.15, boxShadow: "0 30px 60px rgba(239, 68, 68, 0.8)" }}
+          whileTap={{ scale: 0.92 }}
           data-testid="button-exit-child-mode"
         >
+          {/* Glowing background effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-red-400/0 via-red-300/50 to-red-400/0"
+            animate={{ x: [-100, 100] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          
           <motion.span 
-            animate={{ rotate: [0, 20, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-2xl"
+            animate={{ rotate: [0, 25, 0], y: [0, -5, 0] }}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            className="text-2xl relative z-10"
           >
             👋
           </motion.span>
-          <span>Exit</span>
+          <span className="relative z-10">Exit</span>
         </motion.button>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-16">
-        {/* ULTRA-GORGEOUS WELCOME HEADER */}
+        {/* MEGA GORGEOUS WELCOME HEADER */}
         <motion.div
-          initial={{ opacity: 0, y: -40, scale: 0.9 }}
+          initial={{ opacity: 0, y: -50, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-          className="text-center mb-12 md:mb-16"
+          transition={{ duration: 1, type: "spring", stiffness: 80, damping: 15 }}
+          className="text-center mb-16 md:mb-20 relative"
         >
-          {/* ANIMATED EMOJI CELEBRATION */}
-          <div className="mb-6 flex justify-center gap-3">
+          {/* Background glow effect */}
+          <motion.div
+            className="absolute inset-0 blur-3xl opacity-30"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            <div className="w-full h-full bg-gradient-to-b from-purple-400 via-pink-400 to-transparent rounded-full" />
+          </motion.div>
+
+          {/* MEGA ANIMATED EMOJI CELEBRATION */}
+          <div className="mb-8 flex justify-center gap-4 md:gap-6">
             <motion.span 
-              animate={{ rotate: [0, 360], y: [0, -15, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="text-6xl sm:text-7xl md:text-8xl"
+              animate={{ rotate: [0, 360], y: [0, -25, 0], scale: [1, 1.3, 1] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="text-7xl sm:text-8xl md:text-9xl inline-block"
             >
               ✨
             </motion.span>
             <motion.span 
-              animate={{ rotate: [0, -360], scale: [1, 1.2, 1], y: [0, -20, 0] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 0.2 }}
-              className="text-6xl sm:text-7xl md:text-8xl"
+              animate={{ rotate: [0, -360], scale: [1, 1.3, 1], y: [0, -30, 0] }}
+              transition={{ duration: 4, repeat: Infinity, delay: 0.3 }}
+              className="text-7xl sm:text-8xl md:text-9xl inline-block"
             >
               📚
             </motion.span>
             <motion.span 
-              animate={{ rotate: [0, 360], y: [0, -15, 0] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 0.4 }}
-              className="text-6xl sm:text-7xl md:text-8xl"
+              animate={{ rotate: [0, 360], y: [0, -25, 0], scale: [1, 1.3, 1] }}
+              transition={{ duration: 4, repeat: Infinity, delay: 0.6 }}
+              className="text-7xl sm:text-8xl md:text-9xl inline-block"
             >
               ✨
             </motion.span>
           </div>
 
-          {/* MASSIVE BEAUTIFUL TITLE */}
+          {/* MASSIVE BEAUTIFUL PULSING TITLE */}
           <motion.h1 
-            className="font-heading text-5xl sm:text-6xl md:text-8xl font-black mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-300 dark:via-pink-300 dark:to-blue-300 bg-clip-text text-transparent drop-shadow-2xl leading-tight"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="font-heading text-6xl sm:text-7xl md:text-9xl font-black mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-300 dark:via-pink-300 dark:to-blue-300 bg-clip-text text-transparent drop-shadow-2xl leading-tight"
+            animate={{ scale: [1, 1.08, 1], y: [0, -8, 0] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           >
             {settings?.childName ? `Welcome ${settings.childName}!` : "Story Time!"}
           </motion.h1>
 
-          {/* ANIMATED SUBTITLE */}
+          {/* ENHANCED ANIMATED SUBTITLE */}
           <motion.p 
-            className="text-2xl sm:text-3xl md:text-4xl text-gray-700 dark:text-gray-300 font-bold drop-shadow-lg"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            className="text-2xl sm:text-3xl md:text-5xl text-gray-700 dark:text-gray-300 font-bold drop-shadow-lg"
+            animate={{ y: [0, -8, 0], opacity: [0.9, 1, 0.9] }}
+            transition={{ duration: 2.5, repeat: Infinity }}
           >
             Choose your magical adventure
           </motion.p>
         </motion.div>
 
-        {/* STORIES GRID - ULTRA BEAUTIFUL */}
+        {/* STORIES GRID - MEGA ULTRA BEAUTIFUL */}
         {stories.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-20"
+            className="text-center py-24"
           >
             <motion.div 
-              animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+              animate={{ scale: [1, 1.3, 1], rotate: [0, 360], filter: [`drop-shadow(0 0 4px rgba(249, 115, 22, 0.4))`, `drop-shadow(0 0 20px rgba(249, 115, 22, 0.8))`, `drop-shadow(0 0 4px rgba(249, 115, 22, 0.4))`] }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="text-8xl mb-6 inline-block"
+              className="text-9xl mb-8 inline-block"
             >
               📖
             </motion.div>
-            <p className="text-3xl text-gray-600 dark:text-gray-400 font-bold">
+            <p className="text-4xl text-gray-600 dark:text-gray-400 font-bold">
               No stories available yet. Check back soon!
             </p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-12">
             {stories.map((story, index) => (
               <motion.div
                 key={story.id}
-                initial={{ opacity: 0, y: 40, scale: 0.8 }}
+                initial={{ opacity: 0, y: 60, scale: 0.7 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: index * 0.08, type: "spring", stiffness: 200 }}
-                whileHover={{ y: -15, scale: 1.05 }}
+                transition={{ delay: index * 0.1, type: "spring", stiffness: 150, damping: 20 }}
+                whileHover={{ y: -25, scale: 1.08 }}
                 data-testid={`card-story-${index}`}
+                className="relative group"
               >
+                {/* GLOWING CARD BACKGROUND EFFECT */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-blue-500/20 rounded-3xl blur-2xl"
+                  animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.15, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, delay: index * 0.1 }}
+                />
+
                 <Card
-                  className="overflow-hidden cursor-pointer hover-elevate transition-all border-4 border-white/30 h-full shadow-2xl hover:shadow-3xl rounded-3xl"
+                  className="overflow-hidden cursor-pointer hover-elevate transition-all border-4 border-white/40 h-full shadow-2xl hover:shadow-3xl rounded-3xl relative z-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm"
                   onClick={() => handleStoryClick(story)}
                 >
-                  {/* STORY IMAGE WITH GRADIENT OVERLAY */}
-                  <div className="relative h-56 md:h-64 overflow-hidden bg-gradient-to-br from-purple-300 to-pink-300 dark:from-purple-800 dark:to-pink-800 group">
-                    {/* Animated gradient background */}
+                  {/* STORY IMAGE WITH MULTIPLE OVERLAYS */}
+                  <div className="relative h-60 md:h-72 overflow-hidden bg-gradient-to-br from-purple-300 to-pink-300 dark:from-purple-800 dark:to-pink-800 group">
+                    {/* Animated rotating gradient background */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-br from-transparent via-white/15 to-transparent"
                       animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    />
+
+                    {/* Rainbow shimmer effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-rainbow/20 to-transparent"
+                      animate={{ x: [-200, 200] }}
+                      transition={{ duration: 3, repeat: Infinity }}
                     />
 
                     <motion.img
@@ -240,83 +288,89 @@ export default function ChildModeSelectionPage() {
                       className="w-full h-full object-cover relative z-10"
                       loading="lazy"
                       data-testid={`img-story-${index}`}
-                      whileHover={{ scale: 1.15 }}
-                      transition={{ duration: 0.3 }}
+                      whileHover={{ scale: 1.2, rotate: 2 }}
+                      transition={{ duration: 0.4 }}
                     />
 
-                    {/* Glowing overlay on hover */}
+                    {/* Multi-layer glow overlay on hover */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
+                      className="absolute inset-0 bg-gradient-to-t from-primary/50 via-secondary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"
                     />
 
                     {/* Category Badge */}
                     <div className="absolute top-3 right-3 z-30">
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Badge className={`${categoryColors[story.category] || "bg-gray-500/20"} font-bold text-sm border-2 backdrop-blur-md`}>
+                      <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+                        <Badge className={`${categoryColors[story.category] || "bg-gray-500/20"} font-bold text-sm border-2 backdrop-blur-md shadow-lg`}>
                           {story.category}
                         </Badge>
                       </motion.div>
                     </div>
 
-                    {/* Audio Indicator */}
+                    {/* Audio Indicator with mega glow */}
                     {story.voiceoverUrl && (
                       <motion.div 
-                        className="absolute bottom-3 right-3 bg-gradient-to-r from-primary to-secondary p-3 rounded-full shadow-lg z-30 border-2 border-white/50"
-                        animate={{ scale: [1, 1.15, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="absolute bottom-3 right-3 bg-gradient-to-br from-primary via-secondary to-accent p-4 rounded-full shadow-2xl z-30 border-3 border-white/60"
+                        animate={{ scale: [1, 1.25, 1], filter: [`drop-shadow(0 0 8px rgba(99, 102, 241, 0.6))`, `drop-shadow(0 0 20px rgba(99, 102, 241, 1))`, `drop-shadow(0 0 8px rgba(99, 102, 241, 0.6))`] }}
+                        transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }}>
-                          <Play className="w-6 h-6 text-white" fill="currentColor" />
+                        <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}>
+                          <Play className="w-7 h-7 text-white" fill="currentColor" />
                         </motion.div>
                       </motion.div>
                     )}
                   </div>
 
-                  {/* STORY CONTENT - ULTRA BEAUTIFUL */}
-                  <div className="p-5 md:p-6 bg-gradient-to-br from-white/95 via-purple-50/80 to-pink-50/80 dark:from-gray-800/95 dark:via-purple-900/80 dark:to-pink-900/80 backdrop-blur-sm">
+                  {/* STORY CONTENT - MEGA ULTRA BEAUTIFUL */}
+                  <div className="p-6 md:p-7 bg-gradient-to-br from-white/98 via-purple-50/90 to-pink-50/90 dark:from-gray-800/98 dark:via-purple-900/90 dark:to-pink-900/90">
                     {/* Title */}
                     <motion.h3 
                       className="font-heading text-2xl md:text-3xl font-black mb-3 text-gray-900 dark:text-white line-clamp-2 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-300 dark:to-pink-300 bg-clip-text text-transparent"
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.08 + 0.2 }}
+                      transition={{ delay: index * 0.1 + 0.2 }}
                     >
                       {story.title}
                     </motion.h3>
 
                     {/* Summary */}
                     <motion.p 
-                      className="text-sm md:text-base text-gray-700 dark:text-gray-300 line-clamp-3 mb-5 font-medium"
+                      className="text-sm md:text-base text-gray-700 dark:text-gray-300 line-clamp-3 mb-6 font-medium leading-relaxed"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.08 + 0.3 }}
+                      transition={{ delay: index * 0.1 + 0.3 }}
                     >
                       {story.summary}
                     </motion.p>
 
-                    {/* ULTRA-BEAUTIFUL READ BUTTON */}
+                    {/* MEGA ULTRA-BEAUTIFUL READ BUTTON */}
                     <motion.div
-                      className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white px-6 py-4 rounded-2xl font-bold text-base md:text-lg shadow-lg border-2 border-white/40 relative overflow-hidden group"
-                      whileHover={{ scale: 1.08, boxShadow: "0 20px 40px rgba(139, 92, 246, 0.8)" }}
-                      whileTap={{ scale: 0.95 }}
-                      initial={{ opacity: 0, y: 20 }}
+                      className="flex items-center justify-center gap-3 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white px-7 py-5 rounded-2xl font-bold text-lg md:text-xl shadow-lg border-3 border-white/50 relative overflow-hidden group cursor-pointer"
+                      whileHover={{ scale: 1.12, boxShadow: "0 30px 60px rgba(139, 92, 246, 0.9)" }}
+                      whileTap={{ scale: 0.92 }}
+                      initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.08 + 0.4 }}
+                      transition={{ delay: index * 0.1 + 0.4 }}
                     >
-                      {/* Shimmer effect */}
+                      {/* Dual shimmer effects */}
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                        animate={{ x: [-100, 100] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                        animate={{ x: [-150, 150] }}
+                        transition={{ duration: 2.5, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-l from-transparent via-white/20 to-transparent"
+                        animate={{ x: [150, -150] }}
+                        transition={{ duration: 3, repeat: Infinity }}
                       />
                       
                       <motion.div 
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                        animate={{ scale: [1, 1.3, 1], rotate: [0, 20, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity }}
+                        className="relative z-10"
                       >
-                        <BookOpen className="w-6 h-6" />
+                        <BookOpen className="w-7 h-7" />
                       </motion.div>
-                      <span className="relative font-heading">Read Story</span>
+                      <span className="relative font-heading z-10">Read Story</span>
                     </motion.div>
                   </div>
                 </Card>
