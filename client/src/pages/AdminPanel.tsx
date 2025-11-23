@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Story, SubscriptionPlan, InsertSubscriptionPlan, CoinSettings, PlanCoinCost } from "@shared/schema";
@@ -322,15 +322,15 @@ export default function AdminPanel() {
     },
   });
 
-  const handleToggleBlockUser = (userId: string, isBlocked: boolean) => {
+  const handleToggleBlockUser = useCallback((userId: string, isBlocked: boolean) => {
     toggleBlockUserMutation.mutate({ userId, isBlocked });
-  };
+  }, [toggleBlockUserMutation]);
 
-  const handleToggleAdmin = (userId: string, isAdmin: boolean) => {
+  const handleToggleAdmin = useCallback((userId: string, isAdmin: boolean) => {
     toggleAdminMutation.mutate({ userId, isAdmin });
-  };
+  }, [toggleAdminMutation]);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
@@ -362,14 +362,13 @@ export default function AdminPanel() {
       setIsRecording(true);
       toast({ title: "Recording started", description: "Start reading your story!" });
     } catch (error) {
-      console.error("Error accessing microphone:", error);
       toast({ 
         title: "Microphone error", 
         description: "Could not access your microphone. Please check permissions.",
         variant: "destructive"
       });
     }
-  };
+  }, [form, toast]);
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {

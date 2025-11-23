@@ -78,15 +78,10 @@ export default function ChildLockSetupPage() {
   });
 
   const onSubmit = (data: any) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form errors:", form.formState.errors);
-    
     if (!user) {
-      console.log("No user found, redirecting to auth");
       setLocation("/auth");
       return;
     }
-    
     saveMutation.mutate(data);
   };
 
