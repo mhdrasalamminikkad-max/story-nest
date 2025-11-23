@@ -82,9 +82,16 @@ export default function ParentDashboard() {
     queryKey: ["/api/admin/check"],
   });
 
-  const { data: parentSettings } = useQuery<ParentSettings>({
+  const { data: parentSettings, isLoading: settingsLoading } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
   });
+
+  // Redirect to setup if user hasn't completed setup
+  useEffect(() => {
+    if (!settingsLoading && !parentSettings) {
+      setLocation("/setup");
+    }
+  }, [settingsLoading, parentSettings, setLocation]);
 
   const storiesWithBookmarks = stories.map(story => ({
     ...story,
