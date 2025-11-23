@@ -11,6 +11,7 @@ export default {
         sm: ".5rem",
         "2xl": "1.5rem",
         "3xl": "2rem",
+        "4xl": "2.5rem",
       },
       colors: {
         // Flat / base colors (regular buttons)

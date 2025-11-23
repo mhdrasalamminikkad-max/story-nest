@@ -2,7 +2,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { BookOpen, LogIn, User, Play, Music2 } from "lucide-react";
+import { BookOpen, LogIn, User, Play, Music2, Sparkles, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,37 +19,43 @@ export default function HomePage() {
   });
   
   const welcomeText = parentSettings?.childName 
-    ? `Welcome to ${parentSettings.childName}`
-    : "Welcome to StoryNest";
+    ? `Welcome, ${parentSettings.childName}!`
+    : "Welcome to StoryNest!";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/30 to-background dark:from-background dark:via-purple-950/30 dark:to-background">
       <AnimatedBackground />
       
       <div className="relative z-10">
         {/* Header */}
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
-          <div className="container mx-auto px-4 sm:px-6 py-4">
+        <header className="sticky top-0 z-50 bg-gradient-to-r from-background/90 to-background/80 dark:from-background/90 dark:to-background/80 backdrop-blur-xl border-b border-primary/10">
+          <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
             <div className="flex items-center justify-between gap-4">
-              <div 
-                className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              <motion.div 
+                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-gradient-to-r from-primary/10 to-secondary/10"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
+                whileHover={{ scale: 1.05 }}
               >
-                <BookOpen className="w-6 h-6 text-primary" />
-                <h1 className="font-heading text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
+                  <BookOpen className="w-7 h-7 text-primary" />
+                </motion.div>
+                <h1 className="font-heading text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   StoryNest
                 </h1>
-              </div>
+              </motion.div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <ThemeToggle />
                 {user ? (
                   <>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => setLocation("/dashboard")}
-                      className="rounded-xl"
+                      className="rounded-2xl font-semibold"
                       data-testid="button-dashboard"
                     >
                       <User className="w-4 h-4 mr-2" />
@@ -57,7 +63,7 @@ export default function HomePage() {
                     </Button>
                     <Button
                       onClick={() => setLocation("/child-mode")}
-                      className="rounded-xl"
+                      className="rounded-2xl font-semibold bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all"
                       data-testid="button-child-mode"
                     >
                       <Play className="w-4 h-4 mr-2" />
@@ -67,7 +73,7 @@ export default function HomePage() {
                 ) : (
                   <Button
                     onClick={() => setLocation("/auth")}
-                    className="rounded-xl"
+                    className="rounded-2xl font-semibold bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all"
                     data-testid="button-sign-in"
                   >
                     <LogIn className="w-4 h-4 mr-2" />
@@ -80,175 +86,228 @@ export default function HomePage() {
         </header>
 
         {/* Main Content */}
-        <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
           {/* Hero Section */}
-          <div className="text-center mb-12 sm:mb-20 space-y-6">
+          <div className="text-center mb-16 sm:mb-32 space-y-8">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, type: "spring" }}
-              className="space-y-6"
+              initial={{ opacity: 0, scale: 0.8, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+              className="space-y-8"
             >
-              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-secondary/50 px-6 py-3 rounded-full mb-8 text-white shadow-lg">
-                <BookOpen className="w-5 h-5 animate-bounce" />
-                <span className="text-base font-bold">{welcomeText}</span>
+              {/* Badge */}
+              <motion.div 
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-primary/20 to-secondary/20 px-8 py-4 rounded-3xl border-2 border-primary/30 shadow-xl"
+                whileHover={{ scale: 1.05 }}
+              >
+                <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                </motion.div>
+                <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{welcomeText}</span>
+              </motion.div>
+
+              {/* Main Heading */}
+              <div className="space-y-4">
+                <h1 className="text-6xl sm:text-7xl lg:text-8xl font-heading font-black leading-tight">
+                  <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-2xl block">
+                    Magical Bedtime
+                  </span>
+                  <span className="bg-gradient-to-r from-secondary via-accent to-primary bg-clip-text text-transparent drop-shadow-2xl block">
+                    Stories
+                  </span>
+                </h1>
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent drop-shadow-lg">
-                ✨ Magical Stories ✨
-              </h1>
-              <p className="text-xl sm:text-2xl text-foreground/80 max-w-3xl mx-auto font-semibold leading-relaxed">
-                Create wonderful memories with enchanting tales that inspire imagination and sweet dreams!
+
+              {/* Subheading */}
+              <p className="text-xl sm:text-2xl lg:text-3xl text-foreground/85 max-w-4xl mx-auto font-semibold leading-relaxed">
+                Where imagination comes alive! Create wonderful memories with enchanting tales that inspire dreams and spark joy.
               </p>
             </motion.div>
           </div>
 
-          {/* Two Big Boxes */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {/* Explore Stories Box */}
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 max-w-6xl mx-auto mb-16 sm:mb-32">
+            {/* Explore Stories */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              viewport={{ once: true }}
             >
               <Card
-                className="group relative overflow-hidden cursor-pointer hover-elevate active-elevate-2 transition-all h-full"
+                className="group relative overflow-hidden cursor-pointer hover-elevate active-elevate-2 transition-all h-full border-2 border-primary/20 shadow-xl"
                 onClick={() => setLocation("/explore-stories")}
                 data-testid="card-explore-stories"
               >
-                {/* Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-blue-500/20 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-blue-900/30" />
+                {/* Animated Background Gradient */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-br from-primary/15 via-secondary/10 to-transparent"
+                  animate={{ opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                />
                 
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-blue-400/30 to-purple-400/30 rounded-full blur-3xl" />
+                {/* Decorative Blurs */}
+                <motion.div 
+                  className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-3xl"
+                  animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+                  transition={{ duration: 8, repeat: Infinity }}
+                />
+                <motion.div 
+                  className="absolute -bottom-20 -left-20 w-64 h-64 bg-gradient-to-tr from-secondary/20 to-accent/20 rounded-full blur-3xl"
+                  animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
+                  transition={{ duration: 8, repeat: Infinity }}
+                />
                 
                 {/* Content */}
-                <div className="relative p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[350px] sm:min-h-[400px]">
+                <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1 }}
+                    className="relative"
+                    whileHover={{ scale: 1.15, rotate: 10 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-2xl opacity-50"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl">
+                      <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                    </div>
                   </motion.div>
                   
-                  <div className="space-y-3">
-                    <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <div className="space-y-4">
+                    <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                       Explore Stories
                     </h2>
-                    <p className="text-base sm:text-lg text-muted-foreground max-w-md">
+                    <p className="text-base sm:text-lg text-foreground/70 max-w-md mx-auto leading-relaxed">
                       Discover hundreds of magical tales across different languages, categories, and themes
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <div className="px-3 py-1 bg-purple-500/10 dark:bg-purple-500/20 rounded-full text-sm font-medium text-purple-700 dark:text-purple-300">
-                      Fairy Tales
-                    </div>
-                    <div className="px-3 py-1 bg-pink-500/10 dark:bg-pink-500/20 rounded-full text-sm font-medium text-pink-700 dark:text-pink-300">
-                      Adventures
-                    </div>
-                    <div className="px-3 py-1 bg-blue-500/10 dark:bg-blue-500/20 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Educational
-                    </div>
-                  </div>
+                  <motion.div className="flex flex-wrap gap-3 justify-center pt-4">
+                    {["Fairy Tales", "Adventures", "Educational"].map((tag) => (
+                      <motion.div
+                        key={tag}
+                        className="px-5 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full text-sm font-bold text-primary dark:text-primary/80 border border-primary/30"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {tag}
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </div>
               </Card>
             </motion.div>
 
-            {/* Rhymes Box */}
+            {/* Rhymes & Songs */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              viewport={{ once: true }}
             >
               <Card
-                className="group relative overflow-hidden cursor-pointer hover-elevate active-elevate-2 transition-all h-full"
+                className="group relative overflow-hidden cursor-pointer hover-elevate active-elevate-2 transition-all h-full border-2 border-secondary/20 shadow-xl"
                 onClick={() => setLocation("/rhymes")}
                 data-testid="card-rhymes"
               >
-                {/* Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-teal-500/20 to-green-500/20 dark:from-blue-900/30 dark:via-teal-900/30 dark:to-green-900/30" />
+                {/* Animated Background Gradient */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-br from-secondary/15 via-accent/10 to-transparent"
+                  animate={{ opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+                />
                 
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/30 to-teal-400/30 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-green-400/30 to-blue-400/30 rounded-full blur-3xl" />
+                {/* Decorative Blurs */}
+                <motion.div 
+                  className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-secondary/20 to-accent/20 rounded-full blur-3xl"
+                  animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, delay: 1 }}
+                />
+                <motion.div 
+                  className="absolute -bottom-20 -left-20 w-64 h-64 bg-gradient-to-tr from-accent/20 to-primary/20 rounded-full blur-3xl"
+                  animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, delay: 1 }}
+                />
                 
                 {/* Content */}
-                <div className="relative p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[350px] sm:min-h-[400px]">
+                <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center shadow-lg"
-                    whileHover={{ scale: 1.1 }}
+                    className="relative"
+                    whileHover={{ scale: 1.15, rotate: -10 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <Music2 className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-secondary to-accent rounded-full blur-2xl opacity-50"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                    />
+                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center shadow-2xl">
+                      <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                    </div>
                   </motion.div>
                   
-                  <div className="space-y-3">
-                    <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-                      Rhymes
+                  <div className="space-y-4">
+                    <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
+                      Rhymes & Songs
                     </h2>
-                    <p className="text-base sm:text-lg text-muted-foreground max-w-md">
+                    <p className="text-base sm:text-lg text-foreground/70 max-w-md mx-auto leading-relaxed">
                       Enjoy delightful nursery rhymes and songs that make learning fun and memorable
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <div className="px-3 py-1 bg-blue-500/10 dark:bg-blue-500/20 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300">
-                      Nursery Rhymes
-                    </div>
-                    <div className="px-3 py-1 bg-teal-500/10 dark:bg-teal-500/20 rounded-full text-sm font-medium text-teal-700 dark:text-teal-300">
-                      Songs
-                    </div>
-                    <div className="px-3 py-1 bg-green-500/10 dark:bg-green-500/20 rounded-full text-sm font-medium text-green-700 dark:text-green-300">
-                      Music
-                    </div>
-                  </div>
+                  <motion.div className="flex flex-wrap gap-3 justify-center pt-4">
+                    {["Nursery Rhymes", "Songs", "Music"].map((tag) => (
+                      <motion.div
+                        key={tag}
+                        className="px-5 py-2 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-full text-sm font-bold text-secondary dark:text-secondary/80 border border-secondary/30"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {tag}
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </div>
               </Card>
             </motion.div>
           </div>
 
-          {/* Features Section */}
+          {/* Why Choose StoryNest */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-16 sm:mt-24"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
+            className="mb-16 sm:mb-24"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
+            <h2 className="text-4xl sm:text-5xl font-bold text-center mb-12 sm:mb-16 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Why Choose StoryNest?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              <Card className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-purple-500/10 dark:bg-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h3 className="font-semibold text-lg">Rich Library</h3>
-                <p className="text-sm text-muted-foreground">
-                  Hundreds of stories across fairy tales, adventures, and educational content
-                </p>
-              </Card>
-
-              <Card className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-pink-500/10 dark:bg-pink-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <Play className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-                </div>
-                <h3 className="font-semibold text-lg">Read Aloud</h3>
-                <p className="text-sm text-muted-foreground">
-                  AI-powered voice narration brings every story to life with engaging audio
-                </p>
-              </Card>
-
-              <Card className="p-6 text-center space-y-4">
-                <div className="w-12 h-12 bg-blue-500/10 dark:bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <Music2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="font-semibold text-lg">Rewards System</h3>
-                <p className="text-sm text-muted-foreground">
-                  Motivate reading with checkpoints and rewards that make learning fun
-                </p>
-              </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {[
+                { icon: BookOpen, title: "Rich Library", desc: "Hundreds of stories across fairy tales, adventures, and educational content", color: "from-primary to-purple-500" },
+                { icon: Play, title: "Read Aloud", desc: "AI-powered voice narration brings every story to life with engaging audio", color: "from-secondary to-orange-500" },
+                { icon: Heart, title: "Safe & Fun", desc: "Parental controls and rewards that make learning enjoyable and memorable", color: "from-accent to-red-500" }
+              ].map((feature, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="p-8 text-center space-y-6 h-full border-2 border-primary/10 hover-elevate transition-all">
+                    <motion.div 
+                      className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-3xl flex items-center justify-center mx-auto shadow-lg`}
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                    >
+                      <feature.icon className="w-8 h-8 text-white" />
+                    </motion.div>
+                    <h3 className="font-bold text-2xl">{feature.title}</h3>
+                    <p className="text-foreground/70 leading-relaxed">{feature.desc}</p>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </main>
