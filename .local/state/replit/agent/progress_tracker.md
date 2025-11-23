@@ -134,10 +134,11 @@
 [x] 134. Ran drizzle-kit push to sync database schema with all required columns
 [x] 135. Workflow restarted successfully - child setup now working without errors
 [x] 136. User can now save settings and continue in child setup - FIXED ✅
-[x] 133. Reinstalled npm packages to restore tsx and all dependencies
-[x] 134. Workflow "Start application" restarted and running successfully on port 5000
-[x] 135. Verified StoryNest homepage loads perfectly with screenshot
-[x] 136. Firebase Admin initialized with service account credentials
+[x] 137. FIXED critical signup redirect bug - backend was returning 200 instead of 404 for new users
+[x] 138. Changed GET /api/parent-settings to return 404 when no settings exist
+[x] 139. New users now properly redirect to /setup instead of /dashboard
+[x] 140. Workflow restarted successfully - signup and child lock setup flow now working correctly
+[x] 141. Child lock setup no longer shows as completed when it wasn't finished - FIXED ✅
 [x] 137. Database tables created and verified - all systems operational
 [x] 138. All migration tasks completed - project fully functional in Replit environment
 [x] 139. PROJECT IMPORT FULLY COMPLETE - StoryNest ready for development and use ✅

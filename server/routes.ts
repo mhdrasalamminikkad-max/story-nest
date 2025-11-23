@@ -307,21 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(parentSettings.userId, userId));
 
       if (!settings) {
-        // Return default settings when user hasn't set up yet
-        res.json({
-          userId,
-          childName: "",
-          coins: 0,
-          isAdmin: false,
-          isBlocked: false,
-          readingTimeLimit: 30,
-          fullscreenLockEnabled: true,
-          theme: "day" as const,
-          subscriptionStatus: "trial" as const,
-          trialStartedAt: undefined,
-          trialEndsAt: undefined,
-          pinHash: ""
-        });
+        // Return 404 when user hasn't set up yet - this tells frontend to redirect to /setup
+        res.status(404).json({ error: "Settings not found" });
         return;
       }
 
