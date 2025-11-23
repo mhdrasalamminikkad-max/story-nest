@@ -5,7 +5,7 @@ import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { PDFViewer } from "@/components/PDFViewer";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle, FileText } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle, FileText, Sparkles, Music } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
@@ -242,13 +242,20 @@ export default function ChildModeReadPage() {
     duration: Math.random() * 2 + 1,
   }));
 
-  const floatingElements = Array.from({ length: 8 }, (_, i) => ({
+  const floatingElements = Array.from({ length: 20 }, (_, i) => ({
     id: i,
-    x: Math.random() * 90,
-    y: Math.random() * 80,
+    x: Math.random() * 95,
+    y: Math.random() * 85,
     delay: Math.random() * 3,
     duration: Math.random() * 8 + 12,
-    type: ['heart', 'star', 'circle'][i % 3],
+    type: ['heart', 'star', 'circle', 'sparkles'][i % 4],
+    size: Math.random() * 8 + 4,
+  }));
+
+  const celebrationParticles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: i * 0.05,
   }));
 
   if (!currentStory) {
@@ -294,70 +301,88 @@ export default function ChildModeReadPage() {
             initial={{ y: "100vh", opacity: 0 }}
             animate={{
               y: "-10vh",
-              opacity: [0, 0.7, 0.7, 0],
+              opacity: [0, 0.8, 0.8, 0],
               rotate: [0, 360],
+              scale: [0.6, 1.1, 1, 0.8],
             }}
             transition={{
               duration: elem.duration,
               repeat: Infinity,
               delay: elem.delay,
-              ease: "linear",
+              ease: "easeInOut",
             }}
           >
             {elem.type === 'heart' && (
-              <Heart className="w-6 h-6 text-pink-400 dark:text-pink-300" fill="currentColor" />
+              <Heart className="text-pink-400 dark:text-pink-300 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
             )}
             {elem.type === 'star' && (
-              <Star className="w-6 h-6 text-yellow-400 dark:text-yellow-300" fill="currentColor" />
+              <Star className="text-yellow-400 dark:text-yellow-300 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
             )}
             {elem.type === 'circle' && (
-              <Circle className="w-6 h-6 text-blue-400 dark:text-blue-300" fill="currentColor" />
+              <Circle className="text-blue-400 dark:text-blue-300 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
+            )}
+            {elem.type === 'sparkles' && (
+              <Sparkles className="text-purple-400 dark:text-purple-300 drop-shadow-lg" style={{ width: `${elem.size}px`, height: `${elem.size}px` }} fill="currentColor" />
             )}
           </motion.div>
         ))}
       </div>
 
       <div className="relative z-10 h-screen flex flex-col">
-        <header className="p-2 sm:p-3 flex justify-between items-center bg-gradient-to-r from-purple-200/30 via-pink-200/30 to-blue-200/30 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-blue-900/30 backdrop-blur-sm">
+        <motion.header 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="p-2 sm:p-3 flex justify-between items-center bg-gradient-to-r from-purple-300/40 via-pink-300/40 to-blue-300/40 dark:from-purple-800/50 dark:via-pink-800/50 dark:to-blue-800/50 backdrop-blur-md shadow-lg"
+        >
           <div className="flex gap-1.5 sm:gap-2 items-center">
             {stories.length > 1 && (
               <>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="rounded-full h-8 w-8 sm:h-9 sm:w-9"
-                  onClick={prevStory}
-                  data-testid="button-prev-story"
-                >
-                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="rounded-full h-8 w-8 sm:h-9 sm:w-9"
-                  onClick={nextStory}
-                  data-testid="button-next-story"
-                >
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-full h-9 w-9 sm:h-10 sm:w-10 bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-lg hover:shadow-xl"
+                    onClick={prevStory}
+                    data-testid="button-prev-story"
+                  >
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-full h-9 w-9 sm:h-10 sm:w-10 bg-gradient-to-r from-secondary to-accent text-white font-bold shadow-lg hover:shadow-xl"
+                    onClick={nextStory}
+                    data-testid="button-next-story"
+                  >
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </Button>
+                </motion.div>
               </>
             )}
             {settings?.childName && (
-              <span className="hidden sm:inline font-heading text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent ml-2">
-                {settings.childName}'s Story Time
-              </span>
+              <motion.span 
+                className="hidden sm:inline font-heading text-sm sm:text-base font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-300 dark:via-pink-300 dark:to-blue-300 bg-clip-text text-transparent ml-3 drop-shadow-lg"
+                animate={{ scale: [1, 1.05, 1], rotate: [0, 2, -2, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                ✨ {settings.childName}'s Story Time ✨
+              </motion.span>
             )}
           </div>
-          <Button
-            size="icon"
-            variant="destructive"
-            className="rounded-full h-8 w-8 sm:h-9 sm:w-9"
-            onClick={handleExit}
-            data-testid="button-exit-child-mode"
-          >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
-        </header>
+          <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              size="icon"
+              variant="destructive"
+              className="rounded-full h-9 w-9 sm:h-10 sm:w-10 shadow-lg hover:shadow-xl"
+              onClick={handleExit}
+              data-testid="button-exit-child-mode"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            </Button>
+          </motion.div>
+        </motion.header>
 
         <main className="flex-1 flex flex-col px-3 sm:px-4 py-4 sm:py-6 min-h-0">
           <AnimatePresence mode="wait">
@@ -369,19 +394,38 @@ export default function ChildModeReadPage() {
               transition={{ duration: 0.4 }}
               className="flex-1 flex flex-col max-w-5xl mx-auto w-full min-h-0"
             >
-              <motion.h1 
-                className="font-heading text-2xl sm:text-4xl md:text-6xl text-center mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent px-2"
-                animate={isReading ? { scale: [1, 1.05, 1] } : {}}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                data-testid="text-current-story-title"
+              <motion.div 
+                className="text-center mb-4 sm:mb-6 px-2"
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
               >
-                {currentStory.title}
-              </motion.h1>
+                <motion.h1 
+                  className="font-heading text-2xl sm:text-4xl md:text-6xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-300 dark:via-pink-300 dark:to-blue-300 bg-clip-text text-transparent drop-shadow-lg"
+                  animate={isReading ? { scale: [1, 1.08, 1], y: [0, -5, 0] } : { scale: 1, y: 0 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  data-testid="text-current-story-title"
+                >
+                  {currentStory.title}
+                </motion.h1>
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                  className="inline-block ml-2"
+                >
+                  <Sparkles className="w-6 h-6 text-yellow-400 drop-shadow-lg inline" fill="currentColor" />
+                </motion.div>
+              </motion.div>
 
-              <div className="flex-1 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto border-2 sm:border-4 border-purple-200 dark:border-purple-800 flex flex-col gap-4">
+              <motion.div 
+                className="flex-1 bg-gradient-to-br from-white/80 to-pink-50/60 dark:from-gray-900/80 dark:to-purple-900/60 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto border-4 border-gradient-to-r from-purple-300/50 to-blue-300/50 dark:from-purple-600/50 dark:to-blue-600/50 flex flex-col gap-4"
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
                 <motion.p 
                   className="text-base sm:text-xl md:text-2xl leading-relaxed text-gray-800 dark:text-gray-100 whitespace-pre-wrap font-medium"
-                  animate={isReading ? { opacity: [0.9, 1, 0.9] } : {}}
+                  animate={isReading ? { opacity: [0.85, 1, 0.85] } : {}}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   data-testid="text-current-story-content"
                 >
@@ -389,43 +433,80 @@ export default function ChildModeReadPage() {
                 </motion.p>
 
                 {currentStory.pdfUrl && (
-                  <div className="w-full mt-6">
+                  <motion.div 
+                    className="w-full mt-6 rounded-xl overflow-hidden shadow-lg border-2 border-purple-200/50 dark:border-purple-700/50"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
                     <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="500px" />
-                  </div>
+                  </motion.div>
                 )}
 
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-4 sm:mt-6">
+              <motion.div 
+                className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 mt-6 sm:mt-8"
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
                 {currentStory.imageUrl && (
-                  <motion.img
-                    src={currentStory.imageUrl}
-                    alt={currentStory.title}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
-                    animate={{ rotate: isReading ? 360 : 0 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    data-testid="img-current-story"
-                  />
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <motion.img
+                      src={currentStory.imageUrl}
+                      alt={currentStory.title}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl"
+                      animate={{ 
+                        rotate: isReading ? 360 : 0,
+                        scale: isReading ? [1, 1.1, 1] : 1,
+                      }}
+                      transition={{ 
+                        rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                      }}
+                      data-testid="img-current-story"
+                    />
+                  </motion.div>
                 )}
-                <Button
-                  className="rounded-full text-lg sm:text-2xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-2xl"
-                  onClick={isReading ? stopReading : startReading}
-                  disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
-                  data-testid="button-read-aloud"
+                <motion.div
+                  whileHover={{ scale: 1.08, boxShadow: "0 20px 40px rgba(139, 92, 246, 0.8)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
-                  {isReading ? (
-                    <>
-                      <VolumeX className="w-8 h-8 mr-3" />
-                      Stop
-                    </>
-                  ) : (
-                    <>
-                      <Volume2 className="w-8 h-8 mr-3" />
-                      {(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}
-                    </>
-                  )}
-                </Button>
-              </div>
+                  <Button
+                    className="w-full sm:w-auto rounded-full text-lg sm:text-2xl px-10 sm:px-12 py-7 sm:py-9 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white font-bold shadow-2xl border-2 border-white/30 hover:border-white/60 transition-all"
+                    onClick={isReading ? stopReading : startReading}
+                    disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
+                    data-testid="button-read-aloud"
+                  >
+                    <motion.div
+                      className="flex items-center justify-center"
+                      animate={isReading ? { scale: [1, 1.15, 1] } : {}}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
+                      {isReading ? (
+                        <>
+                          <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 2, repeat: Infinity }}>
+                            <VolumeX className="w-8 h-8 mr-3" />
+                          </motion.div>
+                          Stop Story
+                        </>
+                      ) : (
+                        <>
+                          <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                            <Volume2 className="w-8 h-8 mr-3" />
+                          </motion.div>
+                          {(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}
+                        </>
+                      )}
+                    </motion.div>
+                  </Button>
+                </motion.div>
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </main>
