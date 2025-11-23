@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 
 // Setup worker only once
 if (typeof window !== "undefined" && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "/api/pdfjs-worker";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdfjs-worker.js";
 }
 
 interface PDFViewerProps {
