@@ -3,9 +3,9 @@ import * as pdfjsLib from "pdfjs-dist";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 
-// Setup worker from node_modules
+// Setup worker from CDN
 if (typeof window !== "undefined" && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdfjs-worker-${pdfjsLib.version}.min.js`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 }
 
 interface PDFViewerProps {
