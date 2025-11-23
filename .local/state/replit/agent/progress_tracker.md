@@ -130,6 +130,10 @@
 [x] 130. Workflow restarted successfully - child lock setup fixes deployed
 [x] 131. Verified child lock setup page renders correctly at /setup route
 [x] 132. Child lock setup form now works properly - COMPLETE ✅
+[x] 133. FIXED error 500 in child setup - database was missing child_name column
+[x] 134. Ran drizzle-kit push to sync database schema with all required columns
+[x] 135. Workflow restarted successfully - child setup now working without errors
+[x] 136. User can now save settings and continue in child setup - FIXED ✅
 [x] 133. Reinstalled npm packages to restore tsx and all dependencies
 [x] 134. Workflow "Start application" restarted and running successfully on port 5000
 [x] 135. Verified StoryNest homepage loads perfectly with screenshot
