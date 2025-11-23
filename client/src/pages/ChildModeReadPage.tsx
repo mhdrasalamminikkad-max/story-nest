@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
+import { PDFViewer } from "@/components/PDFViewer";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, Star, Heart, Circle, FileText } from "lucide-react";
 import { useLocation } from "wouter";
@@ -386,6 +387,12 @@ export default function ChildModeReadPage() {
                 >
                   {currentStory.content}
                 </motion.p>
+
+                {currentStory.pdfUrl && (
+                  <div className="w-full mt-6">
+                    <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="500px" />
+                  </div>
+                )}
 
               </div>
 
