@@ -88,7 +88,7 @@ export default function ChildModeReadPage() {
         setIsFullscreen(true);
       }
     } catch (err) {
-      console.error("Failed to enter fullscreen:", err);
+      // Fullscreen request failed or denied
     }
   };
 
@@ -99,7 +99,7 @@ export default function ChildModeReadPage() {
       }
       setIsFullscreen(false);
     } catch (err) {
-      console.error("Failed to exit fullscreen:", err);
+      // Fullscreen exit failed
     }
   };
 
@@ -143,7 +143,6 @@ export default function ChildModeReadPage() {
     
     const handleError = () => {
       cleanup();
-      console.error("Error playing audio:", audio.error, "URL:", audioUrl);
       setIsReading(false);
       toast({
         title: "Playback Error",
@@ -166,7 +165,6 @@ export default function ChildModeReadPage() {
     
     audio.play().catch((error) => {
       cleanup();
-      console.error("Audio playback failed:", error?.message || error, "URL:", audioUrl);
       setIsReading(false);
       toast({
         title: "Playback Error",
