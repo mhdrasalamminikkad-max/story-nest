@@ -2121,11 +2121,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF.js worker endpoint
-  app.get("/api/pdfjs-worker", (req, res) => {
+  app.get("/api/pdfjs-worker", async (req, res) => {
     try {
-      const fs = require("fs");
-      const path = require("path");
-      const workerPath = path.join(__dirname, "../node_modules/pdfjs-dist/build/pdf.worker.min.js");
+      const path = await import("path");
+      const fs = await import("fs");
+      const workerPath = path.join(process.cwd(), "node_modules/pdfjs-dist/build/pdf.worker.min.js");
       const workerContent = fs.readFileSync(workerPath, "utf-8");
       res.setHeader("Content-Type", "application/javascript");
       res.setHeader("Cache-Control", "public, max-age=86400");
