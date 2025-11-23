@@ -2120,6 +2120,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PDF.js worker endpoint
+  app.get("/api/pdfjs-worker", (req, res) => {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const workerPath = path.join(__dirname, "../node_modules/pdfjs-dist/build/pdf.worker.min.js");
+      const workerContent = fs.readFileSync(workerPath, "utf-8");
+      res.setHeader("Content-Type", "application/javascript");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.end(workerContent);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to load PDF worker" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
