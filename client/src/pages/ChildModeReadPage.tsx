@@ -389,7 +389,7 @@ export default function ChildModeReadPage() {
                 </motion.p>
 
                 {currentStory.pdfUrl && (
-                  <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} storyId={currentStory.id} />
+                  <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="400px" />
                 )}
               </div>
 
