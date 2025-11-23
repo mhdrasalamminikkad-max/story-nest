@@ -82,21 +82,22 @@ export default function HomePage() {
         {/* Main Content */}
         <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
           {/* Hero Section */}
-          <div className="text-center mb-12 sm:mb-16 space-y-4">
+          <div className="text-center mb-12 sm:mb-20 space-y-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, type: "spring" }}
+              className="space-y-6"
             >
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
-                <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">{welcomeText}</span>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-secondary/50 px-6 py-3 rounded-full mb-8 text-white shadow-lg">
+                <BookOpen className="w-5 h-5 animate-bounce" />
+                <span className="text-base font-bold">{welcomeText}</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-4 bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Magical Bedtime Stories
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent drop-shadow-lg">
+                ✨ Magical Stories ✨
               </h1>
-              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Create wonderful memories with enchanting tales that inspire imagination and sweet dreams
+              <p className="text-xl sm:text-2xl text-foreground/80 max-w-3xl mx-auto font-semibold leading-relaxed">
+                Create wonderful memories with enchanting tales that inspire imagination and sweet dreams!
               </p>
             </motion.div>
           </div>
