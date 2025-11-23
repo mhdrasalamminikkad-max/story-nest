@@ -2054,12 +2054,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send the PDF buffer
       res.end(bufferData);
     } catch (error) {
-      console.error("Error serving PDF:", error);
       res.status(500).json({ error: "Failed to serve PDF" });
     }
   });
 
-  // Audio proxy endpoint to handle CORS issues with Firebase storage
+  // Audio proxy endpoint to serve audio (supports both base64 and URLs)
   app.get("/api/audio-proxy/:storyId", async (req, res) => {
     try {
       const { storyId } = req.params;
@@ -2073,18 +2072,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Audio not found" });
       }
 
-      const audioUrl = story.audioUrl || story.voiceoverUrl;
-      const audioResponse = await fetch(audioUrl!);
-      if (!audioResponse.ok) {
-        return res.status(404).json({ error: "Failed to fetch audio" });
+      const audioSource = story.audioUrl || story.voiceoverUrl;
+      let bufferData: Buffer;
+      let contentType = "audio/mpeg";
+
+      // Check if audio is base64 encoded (starts with data:audio/)
+      if (audioSource!.startsWith('data:audio/')) {
+        // Extract base64 data and content type
+        const matches = audioSource!.match(/^data:(audio\/[^;]+);base64,(.+)$/);
+        if (matches) {
+          contentType = matches[1];
+          bufferData = Buffer.from(matches[2], 'base64');
+        } else {
+          return res.status(400).json({ error: "Invalid audio data format" });
+        }
+      } else {
+        // Fetch the audio from URL (Firebase or external)
+        const audioResponse = await fetch(audioSource!);
+        if (!audioResponse.ok) {
+          return res.status(404).json({ error: "Failed to fetch audio" });
+        }
+        const buffer = await audioResponse.arrayBuffer();
+        bufferData = Buffer.from(buffer);
+        
+        // Try to get content type from response
+        const responseContentType = audioResponse.headers.get("content-type");
+        if (responseContentType) {
+          contentType = responseContentType;
+        }
       }
 
-      // Get the audio buffer
-      const buffer = await audioResponse.arrayBuffer();
-      const bufferData = Buffer.from(buffer);
-
       // Set proper headers for audio playback with CORS
-      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Content-Type", contentType);
       res.setHeader("Content-Length", bufferData.length);
       res.setHeader("Accept-Ranges", "bytes");
       res.setHeader("Cache-Control", "public, max-age=3600");
@@ -2095,7 +2114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send the audio buffer
       res.end(bufferData);
     } catch (error) {
-      console.error("Error serving audio:", error);
       res.status(500).json({ error: "Failed to serve audio" });
     }
   });
