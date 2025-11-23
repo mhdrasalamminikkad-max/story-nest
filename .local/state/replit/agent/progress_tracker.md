@@ -158,3 +158,8 @@
 [x] 158. Verified StoryNest homepage loading perfectly with screenshot
 [x] 159. All migration tasks completed - project fully operational in Replit environment
 [x] 160. PROJECT IMPORT COMPLETE - StoryNest ready for development and use ✅
+[x] 161. FIXED Chrome PDF blocking issue - removed X-Frame-Options header restriction
+[x] 162. Updated PDFViewer component to use <object> tag instead of <iframe>
+[x] 163. Added fallback buttons (Open PDF, Download PDF) if browser can't display PDF
+[x] 164. Workflow restarted successfully - PDF viewing now working without Chrome blocking
+[x] 165. PDF viewer now displays PDFs properly with fallback options - FIXED ✅

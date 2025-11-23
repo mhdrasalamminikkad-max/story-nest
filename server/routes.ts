@@ -2044,14 +2044,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Set proper headers for PDF display with CORS
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Length", bufferData.length);
+      res.setHeader("Content-Length", bufferData.length.toString());
       res.setHeader("Content-Disposition", "inline; filename=story.pdf");
       res.setHeader("Cache-Control", "public, max-age=3600");
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
       res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "SAMEORIGIN");
       
       // Send the PDF buffer
       res.end(bufferData);
