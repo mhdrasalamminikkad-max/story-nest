@@ -330,6 +330,21 @@ export default function HomePage() {
               ))}
             </div>
           </motion.div>
+
+          {/* Footer */}
+          <footer className="mt-20 sm:mt-28 pt-12 sm:pt-16 border-t border-foreground/10">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center pb-8 sm:pb-12"
+            >
+              <p className="text-sm text-foreground/50">
+                Powered by Caliph Life School
+              </p>
+            </motion.div>
+          </footer>
         </main>
       </div>
     </div>
