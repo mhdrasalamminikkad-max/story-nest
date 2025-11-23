@@ -641,40 +641,47 @@ export default function ParentDashboard() {
       <div className="relative z-10">
         <MobileHeader title="Dashboard" />
         
-        <header className="hidden md:block border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
-          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
+        <header className="hidden md:block border-b-2 border-primary/20 bg-gradient-to-r from-background via-primary/5 to-background dark:from-background dark:via-primary/10 dark:to-background backdrop-blur-xl sticky top-0 z-20 shadow-lg">
+          <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-5 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
             <div className="flex items-center gap-4">
-              <div 
-                className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              <motion.div 
+                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-gradient-to-r from-primary/10 to-secondary/10"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
+                whileHover={{ scale: 1.05 }}
               >
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                <h1 className="font-heading text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
+                  <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+                </motion.div>
+                <h1 className="font-heading text-lg sm:text-xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   StoryNest
                 </h1>
-              </div>
-              <div className="h-6 w-px bg-border" />
-              <h2 className="font-heading text-lg sm:text-xl text-foreground">Parent Dashboard</h2>
+              </motion.div>
+              <div className="h-7 w-1 bg-gradient-to-b from-primary to-secondary rounded-full" />
+              <h2 className="font-heading text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Parent Dashboard</h2>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {parentSettings && (
-                <Badge variant="secondary" className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm" data-testid="badge-coin-balance">
-                  <Coins className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
-                  <span className="font-semibold">{parentSettings.coins}</span>
-                  <span className="ml-0.5 sm:ml-1 text-muted-foreground hidden xs:inline">coins</span>
-                </Badge>
+                <motion.div whileHover={{ scale: 1.05 }}>
+                  <Badge className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r from-primary/20 to-secondary/20 text-primary font-bold border border-primary/40 shadow-lg" data-testid="badge-coin-balance">
+                    <Coins className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-bounce" />
+                    <span>{parentSettings.coins}</span>
+                    <span className="ml-2 text-primary/80 hidden xs:inline">coins</span>
+                  </Badge>
+                </motion.div>
               )}
               <ThemeToggle />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSignOut}
-                className="rounded-2xl"
-                data-testid="button-signout"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.1 }}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleSignOut}
+                  className="rounded-2xl border-2 border-destructive/30 hover:bg-destructive/10"
+                  data-testid="button-signout"
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </motion.div>
             </div>
           </div>
         </header>
@@ -762,102 +769,114 @@ export default function ParentDashboard() {
               </CardContent>
             </Card>
 
-            <div className="hidden md:flex gap-2 flex-wrap w-full">
-              <Button
-                onClick={() => {
-                  setEditingStory(null);
-                  setShowAddStory(true);
-                  setAudioUrl(null);
-                  setIsRecording(false);
-                  form.reset({
-                    title: "",
-                    content: "",
-                    summary: "",
-                    imageUrl: teddyImage,
-                    language: "english" as const,
-                    category: "educational" as const,
-                    storyType: "lesson" as const,
-                    voiceoverUrl: undefined,
-                  });
-                }}
-                className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-add-story-desktop"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Submit Story for Review
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setLocation("/checkpoints")}
-                className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-checkpoints-desktop"
-              >
-                <Target className="w-4 h-4 mr-2" />
-                Checkpoints & Rewards
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setLocation("/pricing")}
-                className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-view-plans-desktop"
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                View Plans
-              </Button>
-              <Button
-                onClick={() => setLocation("/child-mode")}
-                className="rounded-2xl text-sm sm:text-base flex-1 sm:flex-initial"
-                data-testid="button-child-mode-desktop"
-              >
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Enter Child Mode
-              </Button>
+            <div className="hidden md:flex gap-3 flex-wrap w-full">
+              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+                <Button
+                  onClick={() => {
+                    setEditingStory(null);
+                    setShowAddStory(true);
+                    setAudioUrl(null);
+                    setIsRecording(false);
+                    form.reset({
+                      title: "",
+                      content: "",
+                      summary: "",
+                      imageUrl: teddyImage,
+                      language: "english" as const,
+                      category: "educational" as const,
+                      storyType: "lesson" as const,
+                      voiceoverUrl: undefined,
+                    });
+                  }}
+                  className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-primary to-secondary hover:shadow-xl transition-all font-bold"
+                  data-testid="button-add-story-desktop"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Submit Story for Review
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+                <Button
+                  variant="outline"
+                  onClick={() => setLocation("/checkpoints")}
+                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-primary/40 font-semibold"
+                  data-testid="button-checkpoints-desktop"
+                >
+                  <Target className="w-5 h-5 mr-2" />
+                  Checkpoints & Rewards
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+                <Button
+                  variant="outline"
+                  onClick={() => setLocation("/pricing")}
+                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-secondary/40 font-semibold"
+                  data-testid="button-view-plans-desktop"
+                >
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  View Plans
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+                <Button
+                  onClick={() => setLocation("/child-mode")}
+                  className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
+                  data-testid="button-child-mode-desktop"
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Enter Child Mode
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
 
           <TrialBanner />
 
-          <Tabs defaultValue="published" className="space-y-4 sm:space-y-6">
-            <TabsList className="w-full sm:w-auto" data-testid="tabs-parent-dashboard">
-              <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm" data-testid="tab-published">
-                Published Stories
-              </TabsTrigger>
-              <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm" data-testid="tab-your-stories">
-                Your Stories
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm" data-testid="tab-settings">
-                <SettingsIcon className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Settings</span>
-              </TabsTrigger>
-            </TabsList>
+          <Tabs defaultValue="published" className="space-y-6 sm:space-y-8">
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <TabsList className="w-full sm:w-auto bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-2xl p-1 shadow-lg" data-testid="tabs-parent-dashboard">
+                <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-published">
+                  Published Stories
+                </TabsTrigger>
+                <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-your-stories">
+                  Your Stories
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-settings">
+                  <SettingsIcon className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Settings</span>
+                </TabsTrigger>
+              </TabsList>
+            </motion.div>
 
             <TabsContent value="published">
-              <div className="mb-4 space-y-3">
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    variant={filterBookmarked ? "default" : "outline"}
-                    onClick={() => setFilterBookmarked(!filterBookmarked)}
-                    className="rounded-2xl"
-                    data-testid="button-filter-bookmarks"
-                  >
-                    <BookmarkCheck className="w-4 h-4 mr-2" />
-                    {filterBookmarked ? "Show All" : "Bookmarked Only"}
-                  </Button>
-                </div>
+              <motion.div className="mb-6 space-y-4">
+                <motion.div className="flex gap-3 flex-wrap">
+                  <motion.div whileHover={{ scale: 1.05 }}>
+                    <Button
+                      variant={filterBookmarked ? "default" : "outline"}
+                      onClick={() => setFilterBookmarked(!filterBookmarked)}
+                      className={`rounded-2xl font-bold border-2 ${filterBookmarked ? "bg-gradient-to-r from-primary to-secondary" : "border-primary/40"}`}
+                      data-testid="button-filter-bookmarks"
+                    >
+                      <BookmarkCheck className="w-5 h-5 mr-2" />
+                      {filterBookmarked ? "Show All" : "Bookmarked Only"}
+                    </Button>
+                  </motion.div>
+                </motion.div>
                 
                 <div className="flex gap-3 flex-wrap">
-                  <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <motion.div className="relative flex-1 min-w-[200px]" whileHover={{ scale: 1.02 }}>
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary" />
                     <Input
-                      placeholder="Search stories..."
+                      placeholder="🔍 Search stories..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded-2xl pl-10"
+                      className="rounded-2xl pl-12 border-2 border-primary/30 font-semibold focus:border-primary focus:shadow-lg"
                       data-testid="input-search-stories"
                     />
-                  </div>
+                  </motion.div>
                   <Select value={languageFilter} onValueChange={setLanguageFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-language-filter">
+                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-primary/30 font-semibold" data-testid="select-language-filter">
                       <SelectValue placeholder="Filter by language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -867,10 +886,10 @@ export default function ParentDashboard() {
                     </SelectContent>
                   </Select>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-category-filter">
+                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-secondary/30 font-semibold" data-testid="select-category-filter">
                       <SelectValue placeholder="Filter by category" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl">
                       <SelectItem value="all">All Categories</SelectItem>
                       <SelectItem value="islamic">Islamic</SelectItem>
                       <SelectItem value="history">History</SelectItem>
@@ -881,7 +900,7 @@ export default function ParentDashboard() {
                     </SelectContent>
                   </Select>
                   <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px]" data-testid="select-story-type-filter">
+                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-accent/30 font-semibold" data-testid="select-story-type-filter">
                       <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -898,21 +917,23 @@ export default function ParentDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
+              </motion.div>
               {isLoading ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">Loading stories...</p>
                 </div>
               ) : displayedStories.length === 0 ? (
-                <Card className="rounded-3xl border-2 text-center py-12">
-                  <CardContent className="pt-6">
-                    <p className="text-muted-foreground">
-                      {filterBookmarked ? "No bookmarked stories yet" : "No published stories yet"}
-                    </p>
-                  </CardContent>
-                </Card>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 text-center py-16 shadow-lg">
+                    <CardContent className="pt-8">
+                      <p className="text-xl font-semibold text-foreground">
+                        {filterBookmarked ? "No bookmarked stories yet" : "No published stories yet"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {displayedStories.map((story) => (
                     <StoryCard
                       key={story.id}
