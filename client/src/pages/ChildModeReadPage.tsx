@@ -390,10 +390,11 @@ export default function ChildModeReadPage() {
                 {currentStory.pdfUrl && (
                   <div className="w-full bg-white dark:bg-gray-700 rounded-lg overflow-hidden" style={{ height: "400px" }}>
                     <iframe
-                      src={`/api/pdf-proxy/${currentStory.id}#toolbar=0&navpanes=0&scrollbar=0`}
+                      src={`https://docs.google.com/gvjs?id=${btoa(`/api/pdf-proxy/${currentStory.id}`)}&embedded=true`}
                       className="w-full h-full border-0"
                       title="Story PDF"
                       data-testid="pdf-viewer"
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
                     />
                   </div>
                 )}
