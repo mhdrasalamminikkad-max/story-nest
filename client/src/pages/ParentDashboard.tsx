@@ -557,11 +557,14 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = async (data: any) => {
-    // Check if voice recording is present
-    if (!voiceoverBase64 && !data.voiceoverUrl) {
+    // Check if either voice recording or audio file is present
+    const hasVoiceover = voiceoverBase64 || data.voiceoverUrl;
+    const hasAudio = audioFile || data.audioUrl;
+    
+    if (!hasVoiceover && !hasAudio) {
       toast({
-        title: "Voice Recording Required",
-        description: "Please record your voice narration for this story before submitting",
+        title: "Audio Required",
+        description: "Please record your voice OR upload an audio file before submitting",
         variant: "destructive",
         duration: 4000,
       });

@@ -33,14 +33,20 @@ export const insertStorySchema = storySchema.omit({
   reviewedAt: true,
   status: true
 }).extend({
-  voiceoverUrl: z.string().min(1, "Voice recording is required - please record your story"),
+  voiceoverUrl: z.string().optional(),
   pdfUrl: z.string().optional(),
   audioUrl: z.string().optional(),
   audience: z.enum(["parent", "child", "both"], { required_error: "Please select an audience" }),
   language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"], { required_error: "Please select a category" }),
   storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"], { required_error: "Please select a story type" }),
-});
+}).refine(
+  (data) => data.voiceoverUrl || data.audioUrl,
+  {
+    message: "Please record your voice OR upload an audio file before submitting",
+    path: ["voiceoverUrl"],
+  }
+);
 
 export const reviewStorySchema = z.object({
   action: z.enum(["approve", "reject"]),
