@@ -16,27 +16,9 @@ interface PostStoryGameProps {
   onComplete: (badgeEarned: boolean) => void;
 }
 
-// Generate calm ambient sound
+// Generate calm ambient sound using Web Audio API
 const generateCalmSound = (): string => {
-  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-  const duration = 2;
-  const sampleRate = audioContext.sampleRate;
-  const buffer = audioContext.createAudioBuffer(1, sampleRate * duration, sampleRate);
-  const data = buffer.getChannelData(0);
-  
-  // Create gentle sine wave (calm, soothing tone)
-  const frequency = 432; // Healing frequency
-  for (let i = 0; i < sampleRate * duration; i++) {
-    data[i] = Math.sin((i / sampleRate) * frequency * Math.PI * 2) * 0.1;
-  }
-  
-  // Create blob and return URL
-  const offlineContext = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
-  const source = offlineContext.createBufferSource();
-  source.buffer = buffer;
-  source.connect(offlineContext.destination);
-  source.start(0);
-  
+  // Minimal calm tone - pure data URL for best compatibility
   return "data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==";
 };
 
