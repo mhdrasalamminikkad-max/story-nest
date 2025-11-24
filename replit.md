@@ -66,6 +66,17 @@ StoryNest is a fully responsive web application built with React, Express, and F
 - Tracks all processed payments to prevent replay attacks
 - Ensures idempotency - each payment can only be credited once
 
+### Game Sessions
+- id, userId, storyId, gameType, score, passed, createdAt
+- Tracks post-story game completions and performance
+- Game types: quiz, wordMatching, memory, drawing
+- Passing score: 60% or higher
+
+### Badges
+- id, userId, storyId, gameType, badgeName, earnedAt, createdAt
+- Achievement badges awarded for passing post-story games
+- Used in leaderboard rankings
+
 ## User Journey
 
 1. **Home Page** → Animated hero with floating stars and clouds
@@ -83,6 +94,11 @@ StoryNest is a fully responsive web application built with React, Express, and F
 - **Responsive Design**: Mobile-first with rounded-3xl cards and playful UI
 - **Secret Admin Access**: Type "786786" and press Enter from anywhere to access admin panel
 - **Story Review Workflow**: Parents submit stories for admin approval before publication
+- **Post-Story Games**: 4 interactive game types (Quiz, Word Matching, Memory, Drawing Puzzle)
+  - Optional for parents, compulsory for children (before changing stories)
+  - 60% passing score to earn badges
+  - Age-appropriate difficulty based on story content
+- **Leaderboard System**: Hall of Fame showing top children (by badges) and top parents (by published stories)
 
 ## Trial & Subscription System
 
@@ -140,7 +156,31 @@ StoryNest is a fully responsive web application built with React, Express, and F
 
 ## Recent Changes
 
-### November 16, 2025 (Latest)
+### November 24, 2025 (Latest)
+- **Leaderboard System** (Production-Ready ✅):
+  - Created Hall of Fame page showing top achievers
+  - Two leaderboard tabs: Top Children (by badges earned) and Top Parents (by published stories)
+  - API routes aggregate and rank users with proper SQL joins and grouping
+  - Beautiful UI with trophy icons, medals, and rank indicators (gold, silver, bronze)
+  - Trophy button added to Parent Dashboard header for easy access
+  - Parent rankings display as "Parent of [childName]" for clarity
+  - **Architect approved**: All features working correctly, no security issues
+
+- **Post-Story Game System** (Structurally Complete):
+  - Implemented 4 interactive game types:
+    1. Quiz Game - Multiple choice questions about the story
+    2. Word Matching - Match characters to their traits
+    3. Memory Game - Match story-related cards
+    4. Drawing Puzzle - Arrange puzzle pieces
+  - Created GameModal component with full API integration
+  - Game sessions tracked in database with scores and pass/fail status
+  - Badge system awards achievements for passing games (60%+ score)
+  - BadgesDisplay component shows earned badges beautifully
+  - API routes for game submission and badge awarding with proper authentication
+  - Age-appropriate difficulty based on story content
+  - Note: Games not yet integrated into ChildModeReadPage story flow - awaiting user guidance on trigger points
+
+### November 16, 2025
 - **Trial & Subscription System** (Production-Ready ✅):
   - Implemented 7-day free trial with auto-activation on user setup
   - Created coin-based subscription system with Razorpay payment integration

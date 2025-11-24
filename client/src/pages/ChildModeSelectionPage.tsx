@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +13,10 @@ export default function ChildModeSelectionPage() {
   const [, setLocation] = useLocation();
   const [showPINDialog, setShowPINDialog] = useState(false);
 
+  // Check if a story was pre-selected from parent dashboard
+  const searchParams = new URLSearchParams(window.location.search);
+  const preSelectedStoryId = searchParams.get("story");
+
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
   });
@@ -20,6 +24,17 @@ export default function ChildModeSelectionPage() {
   const { data: settings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
   });
+
+  // Auto-navigate to story if pre-selected AND it's a child/both story
+  useEffect(() => {
+    if (preSelectedStoryId && stories.length > 0) {
+      const story = stories.find(s => s.id === preSelectedStoryId);
+      // Only auto-navigate if story exists and is intended for children
+      if (story && (story.audience === "child" || story.audience === "both")) {
+        setLocation(`/child-mode-read?story=${story.id}`);
+      }
+    }
+  }, [preSelectedStoryId, stories, setLocation]);
 
   const handleVerifyPIN = async (pin: string): Promise<boolean> => {
     try {

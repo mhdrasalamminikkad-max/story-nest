@@ -964,7 +964,16 @@ export default function ParentDashboard() {
                     <StoryCard
                       key={story.id}
                       story={story}
-                      onRead={(story) => setLocation(`/child-mode?story=${story.id}`)}
+                      onRead={(story) => {
+                        // Smart routing based on audience
+                        if (story.audience === "parent") {
+                          // Parent-only stories go directly to read page
+                          setLocation(`/read-story?story=${story.id}`);
+                        } else {
+                          // Child or both stories go to child mode
+                          setLocation(`/child-mode?story=${story.id}`);
+                        }
+                      }}
                       onToggleBookmark={(story) => toggleBookmarkMutation.mutate(story.id)}
                     />
                   ))}
@@ -1044,7 +1053,14 @@ export default function ParentDashboard() {
                           )}
                           {story.status === "published" && (
                             <Button
-                              onClick={() => setLocation(`/child-mode?story=${story.id}`)}
+                              onClick={() => {
+                                // Smart routing based on audience
+                                if (story.audience === "parent") {
+                                  setLocation(`/read-story?story=${story.id}`);
+                                } else {
+                                  setLocation(`/child-mode?story=${story.id}`);
+                                }
+                              }}
                               className="rounded-2xl"
                               data-testid={`button-read-${story.id}`}
                             >
