@@ -557,6 +557,17 @@ export default function ParentDashboard() {
   };
 
   const handleFormSubmit = async (data: any) => {
+    // Check if voice recording is present
+    if (!voiceoverBase64 && !data.voiceoverUrl) {
+      toast({
+        title: "Voice Recording Required",
+        description: "Please record your voice narration for this story before submitting",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    
     // Wait for uploads to complete if they're in progress
     // Show loading indicator on button but don't block with toast
     if (pdfUploading || audioUploading) {

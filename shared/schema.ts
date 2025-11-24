@@ -33,7 +33,7 @@ export const insertStorySchema = storySchema.omit({
   reviewedAt: true,
   status: true
 }).extend({
-  voiceoverUrl: z.string().optional(),
+  voiceoverUrl: z.string().min(1, "Voice recording is required - please record your story"),
   pdfUrl: z.string().optional(),
   audioUrl: z.string().optional(),
   audience: z.enum(["parent", "child", "both"], { required_error: "Please select an audience" }),
