@@ -15,11 +15,13 @@ interface PDFViewerProps {
 
 export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [pdf, setPdf] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scale, setScale] = useState(1.5);
 
   useEffect(() => {
     let isMounted = true;
@@ -68,6 +70,22 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     };
   }, [pdfUrl]);
 
+  // Calculate scale based on container width
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        // Calculate scale so PDF fits nicely in container
+        const calculatedScale = Math.max(1, containerWidth / 400); // Base width 400px, scale up if larger
+        setScale(calculatedScale);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     if (!pdf || !canvasRef.current) return;
 
@@ -80,7 +98,7 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
         const context = canvas.getContext('2d');
         if (!context) return;
 
-        const viewport = page.getViewport({ scale: 1.5 });
+        const viewport = page.getViewport({ scale });
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
@@ -97,7 +115,7 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     };
 
     renderPage();
-  }, [pdf, currentPage]);
+  }, [pdf, currentPage, scale]);
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
@@ -129,7 +147,7 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
   }
 
   return (
-    <div className="w-full flex flex-col gap-4" data-testid="pdf-viewer">
+    <div ref={containerRef} className="w-full flex flex-col gap-4" data-testid="pdf-viewer">
       <div className="w-full overflow-auto bg-muted/30 rounded-lg flex items-center justify-center p-4" style={{ height }}>
         <canvas ref={canvasRef} className="max-w-full h-auto" />
       </div>
