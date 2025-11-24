@@ -677,10 +677,10 @@ export default function ParentDashboard() {
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {parentSettings && (
                 <motion.div whileHover={{ scale: 1.05 }}>
-                  <Badge className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r from-primary/20 to-secondary/20 text-primary font-bold border border-primary/40 shadow-lg" data-testid="badge-coin-balance">
+                  <Badge className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-bold border-2 border-yellow-400 dark:border-yellow-700 shadow-lg" data-testid="badge-coin-balance">
                     <Coins className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-bounce" />
                     <span>{parentSettings.coins}</span>
-                    <span className="ml-2 text-primary/80 hidden xs:inline">coins</span>
+                    <span className="ml-2 hidden xs:inline">coins</span>
                   </Badge>
                 </motion.div>
               )}
@@ -708,10 +708,10 @@ export default function ParentDashboard() {
           >
             <div className="md:hidden flex items-center gap-2 mb-4 px-1">
               {parentSettings && (
-                <Badge variant="secondary" className="px-3 py-1.5 text-sm" data-testid="badge-coin-balance">
+                <Badge className="px-3 py-1.5 text-sm bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-semibold border-2 border-yellow-400 dark:border-yellow-700" data-testid="badge-coin-balance">
                   <Coins className="w-4 h-4 mr-1.5" />
-                  <span className="font-semibold">{parentSettings.coins}</span>
-                  <span className="ml-1 text-muted-foreground">coins</span>
+                  <span>{parentSettings.coins}</span>
+                  <span className="ml-1">coins</span>
                 </Badge>
               )}
               <Button
