@@ -5,7 +5,6 @@ import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { PDFViewer } from "@/components/PDFViewer";
 import { PostStoryGame } from "@/components/PostStoryGame";
-import { createCalmAudio } from "@/lib/calmSound";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useLocation } from "wouter";
@@ -25,7 +24,6 @@ export default function ChildModeReadPage() {
   const [newlyEarnedRewards, setNewlyEarnedRewards] = useState<string[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const calmAudioRef = useRef<HTMLAudioElement | null>(null);
   const handlersRef = useRef<{
     ended?: () => void;
     error?: () => void;
@@ -75,20 +73,9 @@ export default function ChildModeReadPage() {
       enterFullscreen();
     }
 
-    // Start calm background audio when entering child mode
-    if (!calmAudioRef.current) {
-      calmAudioRef.current = createCalmAudio();
-    }
-    
-    calmAudioRef.current?.play().catch(() => console.log("Calm audio play failed"));
-
     return () => {
       if (isReading) {
         stopReading();
-      }
-      if (calmAudioRef.current) {
-        calmAudioRef.current.pause();
-        calmAudioRef.current.currentTime = 0;
       }
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
