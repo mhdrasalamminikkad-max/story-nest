@@ -218,3 +218,8 @@ npm run dev  # Starts both Express server (5000) and Vite dev server
 - Firebase Admin SDK initializes with projectId from environment
 - For production, add service account credentials
 - All API routes require authentication except /api/stories/preview
+- **PERMANENT: PDF.js library configuration** - Uses local worker file from pdfjs-dist package (not CDN). Do NOT change this unless explicitly requested by user
+
+## User Preferences
+
+- PDF.js library implementation is PERMANENT - do not modify without explicit user request
