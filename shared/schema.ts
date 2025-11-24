@@ -317,3 +317,26 @@ export const gameResultSchema = z.object({
 });
 
 export type GameResult = z.infer<typeof gameResultSchema>;
+
+// Game session schema
+export const gameSessionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  storyId: z.string(),
+  gameType: z.enum(["quiz", "wordMatching", "memory", "drawing"]),
+  score: z.number(),
+  totalScore: z.number(),
+  passed: z.boolean(),
+  playedAt: z.number(),
+  createdAt: z.number(),
+});
+
+export const insertGameSessionSchema = gameSessionSchema.omit({
+  id: true,
+  userId: true,
+  playedAt: true,
+  createdAt: true,
+});
+
+export type GameSession = z.infer<typeof gameSessionSchema>;
+export type InsertGameSession = z.infer<typeof insertGameSessionSchema>;

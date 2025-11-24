@@ -154,3 +154,15 @@ export const badges = pgTable("badges", {
   earnedAt: timestamp("earned_at").notNull().default(sql`now()`),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
+
+export const gameSessions = pgTable("game_sessions", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  storyId: varchar("story_id").notNull(),
+  gameType: varchar("game_type", { length: 20 }).notNull(),
+  score: integer("score").notNull(),
+  totalScore: integer("total_score").notNull(),
+  passed: boolean("passed").notNull().default(false),
+  playedAt: timestamp("played_at").notNull().default(sql`now()`),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
