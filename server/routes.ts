@@ -7,7 +7,7 @@ import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, re
 import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
 import { db } from "./db";
-import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions } from "./db/schema";
+import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions } from "./db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -2116,6 +2116,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.end(bufferData);
     } catch (error) {
       res.status(500).json({ error: "Failed to serve audio" });
+    }
+  });
+
+  // Game and Badge endpoints
+  app.post("/api/games/submit", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const { storyId, gameType, score, totalScore } = req.body;
+      const userId = req.userId!;
+
+      // Save game session
+      const gameSessionId = crypto.randomUUID();
+      const passed = score >= (totalScore * 0.6); // 60% pass rate
+
+      await db.insert(gameSessions).values({
+        id: gameSessionId,
+        userId,
+        storyId,
+        gameType,
+        score,
+        totalScore,
+        passed,
+      });
+
+      // Award badge if passed
+      let badgeId = null;
+      if (passed) {
+        badgeId = crypto.randomUUID();
+        const badgeNames = {
+          quiz: "Quiz Master",
+          wordMatching: "Word Wizard",
+          memory: "Memory Champion",
+          drawing: "Creative Artist",
+        };
+
+        await db.insert(badges).values({
+          id: badgeId,
+          userId,
+          storyId,
+          badgeName: badgeNames[gameType as keyof typeof badgeNames],
+          badgeIcon: gameType,
+          gameType,
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        passed,
+        badgeId,
+      });
+    } catch (error) {
+      console.error("Error submitting game:", error);
+      res.status(500).json({ error: "Failed to submit game" });
+    }
+  });
+
+  app.get("/api/badges", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+
+      const userBadges = await db
+        .select()
+        .from(badges)
+        .where(eq(badges.userId, userId))
+        .orderBy(desc(badges.earnedAt));
+
+      const badgesWithTimestamp = userBadges.map(badge => ({
+        ...badge,
+        earnedAt: badge.earnedAt.getTime(),
+        createdAt: badge.createdAt.getTime(),
+      }));
+
+      res.json(badgesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      res.status(500).json({ error: "Failed to fetch badges" });
+    }
+  });
+
+  app.get("/api/badges/story/:storyId", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { storyId } = req.params;
+
+      const storyBadges = await db
+        .select()
+        .from(badges)
+        .where(
+          and(
+            eq(badges.userId, userId),
+            eq(badges.storyId, storyId)
+          )
+        );
+
+      const badgesWithTimestamp = storyBadges.map(badge => ({
+        ...badge,
+        earnedAt: badge.earnedAt.getTime(),
+        createdAt: badge.createdAt.getTime(),
+      }));
+
+      res.json(badgesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching story badges:", error);
+      res.status(500).json({ error: "Failed to fetch story badges" });
     }
   });
 
