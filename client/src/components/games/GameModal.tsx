@@ -265,9 +265,6 @@ export function GameModal({
         )}
       </DialogContent>
 
-      <audio autoPlay loop className="hidden">
-        <source src="/calm-music.mp3" type="audio/mpeg" />
-      </audio>
     </Dialog>
   );
 }
