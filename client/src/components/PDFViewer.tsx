@@ -28,23 +28,29 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
         setLoading(true);
         setError(null);
 
+        console.log('Loading PDF from:', pdfUrl);
+
         loadingTask = pdfjsLib.getDocument({
           url: pdfUrl,
           withCredentials: false,
           isEvalSupported: false,
+          cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
         });
         
         const pdfDoc = await loadingTask.promise;
 
         if (isMounted) {
+          console.log('PDF loaded successfully, pages:', pdfDoc.numPages);
           setPdf(pdfDoc);
           setTotalPages(pdfDoc.numPages);
           setLoading(false);
         }
       } catch (err: any) {
         if (isMounted) {
-          console.error('Error loading PDF:', err);
-          setError('Unable to load PDF');
+          const errorMsg = err?.message || JSON.stringify(err) || 'Unknown error';
+          console.error('Error loading PDF - Full Error:', err);
+          console.error('Error Message:', errorMsg);
+          setError(`Unable to load PDF: ${errorMsg}`);
           setLoading(false);
         }
       }
