@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon, Lock } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon, Lock, Trophy } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -685,6 +685,18 @@ export default function ParentDashboard() {
                 </motion.div>
               )}
               <ThemeToggle />
+              <motion.div whileHover={{ scale: 1.1 }}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setLocation("/leaderboard")}
+                  className="rounded-2xl border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                  data-testid="button-leaderboard"
+                  title="Leaderboard"
+                >
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                </Button>
+              </motion.div>
               <motion.div whileHover={{ scale: 1.1 }}>
                 <Button
                   variant="outline"

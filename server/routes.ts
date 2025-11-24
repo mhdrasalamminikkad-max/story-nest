@@ -2222,6 +2222,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Leaderboard endpoints
+  app.get("/api/leaderboard/children", async (req, res) => {
+    try {
+      // Get top children by badge count
+      const topChildren = await db
+        .select({
+          childName: parentSettings.childName,
+          userId: badges.userId,
+          badgeCount: sql<number>`count(${badges.id})`,
+        })
+        .from(badges)
+        .innerJoin(parentSettings, eq(badges.userId, parentSettings.userId))
+        .groupBy(badges.userId, parentSettings.childName)
+        .orderBy(desc(sql`count(${badges.id})`))
+        .limit(10);
+
+      res.json(topChildren);
+    } catch (error) {
+      console.error("Error fetching children leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch children leaderboard" });
+    }
+  });
+
+  app.get("/api/leaderboard/parents", async (req, res) => {
+    try {
+      // Get top parents by published stories count
+      const topParents = await db
+        .select({
+          childName: parentSettings.childName,
+          userId: stories.userId,
+          storyCount: sql<number>`count(${stories.id})`,
+        })
+        .from(stories)
+        .innerJoin(parentSettings, eq(stories.userId, parentSettings.userId))
+        .where(eq(stories.status, "published"))
+        .groupBy(stories.userId, parentSettings.childName)
+        .orderBy(desc(sql`count(${stories.id})`))
+        .limit(10);
+
+      res.json(topParents);
+    } catch (error) {
+      console.error("Error fetching parents leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch parents leaderboard" });
+    }
+  });
+
 
   const httpServer = createServer(app);
 

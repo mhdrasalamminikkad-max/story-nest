@@ -22,6 +22,7 @@ import CheckpointsPage from "@/pages/CheckpointsPage";
 import StoryExplorer from "@/pages/StoryExplorer";
 import SettingsPage from "@/pages/SettingsPage";
 import RhymesPage from "@/pages/RhymesPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 import NotFound from "@/pages/not-found";
 import {
   Dialog,
@@ -103,6 +104,7 @@ function Router() {
         <Route path="/library" component={LibraryPage} />
         <Route path="/checkpoints" component={CheckpointsPage} />
         <Route path="/explore-stories" component={StoryExplorer} />
+        <Route path="/leaderboard" component={LeaderboardPage} />
         <Route path="/rhymes" component={RhymesPage} />
         <Route component={NotFound} />
       </Switch>
