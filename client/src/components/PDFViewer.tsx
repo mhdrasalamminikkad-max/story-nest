@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Disable worker to use fallback mode (works without external worker script)
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+// Set the worker source to CDN for proper PDF rendering
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 interface PDFViewerProps {
   pdfUrl: string;
