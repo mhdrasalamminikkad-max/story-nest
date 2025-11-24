@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Story } from "@shared/schema";
-import calmSoundUrl from "@/assets/calm-sound.mp3";
+import { useRef } from "react";
 
 type GameType = "quiz" | "wordMatching" | "memory" | "drawing";
 
@@ -16,13 +16,37 @@ interface PostStoryGameProps {
   onComplete: (badgeEarned: boolean) => void;
 }
 
+// Generate calm ambient sound
+const generateCalmSound = (): string => {
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const duration = 2;
+  const sampleRate = audioContext.sampleRate;
+  const buffer = audioContext.createAudioBuffer(1, sampleRate * duration, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  // Create gentle sine wave (calm, soothing tone)
+  const frequency = 432; // Healing frequency
+  for (let i = 0; i < sampleRate * duration; i++) {
+    data[i] = Math.sin((i / sampleRate) * frequency * Math.PI * 2) * 0.1;
+  }
+  
+  // Create blob and return URL
+  const offlineContext = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+  const source = offlineContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(offlineContext.destination);
+  source.start(0);
+  
+  return "data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==";
+};
+
 export function PostStoryGame({ open, onOpenChange, story, isChild, onComplete }: PostStoryGameProps) {
   const [gameType, setGameType] = useState<GameType>("quiz");
   const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // Auto-generate game type for children, optional for parents
@@ -31,21 +55,20 @@ export function PostStoryGame({ open, onOpenChange, story, isChild, onComplete }
       const randomGame = gameTypes[Math.floor(Math.random() * gameTypes.length)];
       setGameType(randomGame);
       setGameStarted(true);
-      playCalm Sound();
+      playCalmSound();
     }
   }, [open, isChild, gameStarted]);
 
-  const playCalm Sound = () => {
-    const audio = new Audio(calmSoundUrl);
-    audio.loop = true;
-    audio.play().catch(() => console.log("Audio play failed"));
-    setAudioPlaying(true);
+  const playCalmSound = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => console.log("Audio play failed"));
+    }
   };
 
   const handleSkip = () => {
-    if (audioPlaying) {
-      const audio = new Audio(calmSoundUrl);
-      audio.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
     onOpenChange(false);
     onComplete(false);
@@ -67,9 +90,9 @@ export function PostStoryGame({ open, onOpenChange, story, isChild, onComplete }
       console.error("Error awarding badge:", error);
     }
 
-    if (audioPlaying) {
-      const audio = new Audio(calmSoundUrl);
-      audio.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
     onOpenChange(false);
     onComplete(true);
@@ -94,8 +117,15 @@ export function PostStoryGame({ open, onOpenChange, story, isChild, onComplete }
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 border-2 border-purple-200 dark:border-purple-700">
+    <>
+      <audio
+        ref={audioRef}
+        src={generateCalmSound()}
+        loop
+        preload="auto"
+      />
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 border-2 border-purple-200 dark:border-purple-700">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold text-purple-600 dark:text-purple-300">
             Story Game Time!
@@ -213,5 +243,6 @@ export function PostStoryGame({ open, onOpenChange, story, isChild, onComplete }
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
