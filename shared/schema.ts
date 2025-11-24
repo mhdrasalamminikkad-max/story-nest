@@ -293,3 +293,27 @@ export const insertReadingSessionSchema = readingSessionSchema.omit({
 
 export type ReadingSession = z.infer<typeof readingSessionSchema>;
 export type InsertReadingSession = z.infer<typeof insertReadingSessionSchema>;
+
+// Badge schema
+export const badgeSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  badgeName: z.string(),
+  badgeIcon: z.string(),
+  earnedAt: z.number(),
+  gameType: z.enum(["quiz", "wordMatching", "memory", "drawing"]),
+  storyId: z.string(),
+  createdAt: z.number(),
+});
+
+export type Badge = z.infer<typeof badgeSchema>;
+
+// Game result schema
+export const gameResultSchema = z.object({
+  storyId: z.string(),
+  gameType: z.enum(["quiz", "wordMatching", "memory", "drawing"]),
+  score: z.number(),
+  totalScore: z.number(),
+});
+
+export type GameResult = z.infer<typeof gameResultSchema>;

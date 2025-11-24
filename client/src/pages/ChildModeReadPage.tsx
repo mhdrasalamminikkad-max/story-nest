@@ -4,6 +4,7 @@ import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { PDFViewer } from "@/components/PDFViewer";
+import { PostStoryGame } from "@/components/PostStoryGame";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useLocation } from "wouter";

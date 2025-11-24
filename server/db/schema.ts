@@ -143,3 +143,14 @@ export const readingSessions = pgTable("reading_sessions", {
   durationMinutes: integer("duration_minutes").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
+
+export const badges = pgTable("badges", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  badgeName: text("badge_name").notNull(),
+  badgeIcon: varchar("badge_icon", { length: 20 }).notNull(),
+  gameType: varchar("game_type", { length: 20 }).notNull(),
+  storyId: varchar("story_id").notNull(),
+  earnedAt: timestamp("earned_at").notNull().default(sql`now()`),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
