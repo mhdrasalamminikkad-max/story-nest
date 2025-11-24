@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import * as pdfjsLib from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 
-// Set the worker source to the correct version
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+// Set the worker source to match the installed version (5.4.394)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.394/pdf.worker.min.js';
 
 interface PDFViewerProps {
   pdfUrl: string;
