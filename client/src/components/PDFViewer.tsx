@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set the worker source to match the installed version (5.4.394)
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.394/pdf.worker.min.js';
+// Configure worker - use multiple fallback sources
+if (typeof window !== 'undefined') {
+  // Try jsdelivr CDN (more reliable)
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.394/build/pdf.worker.min.js';
+}
 
 interface PDFViewerProps {
   pdfUrl: string;
