@@ -2,7 +2,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { BookOpen, LogIn, User, Play, Music2, Sparkles, Heart } from "lucide-react";
+import { BookOpen, User, Play, Music2, Sparkles, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -50,7 +50,7 @@ export default function HomePage() {
 
               <div className="flex items-center gap-2 sm:gap-3">
                 <ThemeToggle />
-                {user ? (
+                {user && (
                   <>
                     <Button
                       variant="outline"
@@ -70,15 +70,6 @@ export default function HomePage() {
                       <span className="hidden sm:inline">Child Mode</span>
                     </Button>
                   </>
-                ) : (
-                  <Button
-                    onClick={() => setLocation("/auth")}
-                    className="rounded-2xl font-semibold bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all"
-                    data-testid="button-sign-in"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
                 )}
               </div>
             </div>
