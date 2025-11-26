@@ -45,77 +45,273 @@ const gameOptions: GameOption[] = [
   { id: "spotdiff", title: "Spot Difference", icon: <Search className="w-8 h-8" />, color: "from-teal-500 to-green-500", description: "Find what's different" },
 ];
 
-function generateQuizQuestions(story: Story) {
-  const words = story.content.split(/\s+/).filter(w => w.length > 3);
-  const sentences = story.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+function extractKeyWords(content: string): string[] {
+  const stopWords = new Set([
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with",
+    "by", "from", "as", "is", "was", "are", "were", "been", "be", "have", "has", "had",
+    "do", "does", "did", "will", "would", "could", "should", "may", "might", "must",
+    "shall", "can", "need", "dare", "ought", "used", "it", "its", "this", "that",
+    "these", "those", "i", "you", "he", "she", "we", "they", "what", "which", "who",
+    "when", "where", "why", "how", "all", "each", "every", "both", "few", "more",
+    "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
+    "than", "too", "very", "just", "also", "now", "here", "there", "then", "once",
+    "her", "his", "him", "my", "your", "our", "their", "me", "us", "them", "into",
+    "said", "says", "went", "came", "got", "one", "two", "three", "about", "after",
+    "before", "over", "under", "again", "further", "while", "being", "having", "doing"
+  ]);
   
-  const questions = [
-    {
-      question: `What is the title of this story?`,
-      options: [story.title, "The Magic Garden", "A Wonderful Day", "The Little Star"],
-      correct: 0
-    },
-    {
-      question: `Which category does this story belong to?`,
-      options: [story.category || "Adventure", "Cooking", "Sports", "Science"],
-      correct: 0
-    },
-    {
-      question: `This story is about...`,
-      options: [
-        sentences[0]?.trim().substring(0, 50) + "..." || "A magical adventure",
-        "A trip to the moon",
-        "Making new friends",
-        "Learning to fly"
-      ],
-      correct: 0
+  const words = content
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 4 && w.length <= 10 && !stopWords.has(w));
+  
+  const wordFreq = new Map<string, number>();
+  words.forEach(w => wordFreq.set(w, (wordFreq.get(w) || 0) + 1));
+  
+  return Array.from(wordFreq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([word]) => word);
+}
+
+function extractSentences(content: string): string[] {
+  return content
+    .split(/[.!?]+/)
+    .map(s => s.trim())
+    .filter(s => s.length >= 20 && s.length <= 120);
+}
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function deduplicateOptions(options: string[], correctAnswer: string): { options: string[]; correctIndex: number } {
+  const unique = new Map<string, string>();
+  
+  unique.set(correctAnswer.toLowerCase().trim(), correctAnswer);
+  
+  for (const opt of options) {
+    const key = opt.toLowerCase().trim();
+    if (!unique.has(key) && unique.size < 4) {
+      unique.set(key, opt);
     }
+  }
+  
+  const fallbacks = ["Something else", "None of these", "A different one", "Another option"];
+  for (const fb of fallbacks) {
+    if (unique.size < 4 && !unique.has(fb.toLowerCase())) {
+      unique.set(fb.toLowerCase(), fb);
+    }
+  }
+  
+  const result = shuffleArray(Array.from(unique.values()));
+  return { 
+    options: result, 
+    correctIndex: result.findIndex(o => o.toLowerCase().trim() === correctAnswer.toLowerCase().trim())
+  };
+}
+
+function generateQuizQuestions(story: Story) {
+  const sentences = extractSentences(story.content);
+  const keyWords = extractKeyWords(story.content);
+  
+  const questions: { question: string; options: string[]; correct: number }[] = [];
+  
+  const titleVariations = [
+    `The ${keyWords[1] || 'Little'} ${keyWords[2] || 'Adventure'}`,
+    `A ${keyWords[3] || 'Magical'} ${keyWords[4] || 'Journey'}`,
+    `${keyWords[5]?.charAt(0).toUpperCase()}${keyWords[5]?.slice(1) || 'Happy'}'s ${keyWords[6] || 'Story'}`,
   ];
+  const titleResult = deduplicateOptions([story.title, ...titleVariations], story.title);
+  questions.push({
+    question: "What is this story called?",
+    options: titleResult.options,
+    correct: titleResult.correctIndex
+  });
+  
+  if (story.category) {
+    const fakeCategories = ["Cooking", "Sports", "Science", "Travel", "Music", "History", "Nature"]
+      .filter(c => c.toLowerCase() !== story.category?.toLowerCase());
+    const catResult = deduplicateOptions([story.category, ...fakeCategories], story.category);
+    questions.push({
+      question: "What type of story is this?",
+      options: catResult.options,
+      correct: catResult.correctIndex
+    });
+  }
+  
+  if (sentences.length > 0) {
+    const firstSentence = sentences[0];
+    const fakeSentences = sentences.slice(1, 4);
+    while (fakeSentences.length < 3) {
+      fakeSentences.push(`The ${keyWords[fakeSentences.length] || 'story'} began differently`);
+    }
+    const sentResult = deduplicateOptions([firstSentence, ...fakeSentences], firstSentence);
+    
+    const displayOptions: string[] = [];
+    const seenDisplays = new Set<string>();
+    for (let i = 0; i < sentResult.options.length; i++) {
+      const full = sentResult.options[i];
+      let display = full.length > 50 ? full.substring(0, 50) + "..." : full;
+      
+      if (seenDisplays.has(display.toLowerCase())) {
+        display = full.length > 60 ? full.substring(0, 60) + "..." : full;
+      }
+      if (seenDisplays.has(display.toLowerCase())) {
+        display = `(${i + 1}) ${display}`;
+      }
+      
+      seenDisplays.add(display.toLowerCase());
+      displayOptions.push(display);
+    }
+    
+    questions.push({
+      question: "How does the story begin?",
+      options: displayOptions,
+      correct: sentResult.correctIndex
+    });
+  }
+  
+  if (keyWords.length >= 4) {
+    const storyWord = keyWords[0].charAt(0).toUpperCase() + keyWords[0].slice(1);
+    const similarWords = keyWords.slice(4, 7).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    const fakeWords = ["Elephant", "Bicycle", "Mountain", "Rainbow"]
+      .filter(w => !keyWords.includes(w.toLowerCase()));
+    const distractors = [...similarWords, ...fakeWords];
+    const wordResult = deduplicateOptions([storyWord, ...distractors], storyWord);
+    questions.push({
+      question: "Which word appears in this story?",
+      options: wordResult.options,
+      correct: wordResult.correctIndex
+    });
+  }
   
   return questions.slice(0, 3);
 }
 
 function generateMemoryCards(story: Story) {
-  const emojis = ["🌟", "🌈", "🦋", "🌸", "🎈", "🍀", "🌙", "⭐"];
-  const pairs = emojis.slice(0, 4);
-  const cards = [...pairs, ...pairs].map((emoji, i) => ({
+  const keyWords = extractKeyWords(story.content);
+  const wordsToUse = keyWords.slice(0, 4).map(w => w.substring(0, 6).toUpperCase());
+  
+  while (wordsToUse.length < 4) {
+    const fallback = ["STORY", "HAPPY", "MAGIC", "DREAM"];
+    wordsToUse.push(fallback[wordsToUse.length]);
+  }
+  
+  const cards = [...wordsToUse, ...wordsToUse].map((word, i) => ({
     id: i,
-    emoji,
+    word,
     isFlipped: false,
     isMatched: false
   }));
   
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-  
-  return cards;
+  return shuffleArray(cards);
 }
 
-function generatePuzzlePieces() {
-  const pieces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  for (let i = pieces.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+function generatePuzzleData(story: Story) {
+  const keyWords = extractKeyWords(story.content);
+  const uniqueWords = new Set<string>();
+  const words: string[] = [];
+  
+  for (const word of keyWords) {
+    const truncated = word.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(truncated) && words.length < 9) {
+      uniqueWords.add(truncated);
+      words.push(truncated);
+    }
   }
-  return pieces;
+  
+  const fallback = ["STORY", "MAGIC", "DREAM", "HAPPY", "BRAVE", "KINDR", "WONDER", "HOPE", "SHINE"];
+  for (const fb of fallback) {
+    if (!uniqueWords.has(fb) && words.length < 9) {
+      uniqueWords.add(fb);
+      words.push(fb);
+    }
+  }
+  
+  const sortedWords = [...words].sort((a, b) => a.localeCompare(b));
+  
+  const pieces = words.map((word, i) => ({
+    id: `piece-${i}-${word}`,
+    word: word,
+  }));
+  
+  let shuffled = shuffleArray([...pieces]);
+  let attempts = 0;
+  while (shuffled.every((p, i) => p.word === sortedWords[i]) && attempts < 20) {
+    shuffled = shuffleArray([...pieces]);
+    attempts++;
+  }
+  
+  return { pieces: shuffled, sortedWords };
 }
 
 function generateWordBuilderData(story: Story) {
-  const commonWords = ["STORY", "HAPPY", "MAGIC", "DREAM", "STARS", "HEART", "SMILE", "BRAVE"];
-  const word = commonWords[Math.floor(Math.random() * commonWords.length)];
-  const letters = word.split('').sort(() => Math.random() - 0.5);
-  return { word, letters };
+  const keyWords = extractKeyWords(story.content);
+  const suitableWords = keyWords.filter(w => w.length >= 4 && w.length <= 7);
+  
+  const word = suitableWords.length > 0 
+    ? suitableWords[Math.floor(Math.random() * Math.min(3, suitableWords.length))].toUpperCase()
+    : "STORY";
+  
+  const letters = shuffleArray(word.split(''));
+  return { word, letters, hint: `A word from the story (${word.length} letters)` };
 }
 
 function generateFillInBlanks(story: Story) {
-  const sentences = [
-    { text: "The story was full of ___ and wonder.", answer: "magic", options: ["magic", "sad", "cold"] },
-    { text: "Everyone lived ___ ever after.", answer: "happily", options: ["happily", "sadly", "quickly"] },
-    { text: "The characters learned an important ___.", answer: "lesson", options: ["lesson", "recipe", "song"] }
-  ];
-  return sentences;
+  const sentences = extractSentences(story.content);
+  const keyWords = extractKeyWords(story.content);
+  const results: { text: string; answer: string; options: string[] }[] = [];
+  
+  for (let i = 0; i < Math.min(3, sentences.length); i++) {
+    const sentence = sentences[i];
+    const words = sentence.split(' ').filter(w => w.length >= 4);
+    
+    if (words.length > 0) {
+      const targetWord = words[Math.floor(Math.random() * words.length)].replace(/[^a-zA-Z]/g, '');
+      if (targetWord.length >= 4) {
+        const blankedSentence = sentence.replace(
+          new RegExp(`\\b${targetWord}\\b`, 'i'),
+          '___'
+        );
+        
+        const fakeOptions = keyWords
+          .filter(w => w.toLowerCase() !== targetWord.toLowerCase())
+          .slice(0, 2);
+        while (fakeOptions.length < 2) {
+          fakeOptions.push(["magic", "happy", "story"][fakeOptions.length]);
+        }
+        
+        const opts = shuffleArray([targetWord.toLowerCase(), ...fakeOptions]);
+        results.push({
+          text: blankedSentence,
+          answer: targetWord.toLowerCase(),
+          options: opts
+        });
+      }
+    }
+  }
+  
+  if (results.length === 0) {
+    results.push({
+      text: `The story "${story.title}" was full of ___ and wonder.`,
+      answer: "magic",
+      options: shuffleArray(["magic", "cold", "sad"])
+    });
+    results.push({
+      text: "Everyone in the story lived ___ ever after.",
+      answer: "happily",
+      options: shuffleArray(["happily", "sadly", "quickly"])
+    });
+  }
+  
+  return results;
 }
 
 function QuizGame({ story, onWin }: { story: Story; onWin: () => void }) {
@@ -179,8 +375,8 @@ function QuizGame({ story, onWin }: { story: Story; onWin: () => void }) {
   );
 }
 
-function MemoryGame({ onWin }: { onWin: () => void }) {
-  const [cards, setCards] = useState(() => generateMemoryCards({} as Story));
+function MemoryGame({ story, onWin }: { story: Story; onWin: () => void }) {
+  const [cards, setCards] = useState(() => generateMemoryCards(story));
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matches, setMatches] = useState(0);
   const [moves, setMoves] = useState(0);
@@ -198,7 +394,7 @@ function MemoryGame({ onWin }: { onWin: () => void }) {
     if (newFlipped.length === 2) {
       setMoves(m => m + 1);
       const [first, second] = newFlipped;
-      if (cards[first].emoji === cards[second].emoji) {
+      if (cards[first].word === cards[second].word) {
         setTimeout(() => {
           const matchedCards = [...cards];
           matchedCards[first].isMatched = true;
@@ -225,34 +421,36 @@ function MemoryGame({ onWin }: { onWin: () => void }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold">Matches: {matches}/4</span>
-        <span className="text-lg">Moves: {moves}</span>
+        <span className="text-lg font-bold">Match words from the story!</span>
+        <span className="text-lg">Found: {matches}/4</span>
       </div>
       
-      <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
+      <div className="grid grid-cols-4 gap-3 max-w-md mx-auto">
         {cards.map((card, i) => (
           <motion.div
             key={i}
             whileHover={{ scale: card.isMatched ? 1 : 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleCardClick(i)}
-            className={`aspect-square rounded-xl flex items-center justify-center text-3xl cursor-pointer transition-all ${
+            className={`aspect-square rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold cursor-pointer transition-all p-1 ${
               card.isFlipped || card.isMatched 
                 ? "bg-gradient-to-br from-pink-400 to-purple-500 text-white shadow-lg" 
                 : "bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700"
             } ${card.isMatched ? "opacity-60" : ""}`}
             data-testid={`card-memory-${i}`}
           >
-            {(card.isFlipped || card.isMatched) ? card.emoji : "?"}
+            {(card.isFlipped || card.isMatched) ? card.word : "?"}
           </motion.div>
         ))}
       </div>
+      <p className="text-center text-sm text-muted-foreground">Moves: {moves}</p>
     </div>
   );
 }
 
 function PuzzleGame({ story, onWin }: { story: Story; onWin: () => void }) {
-  const [pieces, setPieces] = useState(() => generatePuzzlePieces());
+  const [data] = useState(() => generatePuzzleData(story));
+  const [pieces, setPieces] = useState(data.pieces);
   const [selected, setSelected] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
 
@@ -266,50 +464,46 @@ function PuzzleGame({ story, onWin }: { story: Story; onWin: () => void }) {
       setSelected(null);
       setMoves(m => m + 1);
       
-      if (newPieces.every((p, i) => p === i)) {
+      const isSorted = newPieces.every((p, i) => p.word === data.sortedWords[i]);
+      if (isSorted) {
         setTimeout(onWin, 500);
       }
     }
   };
 
-  const colors = [
-    "from-red-400 to-red-500",
-    "from-orange-400 to-orange-500", 
-    "from-yellow-400 to-yellow-500",
-    "from-green-400 to-green-500",
-    "from-blue-400 to-blue-500",
-    "from-indigo-400 to-indigo-500",
-    "from-purple-400 to-purple-500",
-    "from-pink-400 to-pink-500",
-    "from-rose-400 to-rose-500"
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold">Arrange 1-9 in order</span>
+        <span className="text-lg font-bold">Sort words A to Z</span>
         <span className="text-lg">Moves: {moves}</span>
       </div>
       
       <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
-        {pieces.map((piece, i) => (
-          <motion.div
-            key={i}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handlePieceClick(i)}
-            className={`aspect-square rounded-xl flex items-center justify-center text-2xl font-bold cursor-pointer bg-gradient-to-br ${colors[piece]} text-white shadow-lg ${
-              selected === i ? "ring-4 ring-white" : ""
-            }`}
-            data-testid={`piece-puzzle-${i}`}
-          >
-            {piece + 1}
-          </motion.div>
-        ))}
+        {pieces.map((piece, i) => {
+          const isCorrect = piece.word === data.sortedWords[i];
+          return (
+            <motion.div
+              key={piece.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handlePieceClick(i)}
+              className={`aspect-square rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold cursor-pointer shadow-lg p-1 ${
+                isCorrect 
+                  ? "bg-gradient-to-br from-green-400 to-emerald-500 text-white ring-2 ring-green-300" 
+                  : "bg-gradient-to-br from-purple-400 to-pink-500 text-white"
+              } ${selected === i ? "ring-4 ring-yellow-300" : ""}`}
+              data-testid={`piece-puzzle-${i}`}
+            >
+              {piece.word}
+            </motion.div>
+          );
+        })}
       </div>
       
       <p className="text-center text-sm text-muted-foreground">
-        Click two pieces to swap them
+        Tap two words to swap. Put them in ABC order (top-left to bottom-right).
+        <br />
+        <span className="text-green-500">Green = Correct position</span>
       </p>
     </div>
   );
@@ -461,73 +655,133 @@ function FillInBlankGame({ story, onWin }: { story: Story; onWin: () => void }) 
   );
 }
 
-function SpotDifferenceGame({ onWin }: { onWin: () => void }) {
-  const [found, setFound] = useState<number[]>([]);
-  const differences = [
-    { id: 1, x: 25, y: 30 },
-    { id: 2, x: 60, y: 50 },
-    { id: 3, x: 80, y: 20 },
-  ];
+function getWordRoot(word: string): string {
+  return word.toLowerCase()
+    .replace(/ies$/i, 'y')
+    .replace(/es$/i, '')
+    .replace(/s$/i, '')
+    .replace(/ed$/i, '')
+    .replace(/ing$/i, '')
+    .replace(/er$/i, '')
+    .replace(/est$/i, '')
+    .replace(/ly$/i, '');
+}
 
-  const handleClick = (id: number) => {
-    if (!found.includes(id)) {
-      const newFound = [...found, id];
-      setFound(newFound);
-      if (newFound.length === differences.length) {
-        setTimeout(onWin, 500);
+function areWordsSimilar(word1: string, word2: string): boolean {
+  const r1 = getWordRoot(word1);
+  const r2 = getWordRoot(word2);
+  if (r1 === r2) return true;
+  if (r1.includes(r2) || r2.includes(r1)) return true;
+  if (Math.abs(r1.length - r2.length) <= 1 && r1.substring(0, 3) === r2.substring(0, 3)) return true;
+  return false;
+}
+
+function generateSpotDifferenceData(story: Story) {
+  const keyWords = extractKeyWords(story.content);
+  
+  const contrastPairs = [
+    ["FOREST", "OCEAN"], ["MOUNTAIN", "VALLEY"], ["NIGHT", "DAY"],
+    ["HAPPY", "QUIET"], ["BRAVE", "GENTLE"], ["MAGIC", "SIMPLE"],
+    ["CASTLE", "COTTAGE"], ["DRAGON", "BUNNY"], ["KING", "FARMER"]
+  ];
+  
+  const storyPairs: Array<{ original: string; changed: string }> = [];
+  
+  for (let i = 0; i < keyWords.length && storyPairs.length < 3; i++) {
+    for (let j = i + 3; j < keyWords.length && storyPairs.length < 3; j++) {
+      if (!areWordsSimilar(keyWords[i], keyWords[j]) && 
+          keyWords[i].length >= 3 && keyWords[j].length >= 3) {
+        storyPairs.push({
+          original: keyWords[i].toUpperCase(),
+          changed: keyWords[j].toUpperCase()
+        });
       }
     }
+  }
+  
+  while (storyPairs.length < 3) {
+    const pair = contrastPairs[storyPairs.length % contrastPairs.length];
+    storyPairs.push({ original: pair[0], changed: pair[1] });
+  }
+  
+  const diffIndices = shuffleArray([0, 1, 2]).slice(0, 2);
+  
+  return {
+    items: storyPairs.slice(0, 3).map((p, i) => ({
+      id: i,
+      original: p.original,
+      display: diffIndices.includes(i) ? p.changed : p.original,
+      isDifferent: diffIndices.includes(i)
+    })),
+    totalDifferences: 2
   };
+}
+
+function SpotDifferenceGame({ story, onWin }: { story: Story; onWin: () => void }) {
+  const [data] = useState(() => generateSpotDifferenceData(story));
+  const [found, setFound] = useState<number[]>([]);
+  const [wrongClicks, setWrongClicks] = useState(0);
+
+  const handleClick = (id: number, isDifferent: boolean) => {
+    if (found.includes(id)) return;
+    
+    if (isDifferent) {
+      const newFound = [...found, id];
+      setFound(newFound);
+      if (newFound.length === data.totalDifferences) {
+        setTimeout(onWin, 500);
+      }
+    } else {
+      setWrongClicks(w => w + 1);
+    }
+  };
+
+  const colors = [
+    { bg: "bg-blue-100 dark:bg-blue-900/50", text: "text-blue-800 dark:text-blue-200" },
+    { bg: "bg-purple-100 dark:bg-purple-900/50", text: "text-purple-800 dark:text-purple-200" },
+    { bg: "bg-pink-100 dark:bg-pink-900/50", text: "text-pink-800 dark:text-pink-200" },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold">Find the differences!</span>
-        <span className="text-lg">Found: {found.length}/{differences.length}</span>
+        <span className="text-lg font-bold">Find the different words!</span>
+        <span className="text-lg">Found: {found.length}/{data.totalDifferences}</span>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div className="relative aspect-square bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 rounded-xl overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl">🏠</div>
-          </div>
-          <div className="absolute" style={{ left: "20%", top: "60%" }}>
-            <div className="text-3xl">🌳</div>
-          </div>
-          <div className="absolute" style={{ left: "70%", top: "30%" }}>
-            <div className="text-2xl">☀️</div>
-          </div>
-        </div>
-        
-        <div className="relative aspect-square bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 rounded-xl overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl">🏠</div>
-          </div>
-          {differences.map(diff => (
+      <div className="space-y-4">
+        {data.items.map((item, index) => (
+          <div key={item.id} className="grid grid-cols-2 gap-4">
+            <div className={`p-4 ${colors[index].bg} rounded-xl text-center`}>
+              <div className="text-xs text-muted-foreground mb-2">Original Word</div>
+              <div className={`text-xl font-bold ${colors[index].text}`}>{item.original}</div>
+            </div>
+            
             <motion.div
-              key={diff.id}
-              className={`absolute w-10 h-10 rounded-full cursor-pointer flex items-center justify-center ${
-                found.includes(diff.id) 
-                  ? "bg-green-500/50 ring-2 ring-green-500" 
-                  : "hover:bg-white/20"
+              className={`p-4 rounded-xl cursor-pointer transition-all text-center ${
+                found.includes(item.id)
+                  ? "bg-green-100 dark:bg-green-900/50 ring-4 ring-green-500"
+                  : `${colors[index].bg} hover:ring-2 hover:ring-yellow-400`
               }`}
-              style={{ left: `${diff.x}%`, top: `${diff.y}%`, transform: "translate(-50%, -50%)" }}
-              onClick={() => handleClick(diff.id)}
-              whileTap={{ scale: 0.9 }}
-              data-testid={`spot-diff-${diff.id}`}
+              onClick={() => handleClick(item.id, item.isDifferent)}
+              whileTap={{ scale: 0.98 }}
+              data-testid={`spot-diff-${item.id}`}
             >
-              {found.includes(diff.id) ? <Check className="w-5 h-5 text-green-500" /> : (
-                <span className="text-xl">
-                  {diff.id === 1 ? "🌲" : diff.id === 2 ? "🌙" : "⭐"}
-                </span>
-              )}
+              <div className="text-xs text-muted-foreground mb-2">
+                {found.includes(item.id) ? "Different!" : "Same or Different?"}
+              </div>
+              <div className={`text-xl font-bold ${found.includes(item.id) ? "text-green-700 dark:text-green-300" : colors[index].text}`}>
+                {found.includes(item.id) && <Check className="w-5 h-5 inline mr-1" />}
+                {item.display}
+              </div>
             </motion.div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
       
       <p className="text-center text-sm text-muted-foreground">
-        Tap on the differences in the right image
+        Compare each pair. Tap the right box if the word is DIFFERENT from the left.
+        {wrongClicks > 0 && <span className="block text-orange-500 mt-1">Wrong taps: {wrongClicks}</span>}
       </p>
     </div>
   );
@@ -592,11 +846,11 @@ export function StoryGames({ story, onComplete, onNextStory }: StoryGamesProps) 
         </Button>
         
         {selectedGame === "quiz" && <QuizGame story={story} onWin={handleGameWin} />}
-        {selectedGame === "memory" && <MemoryGame onWin={handleGameWin} />}
+        {selectedGame === "memory" && <MemoryGame story={story} onWin={handleGameWin} />}
         {selectedGame === "puzzle" && <PuzzleGame story={story} onWin={handleGameWin} />}
         {selectedGame === "wordbuilder" && <WordBuilderGame story={story} onWin={handleGameWin} />}
         {selectedGame === "fillin" && <FillInBlankGame story={story} onWin={handleGameWin} />}
-        {selectedGame === "spotdiff" && <SpotDifferenceGame onWin={handleGameWin} />}
+        {selectedGame === "spotdiff" && <SpotDifferenceGame story={story} onWin={handleGameWin} />}
       </div>
     );
   }
