@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,10 @@ import type { ParentSettings } from "@shared/schema";
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  
+  useEffect(() => {
+    setLocation("/dashboard");
+  }, [setLocation]);
   
   const { data: parentSettings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],

@@ -201,3 +201,12 @@
 [x] 201. Application running clean with no errors on port 5000
 [x] 202. Progress tracker updated - all migration tasks marked as complete
 [x] 203. PROJECT IMPORT FULLY COMPLETE - StoryNest ready for development and use ✅✅✅✅
+[x] 204. Removed Sign In button from header temporarily per user request
+[x] 205. Created demo user mode - bypasses Firebase authentication completely
+[x] 206. Updated AuthContext to use fake demo user (demo-user-123)
+[x] 207. Updated backend auth middleware to accept demo token
+[x] 208. Updated queryClient to send demo token for API requests
+[x] 209. Created parent settings for demo user with 1000 coins and active subscription
+[x] 210. Homepage now redirects directly to dashboard without login
+[x] 211. Dashboard loads successfully with full access - no 401 errors
+[x] 212. Demo mode fully functional - can add Sign In back later when ready

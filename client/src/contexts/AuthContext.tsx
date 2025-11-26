@@ -11,60 +11,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const FAKE_USER = {
+  uid: "demo-user-123",
+  email: "demo@storynest.com",
+  displayName: "Demo User",
+  photoURL: null,
+  emailVerified: true,
+  getIdToken: async () => "demo-token-for-testing",
+} as unknown as User;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          await user.getIdToken(true);
-        } catch (error) {
-          console.error("Error refreshing token:", error);
-        }
-      }
-      setUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const refreshInterval = setInterval(async () => {
-      try {
-        await user.getIdToken(true);
-      } catch (error) {
-        console.error("Error refreshing token:", error);
-      }
-    }, 45 * 60 * 1000);
-
-    return () => clearInterval(refreshInterval);
-  }, [user]);
+  const [user, setUser] = useState<User | null>(FAKE_USER);
+  const [loading, setLoading] = useState(false);
 
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      // Wait for the auth state to update
-      await result.user.getIdToken();
-      return result.user;
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
-      throw error;
-    }
+    return FAKE_USER;
   };
 
   const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-    } catch (error) {
-      console.error("Error signing out:", error);
-      throw error;
-    }
+    console.log("Sign out disabled in demo mode");
   };
 
   return (
