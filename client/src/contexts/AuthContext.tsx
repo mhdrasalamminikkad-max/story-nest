@@ -11,25 +11,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const FAKE_USER = {
-  uid: "demo-user-123",
-  email: "demo@storynest.com",
-  displayName: "Demo User",
-  photoURL: null,
-  emailVerified: true,
-  getIdToken: async () => "demo-token-for-testing",
-} as unknown as User;
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(FAKE_USER);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const signInWithGoogle = async () => {
-    return FAKE_USER;
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
   };
 
   const signOut = async () => {
-    console.log("Sign out disabled in demo mode");
+    await firebaseSignOut(auth);
+    setUser(null);
   };
 
   return (
