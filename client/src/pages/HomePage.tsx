@@ -60,7 +60,7 @@ export default function HomePage() {
                     </Button>
                     <Button
                       onClick={() => setLocation("/child-mode")}
-                      className="rounded-2xl font-semibold bg-[#FEF735] text-gray-900 hover:bg-[#FEF735]/90 hover:shadow-lg transition-all border-[#E5B800]"
+                      className="rounded-2xl font-semibold bg-[#F5C518] text-gray-900 hover:bg-[#F5C518]/90 hover:shadow-lg transition-all border-[#D4A500]"
                       data-testid="button-child-mode"
                     >
                       <Play className="w-4 h-4 mr-2" />
@@ -85,7 +85,7 @@ export default function HomePage() {
             >
               {/* Badge */}
               <motion.div 
-                className="inline-flex items-center gap-3 bg-[#FEF735]/20 px-8 py-4 rounded-3xl border-2 border-[#FEF735]/50 shadow-xl"
+                className="inline-flex items-center gap-3 bg-[#F5C518]/20 px-8 py-4 rounded-3xl border-2 border-[#F5C518]/50 shadow-xl"
                 whileHover={{ scale: 1.05 }}
               >
                 <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 2, repeat: Infinity }}>
@@ -100,7 +100,7 @@ export default function HomePage() {
                   <span className="text-[#E5683A] drop-shadow-2xl block">
                     Magical Bedtime
                   </span>
-                  <span className="text-[#FEF735] drop-shadow-2xl block" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3)'}}>
+                  <span className="text-[#F5C518] drop-shadow-2xl block" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3)'}}>
                     Stories
                   </span>
                 </h1>
@@ -136,7 +136,7 @@ export default function HomePage() {
                 
                 {/* Decorative Blurs */}
                 <motion.div 
-                  className="absolute -top-20 -right-20 w-64 h-64 bg-[#FEF735]/20 rounded-full blur-3xl"
+                  className="absolute -top-20 -right-20 w-64 h-64 bg-[#F5C518]/20 rounded-full blur-3xl"
                   animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
                   transition={{ duration: 8, repeat: Infinity }}
                 />
@@ -154,17 +154,17 @@ export default function HomePage() {
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <motion.div 
-                      className="absolute inset-0 bg-[#FEF735]/30 rounded-full blur-2xl"
+                      className="absolute inset-0 bg-[#F5C518]/30 rounded-full blur-2xl"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
                     <motion.div 
-                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#FEF735] flex items-center justify-center shadow-2xl"
+                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#F5C518] flex items-center justify-center shadow-2xl"
                       animate={{ y: [0, -8, 0] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     >
                       <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
-                        <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                        <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
                       </motion.div>
                     </motion.div>
                   </motion.div>
@@ -182,8 +182,8 @@ export default function HomePage() {
                     {["Fairy Tales", "Adventures", "Educational"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-white border border-[#E5B800] cursor-pointer"
-                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(254, 247, 53, 0.6)" }}
+                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer"
+                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -218,7 +218,7 @@ export default function HomePage() {
                 
                 {/* Decorative Blurs */}
                 <motion.div 
-                  className="absolute -top-20 -right-20 w-64 h-64 bg-[#FEF735]/20 rounded-full blur-3xl"
+                  className="absolute -top-20 -right-20 w-64 h-64 bg-[#F5C518]/20 rounded-full blur-3xl"
                   animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
                   transition={{ duration: 8, repeat: Infinity, delay: 1 }}
                 />
@@ -236,17 +236,17 @@ export default function HomePage() {
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <motion.div 
-                      className="absolute inset-0 bg-[#FEF735]/30 rounded-full blur-2xl"
+                      className="absolute inset-0 bg-[#F5C518]/30 rounded-full blur-2xl"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity, delay: 1 }}
                     />
                     <motion.div 
-                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#FEF735] flex items-center justify-center shadow-2xl"
+                      className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#F5C518] flex items-center justify-center shadow-2xl"
                       animate={{ y: [0, -8, 0] }}
                       transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
                     >
                       <motion.div animate={{ rotate: [0, -360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
-                        <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
+                        <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
                       </motion.div>
                     </motion.div>
                   </motion.div>
@@ -264,8 +264,8 @@ export default function HomePage() {
                     {["Nursery Rhymes", "Songs", "Music"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-white border border-[#E5B800] cursor-pointer"
-                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(254, 247, 53, 0.6)" }}
+                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer"
+                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -306,10 +306,10 @@ export default function HomePage() {
                 >
                   <Card className="p-8 text-center space-y-6 h-full border-2 border-[#E5683A]/20 hover-elevate transition-all bg-white dark:bg-gray-900">
                     <motion.div 
-                      className="w-16 h-16 bg-[#FEF735] rounded-3xl flex items-center justify-center mx-auto shadow-lg"
+                      className="w-16 h-16 bg-[#F5C518] rounded-3xl flex items-center justify-center mx-auto shadow-lg"
                       whileHover={{ scale: 1.2, rotate: 10 }}
                     >
-                      <feature.icon className="w-8 h-8 text-white" />
+                      <feature.icon className="w-8 h-8 text-gray-800" />
                     </motion.div>
                     <h3 className="font-bold text-2xl text-black dark:text-white">{feature.title}</h3>
                     <p className="text-black/70 dark:text-white/70 leading-relaxed">{feature.desc}</p>

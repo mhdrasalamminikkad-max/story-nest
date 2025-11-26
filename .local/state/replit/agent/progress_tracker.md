@@ -269,3 +269,12 @@
 [x] 269. Updated MobileHeader to show logo image instead of text
 [x] 270. New logo verified with screenshot - showing "tell" in yellow speech bubble, "mamma" in orange below
 [x] 271. Logo update COMPLETE across all pages
+[x] 272. Softened yellow color from bright #FEF735 to warmer golden #F5C518
+[x] 273. Updated text on yellow backgrounds to dark gray for better readability
+[x] 274. Updated icons on yellow backgrounds (cards, badges) to dark gray
+[x] 275. Updated "Stories" heading yellow to softer golden shade
+[x] 276. Updated Child Mode button to softer yellow with dark text
+[x] 277. Updated AnimatedBackground stars to softer golden yellow
+[x] 278. Updated all decorative blurs from bright yellow to softer yellow
+[x] 279. Color scheme now uses Orange (#E5683A) + Softer Golden (#F5C518) combination
+[x] 280. All yellows now have dark text for readability - COMPLETE

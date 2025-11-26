@@ -75,7 +75,7 @@ export function AnimatedBackground() {
           }}
         >
           <Star
-            className="text-[#FEF735]"
+            className="text-[#F5C518]"
             style={{ width: `${star.size * 4}px`, height: `${star.size * 4}px` }}
             fill="currentColor"
           />
