@@ -32,6 +32,7 @@ import foxImage from "@assets/generated_images/Fox_reading_by_candlelight_2780dc
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Progress } from "@/components/ui/progress";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
@@ -659,17 +660,16 @@ export default function ParentDashboard() {
           <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-5 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
             <div className="flex items-center gap-4">
               <motion.div 
-                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-[#FEF735]/10"
+                className="cursor-pointer hover-elevate active-elevate-2 rounded-2xl transition-all"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
                 whileHover={{ scale: 1.05 }}
               >
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                  <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#E5683A] fill-[#E5683A]" />
-                </motion.div>
-                <h1 className="font-heading text-lg sm:text-xl font-bold text-[#E5683A]">
-                  TELL MAMMA
-                </h1>
+                <img 
+                  src={tellMammaLogo} 
+                  alt="TELL MAMMA" 
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
               </motion.div>
               <div className="h-7 w-1 bg-gradient-to-b from-primary to-secondary rounded-full" />
               <h2 className="font-heading text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Parent Dashboard</h2>

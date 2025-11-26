@@ -9,6 +9,7 @@ import { Check, ArrowLeft, Coins, Sparkles, BookOpen, Heart } from "lucide-react
 import { motion } from "framer-motion";
 import type { PublicSubscriptionPlan, PublicCoinPackage } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
 
 export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
@@ -42,14 +43,15 @@ export default function SubscriptionPage() {
         <header className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div 
-              className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              className="cursor-pointer hover-elevate active-elevate-2 rounded-xl transition-all"
               onClick={() => setLocation("/")}
               data-testid="button-home-logo"
             >
-              <Heart className="w-5 h-5 text-[#E5683A] fill-[#E5683A]" />
-              <h1 className="font-heading text-base sm:text-lg font-bold text-[#E5683A]">
-                TELL MAMMA
-              </h1>
+              <img 
+                src={tellMammaLogo} 
+                alt="TELL MAMMA" 
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
             </div>
             <Button
               variant="ghost"

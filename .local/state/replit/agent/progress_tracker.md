@@ -261,3 +261,11 @@
 [x] 261. Updated subheading text to black on white background (dark mode: white)
 [x] 262. Updated footer text to black/50 on white background (dark mode: white/50)
 [x] 263. All color scheme changes verified and applied - COMPLETE
+[x] 264. Updated logo to new TELL MAMMA image with speech bubble design
+[x] 265. Replaced text logo with image logo on HomePage
+[x] 266. Replaced text logo with image logo on ParentDashboard
+[x] 267. Replaced text logo with image logo on CheckpointsPage
+[x] 268. Replaced text logo with image logo on SubscriptionPage
+[x] 269. Updated MobileHeader to show logo image instead of text
+[x] 270. New logo verified with screenshot - showing "tell" in yellow speech bubble, "mamma" in orange below
+[x] 271. Logo update COMPLETE across all pages

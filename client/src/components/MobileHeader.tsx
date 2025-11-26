@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
 
 interface MobileHeaderProps {
   title?: string;
@@ -9,7 +10,7 @@ interface MobileHeaderProps {
   onSearch?: (query: string) => void;
 }
 
-export function MobileHeader({ title = "TELL MAMMA", showSearch = false, onSearch }: MobileHeaderProps) {
+export function MobileHeader({ title, showSearch = false, onSearch }: MobileHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (value: string) => {
@@ -20,7 +21,15 @@ export function MobileHeader({ title = "TELL MAMMA", showSearch = false, onSearc
   return (
     <header className="md:hidden sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border z-40">
       <div className="flex items-center justify-between px-4 h-14">
-        <h1 className="font-heading text-xl font-bold text-foreground">{title}</h1>
+        {title ? (
+          <h1 className="font-heading text-xl font-bold text-foreground">{title}</h1>
+        ) : (
+          <img 
+            src={tellMammaLogo} 
+            alt="TELL MAMMA" 
+            className="h-10 w-auto object-contain"
+          />
+        )}
         <ThemeToggle />
       </div>
       {showSearch && (

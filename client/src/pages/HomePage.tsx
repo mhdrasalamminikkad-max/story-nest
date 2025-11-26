@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import type { ParentSettings } from "@shared/schema";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
@@ -32,20 +33,16 @@ export default function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
             <div className="flex items-center justify-between gap-4">
               <motion.div 
-                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-[#FEF735]/10"
+                className="cursor-pointer hover-elevate active-elevate-2 rounded-2xl transition-all"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
                 whileHover={{ scale: 1.05 }}
               >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Heart className="w-7 h-7 text-[#E5683A] fill-[#E5683A]" />
-                </motion.div>
-                <h1 className="font-heading text-2xl font-bold text-[#E5683A]">
-                  TELL MAMMA
-                </h1>
+                <img 
+                  src={tellMammaLogo} 
+                  alt="TELL MAMMA" 
+                  className="h-12 sm:h-14 w-auto object-contain"
+                />
               </motion.div>
 
               <div className="flex items-center gap-2 sm:gap-3">

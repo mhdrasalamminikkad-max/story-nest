@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { Checkpoint } from "@shared/schema";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
 
 type CheckpointWithProgress = Checkpoint & {
   currentProgress: number;
@@ -110,14 +111,15 @@ export default function CheckpointsPage() {
         <header className="container mx-auto px-4 py-6 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <div 
-              className="flex items-center gap-2 cursor-pointer hover-elevate active-elevate-2 px-3 py-2 rounded-xl transition-all"
+              className="cursor-pointer hover-elevate active-elevate-2 rounded-xl transition-all"
               onClick={() => setLocation("/")}
               data-testid="button-home-logo"
             >
-              <Heart className="w-5 h-5 text-[#E5683A] fill-[#E5683A]" />
-              <h1 className="font-heading text-base sm:text-lg font-bold text-[#E5683A]">
-                TELL MAMMA
-              </h1>
+              <img 
+                src={tellMammaLogo} 
+                alt="TELL MAMMA" 
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
             </div>
             <Button
               variant="ghost"
