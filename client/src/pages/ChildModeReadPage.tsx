@@ -4,8 +4,9 @@ import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
 import type { CheckpointProgress } from "@/components/RewardsDialog";
 import { PDFViewer } from "@/components/PDFViewer";
+import { StoryGames } from "@/components/StoryGames";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, X, CheckCircle, Gamepad2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
@@ -21,6 +22,8 @@ export default function ChildModeReadPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showRewardsDialog, setShowRewardsDialog] = useState(false);
   const [newlyEarnedRewards, setNewlyEarnedRewards] = useState<string[]>([]);
+  const [showGames, setShowGames] = useState(false);
+  const [storyCompleted, setStoryCompleted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const handlersRef = useRef<{
@@ -134,6 +137,8 @@ export default function ChildModeReadPage() {
     const handleEnded = () => {
       cleanup();
       setIsReading(false);
+      setStoryCompleted(true);
+      setShowGames(true);
       trackStoryMutation.mutate();
     };
     
@@ -216,13 +221,27 @@ export default function ChildModeReadPage() {
   const nextStory = () => {
     if (stories.length === 0) return;
     stopReading();
+    setShowGames(false);
+    setStoryCompleted(false);
     setCurrentStoryIndex((prev) => (prev + 1) % stories.length);
   };
 
   const prevStory = () => {
     if (stories.length === 0) return;
     stopReading();
+    setShowGames(false);
+    setStoryCompleted(false);
     setCurrentStoryIndex((prev) => (prev - 1 + stories.length) % stories.length);
+  };
+
+  const handleFinishStory = () => {
+    setStoryCompleted(true);
+    setShowGames(true);
+    trackStoryMutation.mutate();
+  };
+
+  const handleGameComplete = () => {
+    setShowGames(false);
   };
 
   if (!currentStory) {
@@ -284,67 +303,100 @@ export default function ChildModeReadPage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStory.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-6 max-w-4xl mx-auto"
-            >
-              {/* Story Content Box */}
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200 dark:border-gray-700">
-                <p 
-                  className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-800 dark:text-gray-100 whitespace-pre-wrap"
-                  data-testid="text-current-story-content"
-                >
-                  {currentStory.content}
-                </p>
-              </div>
-
-              {/* PDF Viewer */}
-              {currentStory.pdfUrl && (
-                <div className="w-full rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-                  <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="500px" />
-                </div>
-              )}
-
-              {/* Story Image */}
-              {currentStory.imageUrl && (
-                <div className="flex justify-center">
-                  <img
-                    src={currentStory.imageUrl}
-                    alt={currentStory.title}
-                    className="w-full max-w-md h-auto rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 object-cover"
-                    data-testid="img-current-story"
+            {showGames ? (
+              <motion.div
+                key="games"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-4xl mx-auto"
+              >
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200 dark:border-gray-700">
+                  <StoryGames 
+                    story={currentStory} 
+                    onComplete={handleGameComplete}
+                    onNextStory={nextStory}
                   />
                 </div>
-              )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key={currentStory.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col gap-6 max-w-4xl mx-auto"
+              >
+                {/* Story Content Box */}
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200 dark:border-gray-700">
+                  <p 
+                    className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-800 dark:text-gray-100 whitespace-pre-wrap"
+                    data-testid="text-current-story-content"
+                  >
+                    {currentStory.content}
+                  </p>
+                </div>
 
-              {/* Read Button */}
-              <div className="flex justify-center pt-4">
-                <Button
-                  className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
-                  onClick={isReading ? stopReading : startReading}
-                  disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
-                  data-testid="button-read-aloud"
-                >
-                  <div className="flex items-center gap-2">
-                    {isReading ? (
-                      <>
-                        <VolumeX className="w-6 h-6" />
-                        <span>Stop Story</span>
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="w-6 h-6" />
-                        <span>{(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}</span>
-                      </>
-                    )}
+                {/* PDF Viewer */}
+                {currentStory.pdfUrl && (
+                  <div className="w-full rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
+                    <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="500px" />
                   </div>
-                </Button>
-              </div>
-            </motion.div>
+                )}
+
+                {/* Story Image */}
+                {currentStory.imageUrl && (
+                  <div className="flex justify-center">
+                    <img
+                      src={currentStory.imageUrl}
+                      alt={currentStory.title}
+                      className="w-full max-w-md h-auto rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 object-cover"
+                      data-testid="img-current-story"
+                    />
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                  {/* Read Button */}
+                  <Button
+                    className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
+                    onClick={isReading ? stopReading : startReading}
+                    disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
+                    data-testid="button-read-aloud"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isReading ? (
+                        <>
+                          <VolumeX className="w-6 h-6" />
+                          <span>Stop Story</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-6 h-6" />
+                          <span>{(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
+
+                  {/* Finish Story Button */}
+                  <Button
+                    className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
+                    onClick={handleFinishStory}
+                    disabled={isReading}
+                    data-testid="button-finish-story"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Gamepad2 className="w-6 h-6" />
+                      <span>Play Games</span>
+                    </div>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </main>
       </div>
