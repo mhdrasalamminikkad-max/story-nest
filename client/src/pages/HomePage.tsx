@@ -20,7 +20,7 @@ export default function HomePage() {
   
   const welcomeText = parentSettings?.childName 
     ? `Welcome, ${parentSettings.childName}!`
-    : "Welcome to StoryNest!";
+    : "Welcome to TELL MAMMA!";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/30 to-background dark:from-background dark:via-purple-950/30 dark:to-background">
@@ -38,13 +38,13 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05 }}
               >
                 <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <BookOpen className="w-7 h-7 text-[#E5683A]" />
+                  <Heart className="w-7 h-7 text-[#E5683A] fill-[#E5683A]" />
                 </motion.div>
                 <h1 className="font-heading text-2xl font-bold text-[#E5683A]">
-                  StoryNest
+                  TELL MAMMA
                 </h1>
               </motion.div>
 
@@ -283,7 +283,7 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          {/* Why Choose StoryNest */}
+          {/* Why Choose TELL MAMMA */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -292,7 +292,7 @@ export default function HomePage() {
             className="mb-16 sm:mb-24"
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-center mb-12 sm:mb-16 text-[#E5683A]">
-              Why Choose StoryNest?
+              Why Choose TELL MAMMA?
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[

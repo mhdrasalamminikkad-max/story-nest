@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Target, Trophy, Trash2, Award, BookOpen } from "lucide-react";
+import { ArrowLeft, Plus, Target, Trophy, Trash2, Award, BookOpen, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -114,9 +114,9 @@ export default function CheckpointsPage() {
               onClick={() => setLocation("/")}
               data-testid="button-home-logo"
             >
-              <BookOpen className="w-5 h-5 text-primary" />
-              <h1 className="font-heading text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                StoryNest
+              <Heart className="w-5 h-5 text-[#E5683A] fill-[#E5683A]" />
+              <h1 className="font-heading text-base sm:text-lg font-bold text-[#E5683A]">
+                TELL MAMMA
               </h1>
             </div>
             <Button

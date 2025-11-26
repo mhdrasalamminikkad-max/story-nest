@@ -233,3 +233,15 @@
 [x] 233. Fixed pill badges on cards - yellow background with dark text
 [x] 234. Fixed Why Choose StoryNest section - orange heading, yellow icons, proper text colors
 [x] 235. All color fixes applied and verified - Cards orange, Buttons yellow, Stars yellow
+[x] 236. Changed app name from "StoryNest" to "TELL MAMMA" throughout the app
+[x] 237. Updated logo icon from BookOpen to Heart (filled orange)
+[x] 238. Updated HomePage with new TELL MAMMA branding
+[x] 239. Updated ParentDashboard with TELL MAMMA logo
+[x] 240. Updated CheckpointsPage with TELL MAMMA logo
+[x] 241. Updated SubscriptionPage with TELL MAMMA logo
+[x] 242. Updated subscription.tsx payment name to TELL MAMMA
+[x] 243. Updated AuthPage welcome text to TELL MAMMA
+[x] 244. Updated TrialBanner text to TELL MAMMA
+[x] 245. Updated MobileHeader default title to TELL MAMMA
+[x] 246. Updated "Why Choose" section to "Why Choose TELL MAMMA?"
+[x] 247. All branding changes verified with screenshot - COMPLETE

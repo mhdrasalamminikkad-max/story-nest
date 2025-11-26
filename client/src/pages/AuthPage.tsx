@@ -23,7 +23,7 @@ export default function AuthPage() {
   
   const welcomeText = parentSettings?.childName 
     ? `Welcome to ${parentSettings.childName}`
-    : "Welcome to StoryNest";
+    : "Welcome to TELL MAMMA";
 
   const handleGoogleSignIn = async () => {
     setLoading(true);

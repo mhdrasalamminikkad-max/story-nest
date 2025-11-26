@@ -13,7 +13,7 @@ import { TrialBanner } from "@/components/TrialBanner";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon, Lock, Trophy } from "lucide-react";
+import { Plus, Play, LogOut, BookmarkCheck, Clock, CheckCircle, XCircle, FileText, Mic, Square, Trash2, Volume2, CreditCard, Coins, Search, Target, Home, BookOpen, Upload, FileAudio, Loader2, Settings as SettingsIcon, Lock, Trophy, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -659,16 +659,16 @@ export default function ParentDashboard() {
           <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-5 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
             <div className="flex items-center gap-4">
               <motion.div 
-                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-gradient-to-r from-primary/10 to-secondary/10"
+                className="flex items-center gap-3 cursor-pointer hover-elevate active-elevate-2 px-4 py-2 rounded-2xl transition-all bg-[#FEF735]/10"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
                 whileHover={{ scale: 1.05 }}
               >
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
-                  <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                  <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#E5683A] fill-[#E5683A]" />
                 </motion.div>
-                <h1 className="font-heading text-lg sm:text-xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  StoryNest
+                <h1 className="font-heading text-lg sm:text-xl font-bold text-[#E5683A]">
+                  TELL MAMMA
                 </h1>
               </motion.div>
               <div className="h-7 w-1 bg-gradient-to-b from-primary to-secondary rounded-full" />

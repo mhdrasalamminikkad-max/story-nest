@@ -9,7 +9,7 @@ interface MobileHeaderProps {
   onSearch?: (query: string) => void;
 }
 
-export function MobileHeader({ title = "StoryNest", showSearch = false, onSearch }: MobileHeaderProps) {
+export function MobileHeader({ title = "TELL MAMMA", showSearch = false, onSearch }: MobileHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (value: string) => {

@@ -146,7 +146,7 @@ export default function SubscriptionPage() {
       key: process.env.VITE_RAZORPAY_KEY_ID,
       amount: orderData.amount,
       currency: orderData.currency,
-      name: "StoryNest",
+      name: "TELL MAMMA",
       description: `Purchase ${orderData.coinPackage.coins} coins`,
       order_id: orderData.orderId,
       handler: (response: any) => {
@@ -243,7 +243,7 @@ export default function SubscriptionPage() {
               {subscriptionStatus.status === "expired" && (
                 <div className="p-3 bg-destructive/10 rounded-md border border-destructive/20">
                   <p className="text-sm text-destructive">
-                    Your trial has expired. Purchase coins and redeem a pass to continue using StoryNest.
+                    Your trial has expired. Purchase coins and redeem a pass to continue using TELL MAMMA.
                   </p>
                 </div>
               )}

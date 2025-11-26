@@ -142,7 +142,7 @@ export function TrialBanner() {
               <div>
                 <h3 className="font-semibold text-lg mb-1">Trial Expired</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your free trial has ended. Purchase a subscription to continue enjoying StoryNest.
+                  Your free trial has ended. Purchase a subscription to continue enjoying TELL MAMMA.
                 </p>
               </div>
             </div>
