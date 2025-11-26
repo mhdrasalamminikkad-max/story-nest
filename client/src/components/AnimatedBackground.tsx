@@ -75,7 +75,7 @@ export function AnimatedBackground() {
           }}
         >
           <Star
-            className={theme === "night" ? "text-yellow-100" : "text-purple-400"}
+            className="text-[#FEF735]"
             style={{ width: `${star.size * 4}px`, height: `${star.size * 4}px` }}
             fill="currentColor"
           />
