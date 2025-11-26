@@ -110,7 +110,7 @@ export default function HomePage() {
               </div>
 
               {/* Subheading */}
-              <p className="text-xl sm:text-2xl lg:text-3xl text-foreground/85 max-w-4xl mx-auto font-semibold leading-relaxed">
+              <p className="text-xl sm:text-2xl lg:text-3xl text-black dark:text-white max-w-4xl mx-auto font-semibold leading-relaxed">
                 Where imagination comes alive! Create wonderful memories with enchanting tales that inspire dreams and spark joy.
               </p>
             </motion.div>
@@ -167,7 +167,7 @@ export default function HomePage() {
                       transition={{ duration: 3, repeat: Infinity }}
                     >
                       <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
-                        <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-900" />
+                        <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
                       </motion.div>
                     </motion.div>
                   </motion.div>
@@ -176,7 +176,7 @@ export default function HomePage() {
                     <h2 className="text-4xl sm:text-5xl font-bold text-white">
                       Explore Stories
                     </h2>
-                    <p className="text-base sm:text-lg text-white/90 max-w-md mx-auto leading-relaxed">
+                    <p className="text-base sm:text-lg text-white max-w-md mx-auto leading-relaxed">
                       Discover hundreds of magical tales across different languages, categories, and themes
                     </p>
                   </div>
@@ -185,7 +185,7 @@ export default function HomePage() {
                     {["Fairy Tales", "Adventures", "Educational"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-gray-900 border border-[#E5B800] cursor-pointer"
+                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-white border border-[#E5B800] cursor-pointer"
                         whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(254, 247, 53, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
@@ -249,7 +249,7 @@ export default function HomePage() {
                       transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
                     >
                       <motion.div animate={{ rotate: [0, -360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
-                        <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-gray-900" />
+                        <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-white" />
                       </motion.div>
                     </motion.div>
                   </motion.div>
@@ -258,7 +258,7 @@ export default function HomePage() {
                     <h2 className="text-4xl sm:text-5xl font-bold text-white">
                       Rhymes & Songs
                     </h2>
-                    <p className="text-base sm:text-lg text-white/90 max-w-md mx-auto leading-relaxed">
+                    <p className="text-base sm:text-lg text-white max-w-md mx-auto leading-relaxed">
                       Enjoy delightful nursery rhymes and songs that make learning fun and memorable
                     </p>
                   </div>
@@ -267,7 +267,7 @@ export default function HomePage() {
                     {["Nursery Rhymes", "Songs", "Music"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-gray-900 border border-[#E5B800] cursor-pointer"
+                        className="px-5 py-2 bg-[#FEF735] rounded-full text-sm font-bold text-white border border-[#E5B800] cursor-pointer"
                         whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(254, 247, 53, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
@@ -312,10 +312,10 @@ export default function HomePage() {
                       className="w-16 h-16 bg-[#FEF735] rounded-3xl flex items-center justify-center mx-auto shadow-lg"
                       whileHover={{ scale: 1.2, rotate: 10 }}
                     >
-                      <feature.icon className="w-8 h-8 text-gray-900" />
+                      <feature.icon className="w-8 h-8 text-white" />
                     </motion.div>
-                    <h3 className="font-bold text-2xl text-[#E5683A]">{feature.title}</h3>
-                    <p className="text-foreground/70 leading-relaxed">{feature.desc}</p>
+                    <h3 className="font-bold text-2xl text-black dark:text-white">{feature.title}</h3>
+                    <p className="text-black/70 dark:text-white/70 leading-relaxed">{feature.desc}</p>
                   </Card>
                 </motion.div>
               ))}
@@ -331,7 +331,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-center pb-8 sm:pb-12"
             >
-              <p className="text-sm text-foreground/50">
+              <p className="text-sm text-black/50 dark:text-white/50">
                 Powered by Caliph Life School
               </p>
             </motion.div>
