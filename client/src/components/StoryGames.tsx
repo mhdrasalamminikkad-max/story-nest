@@ -45,7 +45,26 @@ const gameOptions: GameOption[] = [
   { id: "spotdiff", title: "Spot Difference", icon: <Search className="w-8 h-8" />, color: "from-teal-500 to-green-500", description: "Find what's different" },
 ];
 
-function extractKeyWords(content: string): string[] {
+function normalizeContent(content: string): string {
+  if (!content) return "";
+  
+  let normalized = content
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/data:[^;]+;base64,[^\s"']+/gi, '')
+    .replace(/https?:\/\/[^\s]+/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return normalized;
+}
+
+function extractKeyWords(content: string, title?: string, category?: string): string[] {
   const stopWords = new Set([
     "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with",
     "by", "from", "as", "is", "was", "are", "were", "been", "be", "have", "has", "had",
@@ -57,29 +76,41 @@ function extractKeyWords(content: string): string[] {
     "than", "too", "very", "just", "also", "now", "here", "there", "then", "once",
     "her", "his", "him", "my", "your", "our", "their", "me", "us", "them", "into",
     "said", "says", "went", "came", "got", "one", "two", "three", "about", "after",
-    "before", "over", "under", "again", "further", "while", "being", "having", "doing"
+    "before", "over", "under", "again", "further", "while", "being", "having", "doing",
+    "really", "always", "never", "like", "know", "think", "make", "made", "look",
+    "looked", "looked", "back", "away", "still", "even", "much", "well", "long"
   ]);
   
-  const words = content
+  const normalized = normalizeContent(content);
+  
+  const allText = [normalized, title || "", category || ""].join(" ");
+  
+  const words = allText
     .toLowerCase()
     .replace(/[^a-z\s]/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length >= 4 && w.length <= 10 && !stopWords.has(w));
+    .filter(w => w.length >= 3 && w.length <= 12 && !stopWords.has(w));
   
   const wordFreq = new Map<string, number>();
   words.forEach(w => wordFreq.set(w, (wordFreq.get(w) || 0) + 1));
   
-  return Array.from(wordFreq.entries())
+  const sortedWords = Array.from(wordFreq.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 20)
+    .slice(0, 30)
     .map(([word]) => word);
+  
+  return sortedWords;
 }
 
 function extractSentences(content: string): string[] {
-  return content
+  const normalized = normalizeContent(content);
+  
+  const sentences = normalized
     .split(/[.!?]+/)
     .map(s => s.trim())
-    .filter(s => s.length >= 20 && s.length <= 120);
+    .filter(s => s.length >= 10 && s.length <= 200 && /[a-zA-Z]/.test(s));
+  
+  return sentences;
 }
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -119,14 +150,15 @@ function deduplicateOptions(options: string[], correctAnswer: string): { options
 
 function generateQuizQuestions(story: Story) {
   const sentences = extractSentences(story.content);
-  const keyWords = extractKeyWords(story.content);
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
   
   const questions: { question: string; options: string[]; correct: number }[] = [];
   
+  const titleWords = keyWords.filter(w => !story.title.toLowerCase().includes(w));
   const titleVariations = [
-    `The ${keyWords[1] || 'Little'} ${keyWords[2] || 'Adventure'}`,
-    `A ${keyWords[3] || 'Magical'} ${keyWords[4] || 'Journey'}`,
-    `${keyWords[5]?.charAt(0).toUpperCase()}${keyWords[5]?.slice(1) || 'Happy'}'s ${keyWords[6] || 'Story'}`,
+    `The ${titleWords[0] || keyWords[0] || 'Little'} ${titleWords[1] || keyWords[1] || 'Tale'}`,
+    `A ${titleWords[2] || keyWords[2] || 'New'} ${titleWords[3] || keyWords[3] || 'Journey'}`,
+    `${(titleWords[4] || keyWords[4] || 'Another')?.charAt(0).toUpperCase()}${(titleWords[4] || keyWords[4] || 'Another')?.slice(1)}'s ${titleWords[5] || keyWords[5] || 'Story'}`,
   ];
   const titleResult = deduplicateOptions([story.title, ...titleVariations], story.title);
   questions.push({
@@ -136,8 +168,8 @@ function generateQuizQuestions(story: Story) {
   });
   
   if (story.category) {
-    const fakeCategories = ["Cooking", "Sports", "Science", "Travel", "Music", "History", "Nature"]
-      .filter(c => c.toLowerCase() !== story.category?.toLowerCase());
+    const allCategories = ["Adventure", "Bedtime", "Fairy Tale", "Animals", "Fantasy", "Learning", "Rhymes", "Nature", "Friendship"];
+    const fakeCategories = allCategories.filter(c => c.toLowerCase() !== story.category?.toLowerCase());
     const catResult = deduplicateOptions([story.category, ...fakeCategories], story.category);
     questions.push({
       question: "What type of story is this?",
@@ -146,13 +178,12 @@ function generateQuizQuestions(story: Story) {
     });
   }
   
-  if (sentences.length > 0) {
+  if (sentences.length >= 2) {
     const firstSentence = sentences[0];
-    const fakeSentences = sentences.slice(1, 4);
-    while (fakeSentences.length < 3) {
-      fakeSentences.push(`The ${keyWords[fakeSentences.length] || 'story'} began differently`);
-    }
-    const sentResult = deduplicateOptions([firstSentence, ...fakeSentences], firstSentence);
+    const otherSentences = sentences.slice(1).filter(s => s !== firstSentence);
+    const shuffledOthers = shuffleArray(otherSentences).slice(0, 3);
+    
+    const sentResult = deduplicateOptions([firstSentence, ...shuffledOthers], firstSentence);
     
     const displayOptions: string[] = [];
     const seenDisplays = new Set<string>();
@@ -180,11 +211,10 @@ function generateQuizQuestions(story: Story) {
   
   if (keyWords.length >= 4) {
     const storyWord = keyWords[0].charAt(0).toUpperCase() + keyWords[0].slice(1);
-    const similarWords = keyWords.slice(4, 7).map(w => w.charAt(0).toUpperCase() + w.slice(1));
-    const fakeWords = ["Elephant", "Bicycle", "Mountain", "Rainbow"]
-      .filter(w => !keyWords.includes(w.toLowerCase()));
-    const distractors = [...similarWords, ...fakeWords];
-    const wordResult = deduplicateOptions([storyWord, ...distractors], storyWord);
+    const unrelatedWords = ["Spaceship", "Computer", "Dinosaur", "Robot", "Volcano", "Penguin", "Submarine", "Helicopter"]
+      .filter(w => !keyWords.includes(w.toLowerCase()) && !story.content.toLowerCase().includes(w.toLowerCase()));
+    const shuffledUnrelated = shuffleArray(unrelatedWords).slice(0, 3);
+    const wordResult = deduplicateOptions([storyWord, ...shuffledUnrelated], storyWord);
     questions.push({
       question: "Which word appears in this story?",
       options: wordResult.options,
@@ -196,12 +226,53 @@ function generateQuizQuestions(story: Story) {
 }
 
 function generateMemoryCards(story: Story) {
-  const keyWords = extractKeyWords(story.content);
-  const wordsToUse = keyWords.slice(0, 4).map(w => w.substring(0, 6).toUpperCase());
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
+  
+  const uniqueWords = new Set<string>();
+  const wordsToUse: string[] = [];
+  
+  for (const word of keyWords) {
+    const shortened = word.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(shortened) && wordsToUse.length < 4) {
+      uniqueWords.add(shortened);
+      wordsToUse.push(shortened);
+    }
+  }
+  
+  const titleWords = story.title
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3);
+  
+  for (const word of titleWords) {
+    const shortened = word.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(shortened) && wordsToUse.length < 4) {
+      uniqueWords.add(shortened);
+      wordsToUse.push(shortened);
+    }
+  }
+  
+  if (story.category) {
+    const catWord = story.category.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(catWord) && wordsToUse.length < 4) {
+      uniqueWords.add(catWord);
+      wordsToUse.push(catWord);
+    }
+  }
   
   while (wordsToUse.length < 4) {
-    const fallback = ["STORY", "HAPPY", "MAGIC", "DREAM"];
-    wordsToUse.push(fallback[wordsToUse.length]);
+    const extraWords = keyWords.slice(4).map(w => w.substring(0, 6).toUpperCase());
+    for (const ew of extraWords) {
+      if (!uniqueWords.has(ew) && wordsToUse.length < 4) {
+        uniqueWords.add(ew);
+        wordsToUse.push(ew);
+      }
+    }
+    if (wordsToUse.length < 4) {
+      const filler = `WORD${wordsToUse.length + 1}`;
+      wordsToUse.push(filler);
+    }
   }
   
   const cards = [...wordsToUse, ...wordsToUse].map((word, i) => ({
@@ -215,7 +286,7 @@ function generateMemoryCards(story: Story) {
 }
 
 function generatePuzzleData(story: Story) {
-  const keyWords = extractKeyWords(story.content);
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
   const uniqueWords = new Set<string>();
   const words: string[] = [];
   
@@ -227,11 +298,39 @@ function generatePuzzleData(story: Story) {
     }
   }
   
-  const fallback = ["STORY", "MAGIC", "DREAM", "HAPPY", "BRAVE", "KINDR", "WONDER", "HOPE", "SHINE"];
-  for (const fb of fallback) {
-    if (!uniqueWords.has(fb) && words.length < 9) {
-      uniqueWords.add(fb);
-      words.push(fb);
+  const titleWords = story.title
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3);
+  
+  for (const word of titleWords) {
+    const truncated = word.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(truncated) && words.length < 9) {
+      uniqueWords.add(truncated);
+      words.push(truncated);
+    }
+  }
+  
+  if (story.category) {
+    const catWord = story.category.substring(0, 6).toUpperCase();
+    if (!uniqueWords.has(catWord) && words.length < 9) {
+      uniqueWords.add(catWord);
+      words.push(catWord);
+    }
+  }
+  
+  while (words.length < 9) {
+    const extraWords = keyWords.slice(words.length).map(w => w.substring(0, 6).toUpperCase());
+    for (const ew of extraWords) {
+      if (!uniqueWords.has(ew) && words.length < 9) {
+        uniqueWords.add(ew);
+        words.push(ew);
+      }
+    }
+    if (words.length < 9) {
+      const filler = `WRD${words.length + 1}`;
+      words.push(filler);
     }
   }
   
@@ -253,25 +352,49 @@ function generatePuzzleData(story: Story) {
 }
 
 function generateWordBuilderData(story: Story) {
-  const keyWords = extractKeyWords(story.content);
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
   const suitableWords = keyWords.filter(w => w.length >= 4 && w.length <= 7);
   
-  const word = suitableWords.length > 0 
-    ? suitableWords[Math.floor(Math.random() * Math.min(3, suitableWords.length))].toUpperCase()
-    : "STORY";
+  const titleWords = story.title
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 4 && w.length <= 7);
+  
+  const allSuitableWords = Array.from(new Set([...suitableWords, ...titleWords]));
+  
+  let word: string;
+  if (allSuitableWords.length > 0) {
+    word = allSuitableWords[Math.floor(Math.random() * Math.min(5, allSuitableWords.length))].toUpperCase();
+  } else if (keyWords.length > 0) {
+    word = keyWords[0].substring(0, 6).toUpperCase();
+  } else {
+    const normalized = normalizeContent(story.content);
+    const anyWord = normalized.split(/\s+/).find(w => w.length >= 4 && w.length <= 7 && /^[a-zA-Z]+$/.test(w));
+    word = (anyWord || story.title.split(/\s+/)[0] || "STORY").toUpperCase().substring(0, 7);
+  }
   
   const letters = shuffleArray(word.split(''));
-  return { word, letters, hint: `A word from the story (${word.length} letters)` };
+  return { word, letters, hint: `A word from "${story.title}" (${word.length} letters)` };
 }
 
 function generateFillInBlanks(story: Story) {
   const sentences = extractSentences(story.content);
-  const keyWords = extractKeyWords(story.content);
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
   const results: { text: string; answer: string; options: string[] }[] = [];
+  
+  const stopWords = new Set([
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with",
+    "was", "were", "is", "are", "be", "been", "have", "has", "had", "this", "that",
+    "said", "says", "went", "came", "got", "one", "two", "three", "into", "from"
+  ]);
   
   for (let i = 0; i < Math.min(3, sentences.length); i++) {
     const sentence = sentences[i];
-    const words = sentence.split(' ').filter(w => w.length >= 4);
+    const words = sentence.split(' ').filter(w => {
+      const cleanWord = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+      return cleanWord.length >= 4 && !stopWords.has(cleanWord);
+    });
     
     if (words.length > 0) {
       const targetWord = words[Math.floor(Math.random() * words.length)].replace(/[^a-zA-Z]/g, '');
@@ -282,10 +405,16 @@ function generateFillInBlanks(story: Story) {
         );
         
         const fakeOptions = keyWords
-          .filter(w => w.toLowerCase() !== targetWord.toLowerCase())
+          .filter(w => w.toLowerCase() !== targetWord.toLowerCase() && w.length >= 3)
           .slice(0, 2);
+        
         while (fakeOptions.length < 2) {
-          fakeOptions.push(["magic", "happy", "story"][fakeOptions.length]);
+          const additionalWords = ["friend", "happy", "kind", "brave", "gentle", "funny"];
+          for (const aw of additionalWords) {
+            if (!fakeOptions.includes(aw) && aw !== targetWord.toLowerCase() && fakeOptions.length < 2) {
+              fakeOptions.push(aw);
+            }
+          }
         }
         
         const opts = shuffleArray([targetWord.toLowerCase(), ...fakeOptions]);
@@ -298,16 +427,29 @@ function generateFillInBlanks(story: Story) {
     }
   }
   
-  if (results.length === 0) {
+  if (results.length === 0 && keyWords.length > 0) {
+    const keyWord = keyWords[0];
     results.push({
-      text: `The story "${story.title}" was full of ___ and wonder.`,
-      answer: "magic",
-      options: shuffleArray(["magic", "cold", "sad"])
+      text: `In the story "${story.title}", we learned about ___.`,
+      answer: keyWord,
+      options: shuffleArray([keyWord, keyWords[1] || "friend", keyWords[2] || "happy"])
     });
+    
+    if (keyWords.length >= 2) {
+      results.push({
+        text: `The story mentions something about ___.`,
+        answer: keyWords[1],
+        options: shuffleArray([keyWords[1], keyWords[2] || "kind", keyWords[3] || "brave"])
+      });
+    }
+  }
+  
+  if (results.length === 0) {
+    const titleWord = story.title.toLowerCase().split(/\s+/).find(w => w.length >= 4) || story.title.toLowerCase().split(/\s+/)[0];
     results.push({
-      text: "Everyone in the story lived ___ ever after.",
-      answer: "happily",
-      options: shuffleArray(["happily", "sadly", "quickly"])
+      text: `This story is called "${story.title}" and it is about ___.`,
+      answer: titleWord,
+      options: shuffleArray([titleWord, "something", "nothing"])
     });
   }
   
@@ -677,13 +819,7 @@ function areWordsSimilar(word1: string, word2: string): boolean {
 }
 
 function generateSpotDifferenceData(story: Story) {
-  const keyWords = extractKeyWords(story.content);
-  
-  const contrastPairs = [
-    ["FOREST", "OCEAN"], ["MOUNTAIN", "VALLEY"], ["NIGHT", "DAY"],
-    ["HAPPY", "QUIET"], ["BRAVE", "GENTLE"], ["MAGIC", "SIMPLE"],
-    ["CASTLE", "COTTAGE"], ["DRAGON", "BUNNY"], ["KING", "FARMER"]
-  ];
+  const keyWords = extractKeyWords(story.content, story.title, story.category || undefined);
   
   const storyPairs: Array<{ original: string; changed: string }> = [];
   
@@ -699,9 +835,37 @@ function generateSpotDifferenceData(story: Story) {
     }
   }
   
+  const titleWords = story.title
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 3);
+  
+  for (let i = 0; i < titleWords.length && storyPairs.length < 3; i++) {
+    for (const kw of keyWords) {
+      if (!areWordsSimilar(titleWords[i], kw) && kw.length >= 3 && storyPairs.length < 3) {
+        storyPairs.push({
+          original: titleWords[i].toUpperCase(),
+          changed: kw.toUpperCase()
+        });
+        break;
+      }
+    }
+  }
+  
   while (storyPairs.length < 3) {
-    const pair = contrastPairs[storyPairs.length % contrastPairs.length];
-    storyPairs.push({ original: pair[0], changed: pair[1] });
+    const extraPairs = keyWords.slice(storyPairs.length * 2);
+    if (extraPairs.length >= 2) {
+      storyPairs.push({
+        original: extraPairs[0].toUpperCase(),
+        changed: extraPairs[1].toUpperCase()
+      });
+    } else {
+      storyPairs.push({
+        original: `WORD${storyPairs.length + 1}`,
+        changed: `ITEM${storyPairs.length + 1}`
+      });
+    }
   }
   
   const diffIndices = shuffleArray([0, 1, 2]).slice(0, 2);
