@@ -86,7 +86,7 @@ export function PINDialog({
                   setPin(value);
                   setError("");
                 }}
-                className="text-center text-2xl tracking-widest rounded-2xl"
+                className="text-center text-2xl tracking-widest rounded-2xl text-foreground bg-background border-2 border-input"
                 placeholder="••••"
                 autoFocus
                 data-testid="input-pin"

@@ -40,13 +40,7 @@ export const insertStorySchema = storySchema.omit({
   language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
   category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"], { required_error: "Please select a category" }),
   storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"], { required_error: "Please select a story type" }),
-}).refine(
-  (data) => data.voiceoverUrl || data.audioUrl,
-  {
-    message: "Please record your voice OR upload an audio file before submitting",
-    path: ["voiceoverUrl"],
-  }
-);
+});
 
 export const reviewStorySchema = z.object({
   action: z.enum(["approve", "reject"]),
@@ -61,6 +55,7 @@ export type ReviewStory = z.infer<typeof reviewStorySchema>;
 export const parentSettingsSchema = z.object({
   userId: z.string(),
   pinHash: z.string(),
+  parentName: z.string().optional(),
   childName: z.string().optional(),
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),
@@ -75,6 +70,7 @@ export const parentSettingsSchema = z.object({
 
 export const insertParentSettingsSchema = z.object({
   pin: z.string().length(4, "PIN must be exactly 4 digits"),
+  parentName: z.string().min(1, "Please enter your name").max(50, "Name is too long"),
   childName: z.string().min(1, "Please enter your child's name").max(50, "Name is too long"),
   readingTimeLimit: z.number().min(10).max(60),
   fullscreenLockEnabled: z.boolean(),

@@ -557,12 +557,12 @@ export default function ParentDashboard() {
     });
   };
 
-  const handleFormSubmit = async (data: any) => {
-    // Check if either voice recording or audio file is present
+  const handleFormSubmit = async (data: any, isDraft: boolean = false) => {
+    // Check if either voice recording or audio file is present (only for non-draft submissions)
     const hasVoiceover = voiceoverBase64 || data.voiceoverUrl;
     const hasAudio = audioFile || data.audioUrl;
     
-    if (!hasVoiceover && !hasAudio) {
+    if (!isDraft && !hasVoiceover && !hasAudio) {
       toast({
         title: "Audio Required",
         description: "Please record your voice OR upload an audio file before submitting",
@@ -603,8 +603,8 @@ export default function ParentDashboard() {
     // Close dialog immediately for instant feedback
     setShowAddStory(false);
     toast({
-      title: editingStory ? "Story saved!" : "Story created!",
-      description: "Your story has been saved successfully",
+      title: editingStory ? "Story saved!" : (isDraft ? "Draft saved!" : "Story created!"),
+      description: isDraft ? "Your draft has been saved" : "Your story has been saved successfully",
       duration: 2000,
     });
     
@@ -1453,7 +1453,7 @@ export default function ParentDashboard() {
                 name={"voiceoverUrl" as any}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Voice Recording (Required) *</FormLabel>
+                    <FormLabel>Voice Recording (Optional for Draft, Required for Review)</FormLabel>
                     <FormControl>
                       <div className="space-y-3">
                         {!audioUrl && !isRecording && (
@@ -1551,7 +1551,27 @@ export default function ParentDashboard() {
                 )}
               />
 
-              <DialogFooter>
+              <DialogFooter className="flex gap-2">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={form.handleSubmit((data) => handleFormSubmit(data, true))}
+                  className="rounded-2xl" 
+                  data-testid="button-create-draft"
+                  disabled={pdfUploading || audioUploading}
+                >
+                  {(pdfUploading || audioUploading) ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      {editingStory ? "Save Draft" : "Create Draft"}
+                    </>
+                  )}
+                </Button>
                 <Button 
                   type="submit" 
                   className="rounded-2xl" 
@@ -1561,10 +1581,13 @@ export default function ParentDashboard() {
                   {(pdfUploading || audioUploading) ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Uploading files...
+                      Uploading...
                     </>
                   ) : (
-                    editingStory ? "Save Draft" : "Create Draft"
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Submit for Review
+                    </>
                   )}
                 </Button>
               </DialogFooter>

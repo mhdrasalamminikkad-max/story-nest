@@ -156,7 +156,23 @@ StoryNest is a fully responsive web application built with React, Express, and F
 
 ## Recent Changes
 
-### November 24, 2025 (Latest)
+### November 27, 2025 (Latest)
+- **Story Creation Improvements**:
+  - Added "Create Draft" button that allows saving stories without audio/voiceover
+  - Audio/voiceover is now optional for drafts but required for "Submit for Review"
+  - Two-button submission: "Create Draft" (outline) and "Submit for Review" (primary)
+  - Clear messaging that voice recording is optional for drafts
+
+- **Parent Name Field**:
+  - Added parentName field to Child Lock Setup form
+  - Database schema updated to include parentName in parent_settings table
+  - Parent name helps personalize the experience
+
+- **PIN Dialog Visibility Fix**:
+  - Fixed password input visibility in PIN dialogs (was white on white background)
+  - Added explicit dark text styling for all PIN input fields
+
+### November 24, 2025
 - **Leaderboard System** (Production-Ready ✅):
   - Created Hall of Fame page showing top achievers
   - Two leaderboard tabs: Top Children (by badges earned) and Top Parents (by published stories)

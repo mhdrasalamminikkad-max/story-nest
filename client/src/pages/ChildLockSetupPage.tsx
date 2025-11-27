@@ -40,6 +40,7 @@ export default function ChildLockSetupPage() {
     resolver: zodResolver(insertParentSettingsSchema),
     defaultValues: {
       pin: "",
+      parentName: "",
       childName: "",
       readingTimeLimit: 30,
       fullscreenLockEnabled: true,
@@ -129,7 +130,7 @@ export default function ChildLockSetupPage() {
                               inputMode="numeric"
                               maxLength={4}
                               placeholder="Enter 4-digit PIN"
-                              className="text-center text-2xl tracking-widest rounded-2xl"
+                              className="text-center text-2xl tracking-widest rounded-2xl text-foreground bg-background border-2 border-input"
                               {...field}
                               onChange={(e) => {
                                 const value = e.target.value.replace(/\D/g, "");
@@ -148,6 +149,31 @@ export default function ChildLockSetupPage() {
 
                     <FormField
                       control={form.control}
+                      name="parentName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base">
+                            Your Name (Parent)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Enter your name"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input"
+                              {...field}
+                              data-testid="input-parent-name"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            This helps personalize the experience
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="childName"
                       render={({ field }) => (
                         <FormItem>
@@ -158,7 +184,7 @@ export default function ChildLockSetupPage() {
                             <Input
                               type="text"
                               placeholder="Enter your child's name"
-                              className="rounded-2xl"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input"
                               {...field}
                               data-testid="input-child-name"
                             />
