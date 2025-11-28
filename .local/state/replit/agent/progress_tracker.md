@@ -22,3 +22,8 @@
 [x] 323. Import migration COMPLETE - All tasks finished
 [x] 324. Connected external PostgreSQL database (helium/heliumdb)
 [x] 325. Database tables verified and created successfully
+[x] 326. Added missing badges table with all columns
+[x] 327. Added missing game_sessions table with all columns
+[x] 328. Added missing columns to stories table (pdf_url, audio_url, audience)
+[x] 329. Added missing columns to parent_settings table (parent_name, child_name)
+[x] 330. All 14 database tables now created and verified

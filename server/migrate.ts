@@ -145,7 +145,50 @@ export async function runMigrations() {
         duration_minutes INTEGER NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+
+      CREATE TABLE IF NOT EXISTS badges (
+        id VARCHAR PRIMARY KEY,
+        user_id VARCHAR NOT NULL,
+        badge_name TEXT NOT NULL,
+        badge_icon VARCHAR(20) NOT NULL,
+        game_type VARCHAR(20) NOT NULL,
+        story_id VARCHAR NOT NULL,
+        earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS game_sessions (
+        id VARCHAR PRIMARY KEY,
+        user_id VARCHAR NOT NULL,
+        story_id VARCHAR NOT NULL,
+        game_type VARCHAR(20) NOT NULL,
+        score INTEGER NOT NULL,
+        total_score INTEGER NOT NULL,
+        passed BOOLEAN NOT NULL DEFAULT false,
+        played_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
     `);
+
+    // Add missing columns to existing tables (if they don't exist)
+    try {
+      await db.execute(sql`
+        ALTER TABLE stories ADD COLUMN IF NOT EXISTS pdf_url TEXT;
+        ALTER TABLE stories ADD COLUMN IF NOT EXISTS audio_url TEXT;
+        ALTER TABLE stories ADD COLUMN IF NOT EXISTS audience VARCHAR(10) NOT NULL DEFAULT 'both';
+      `);
+    } catch (e) {
+      // Column might already exist, ignore error
+    }
+
+    try {
+      await db.execute(sql`
+        ALTER TABLE parent_settings ADD COLUMN IF NOT EXISTS parent_name VARCHAR(50);
+        ALTER TABLE parent_settings ADD COLUMN IF NOT EXISTS child_name VARCHAR(50);
+      `);
+    } catch (e) {
+      // Column might already exist, ignore error
+    }
     
     console.log('✅ Database tables created successfully!');
   } catch (error) {
