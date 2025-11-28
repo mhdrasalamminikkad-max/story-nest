@@ -51,12 +51,13 @@ export default function ChildLockSetupPage() {
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Submitting child lock settings:", data);
-      const res = await apiRequest("POST", "/api/parent-settings", data);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to save settings");
+      try {
+        const res = await apiRequest("POST", "/api/parent-settings", data);
+        return await res.json();
+      } catch (error: any) {
+        console.error("API error details:", error.message);
+        throw error;
       }
-      return await res.json();
     },
     onSuccess: () => {
       console.log("Settings saved successfully");

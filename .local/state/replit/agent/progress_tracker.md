@@ -27,3 +27,5 @@
 [x] 328. Added missing columns to stories table (pdf_url, audio_url, audience)
 [x] 329. Added missing columns to parent_settings table (parent_name, child_name)
 [x] 330. All 14 database tables now created and verified
+[x] 331. Fixed child lock setup error handling
+[x] 332. Child setup now working - user signed in and settings saved successfully
