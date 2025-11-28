@@ -2075,7 +2075,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Audio not found" });
       }
 
-      const audioSource = story.audioUrl || story.voiceoverUrl;
+      // Prioritize voiceoverUrl (parent's recorded voice) over audioUrl (AI/uploaded audio)
+      const audioSource = story.voiceoverUrl || story.audioUrl;
       let bufferData: Buffer;
       let contentType = "audio/mpeg";
 

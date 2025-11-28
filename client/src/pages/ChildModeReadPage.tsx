@@ -108,7 +108,8 @@ export default function ChildModeReadPage() {
   };
 
   const startReading = () => {
-    const audioSource = currentStory?.audioUrl || currentStory?.voiceoverUrl;
+    // Prioritize voiceoverUrl (parent's recorded voice) over audioUrl (AI/uploaded audio)
+    const audioSource = currentStory?.voiceoverUrl || currentStory?.audioUrl;
     
     if (!currentStory || !audioSource) return;
 
@@ -364,7 +365,7 @@ export default function ChildModeReadPage() {
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={isReading ? stopReading : startReading}
-                    disabled={!currentStory.audioUrl && !currentStory.voiceoverUrl && !isReading}
+                    disabled={!currentStory.voiceoverUrl && !currentStory.audioUrl && !isReading}
                     data-testid="button-read-aloud"
                   >
                     <div className="flex items-center gap-2">
@@ -376,18 +377,31 @@ export default function ChildModeReadPage() {
                       ) : (
                         <>
                           <Volume2 className="w-6 h-6" />
-                          <span>{(currentStory.audioUrl || currentStory.voiceoverUrl) ? "Read to Me" : "No Recording"}</span>
+                          <span>{(currentStory.voiceoverUrl || currentStory.audioUrl) ? "Read to Me" : "No Recording"}</span>
                         </>
                       )}
                     </div>
                   </Button>
 
-                  {/* Finish Story Button */}
+                  {/* I Completed Reading Button */}
+                  <Button
+                    className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
+                    onClick={handleFinishStory}
+                    disabled={isReading}
+                    data-testid="button-completed-reading"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-6 h-6" />
+                      <span>I Completed Reading</span>
+                    </div>
+                  </Button>
+
+                  {/* Play Games Button */}
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={handleFinishStory}
                     disabled={isReading}
-                    data-testid="button-finish-story"
+                    data-testid="button-play-games"
                   >
                     <div className="flex items-center gap-2">
                       <Gamepad2 className="w-6 h-6" />

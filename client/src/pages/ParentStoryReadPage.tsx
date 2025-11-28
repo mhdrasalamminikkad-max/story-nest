@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Volume2, VolumeX, ChevronLeft, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Volume2, VolumeX, ChevronLeft, ArrowLeft, Gamepad2, BookOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Story } from "@shared/schema";
 import { PDFViewer } from "@/components/PDFViewer";
+import { StoryGames } from "@/components/StoryGames";
 
 export default function ParentStoryReadPage() {
   const [location, setLocation] = useLocation();
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showGames, setShowGames] = useState(false);
   
   // Get story ID from URL params
   const searchParams = new URLSearchParams(window.location.search);
@@ -122,73 +124,115 @@ export default function ParentStoryReadPage() {
             Back to Dashboard
           </Button>
 
-          <Button
-            variant={isSpeaking ? "destructive" : "default"}
-            onClick={toggleSpeech}
-            data-testid="button-toggle-speech"
-            className="rounded-2xl"
-          >
-            {isSpeaking ? (
-              <>
-                <VolumeX className="w-4 h-4 mr-2" />
-                Stop Reading
-              </>
-            ) : (
-              <>
-                <Volume2 className="w-4 h-4 mr-2" />
-                Read Aloud
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={isSpeaking ? "destructive" : "default"}
+              onClick={toggleSpeech}
+              data-testid="button-toggle-speech"
+              className="rounded-2xl"
+            >
+              {isSpeaking ? (
+                <>
+                  <VolumeX className="w-4 h-4 mr-2" />
+                  Stop Reading
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-4 h-4 mr-2" />
+                  Read Aloud
+                </>
+              )}
+            </Button>
+            
+            <Button
+              variant={showGames ? "secondary" : "outline"}
+              onClick={() => setShowGames(!showGames)}
+              data-testid="button-toggle-games"
+              className="rounded-2xl"
+            >
+              {showGames ? (
+                <>
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  View Story
+                </>
+              ) : (
+                <>
+                  <Gamepad2 className="w-4 h-4 mr-2" />
+                  Preview Games
+                </>
+              )}
+            </Button>
+          </div>
         </motion.div>
 
-        {/* Story Content */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-3xl shadow-xl p-6 md:p-10 space-y-6"
-        >
-          {/* Story Image */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="relative aspect-video rounded-2xl overflow-hidden"
-          >
-            <img
-              src={currentStory.imageUrl}
-              alt={currentStory.title}
-              className="w-full h-full object-cover"
-              data-testid="img-story"
-            />
-          </motion.div>
+        {/* Content Area - Story or Games */}
+        <AnimatePresence mode="wait">
+          {showGames ? (
+            <motion.div
+              key="games"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-card rounded-3xl shadow-xl p-6 md:p-10"
+            >
+              <StoryGames 
+                story={currentStory} 
+                onComplete={() => setShowGames(false)}
+                onNextStory={() => setShowGames(false)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="story"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-card rounded-3xl shadow-xl p-6 md:p-10 space-y-6"
+            >
+              {/* Story Image */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="relative aspect-video rounded-2xl overflow-hidden"
+              >
+                <img
+                  src={currentStory.imageUrl}
+                  alt={currentStory.title}
+                  className="w-full h-full object-cover"
+                  data-testid="img-story"
+                />
+              </motion.div>
 
-          {/* Story Title */}
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="font-heading text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
-            data-testid="text-story-title"
-          >
-            {currentStory.title}
-          </motion.h1>
+              {/* Story Title */}
+              <motion.h1
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="font-heading text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+                data-testid="text-story-title"
+              >
+                {currentStory.title}
+              </motion.h1>
 
-          {/* Story Content */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="prose prose-lg dark:prose-invert max-w-none"
-            data-testid="text-story-content"
-          >
-            {currentStory.content.split("\n\n").map((paragraph, index) => (
-              <p key={index} className="mb-4 text-card-foreground leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </motion.div>
-        </motion.div>
+              {/* Story Content */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="prose prose-lg dark:prose-invert max-w-none"
+                data-testid="text-story-content"
+              >
+                {currentStory.content.split("\n\n").map((paragraph, index) => (
+                  <p key={index} className="mb-4 text-card-foreground leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

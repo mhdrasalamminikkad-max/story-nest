@@ -16,7 +16,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins } from "lucide-react";
+import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -105,9 +105,10 @@ export default function AdminPanel() {
     enabled: adminCheck?.isAdmin || false,
   });
 
-  const { data: pendingStories = [] } = useQuery<Story[]>({
+  const { data: pendingStories = [], refetch: refetchPendingStories } = useQuery<Story[]>({
     queryKey: ["/api/admin/pending-stories"],
     enabled: adminCheck?.isAdmin || false,
+    refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
 
   const { data: users = [] } = useQuery<AdminUser[]>({
@@ -533,9 +534,21 @@ export default function AdminPanel() {
 
               <TabsContent value="review">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Pending Story Reviews</CardTitle>
-                    <CardDescription>Review and approve or reject stories submitted by parents</CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                      <CardTitle>Pending Story Reviews</CardTitle>
+                      <CardDescription>Review and approve or reject stories submitted by parents</CardDescription>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refetchPendingStories()}
+                      className="rounded-2xl"
+                      data-testid="button-refresh-pending"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     {pendingStories.length === 0 ? (
