@@ -16,3 +16,7 @@
 [x] 317. Fixed LSP error with Set iteration using Array.from()
 [x] 318. Architect reviewed and approved all StoryGames content extraction fixes
 [x] 319. Games now properly extract and display content based on actual story text - COMPLETE
+[x] 320. Installed missing tsx package dependency
+[x] 321. Restarted workflow successfully - server running on port 5000
+[x] 322. Verified application loads correctly with screenshot
+[x] 323. Import migration COMPLETE - All tasks finished
