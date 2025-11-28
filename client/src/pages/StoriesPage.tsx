@@ -107,7 +107,7 @@ export default function StoriesPage() {
                 key={story.id}
                 story={story}
                 showBookmark={false}
-                onRead={() => setLocation(`/child-mode?story=${story.id}`)}
+                onRead={() => setLocation(`/read-story?story=${story.id}`)}
               />
             ))}
           </div>

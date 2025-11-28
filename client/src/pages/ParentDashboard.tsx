@@ -965,14 +965,8 @@ export default function ParentDashboard() {
                       key={story.id}
                       story={story}
                       onRead={(story) => {
-                        // Smart routing based on audience
-                        if (story.audience === "parent") {
-                          // Parent-only stories go directly to read page
-                          setLocation(`/read-story?story=${story.id}`);
-                        } else {
-                          // Child or both stories go to child mode
-                          setLocation(`/child-mode?story=${story.id}`);
-                        }
+                        // All stories in parent dashboard go to parent read page
+                        setLocation(`/read-story?story=${story.id}`);
                       }}
                       onToggleBookmark={(story) => toggleBookmarkMutation.mutate(story.id)}
                     />
@@ -1054,12 +1048,8 @@ export default function ParentDashboard() {
                           {story.status === "published" && (
                             <Button
                               onClick={() => {
-                                // Smart routing based on audience
-                                if (story.audience === "parent") {
-                                  setLocation(`/read-story?story=${story.id}`);
-                                } else {
-                                  setLocation(`/child-mode?story=${story.id}`);
-                                }
+                                // All stories in parent dashboard go to parent read page
+                                setLocation(`/read-story?story=${story.id}`);
                               }}
                               className="rounded-2xl"
                               data-testid={`button-read-${story.id}`}
@@ -1180,7 +1170,7 @@ export default function ParentDashboard() {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit((data) => handleFormSubmit(data, false))} className="space-y-6">
               <FormField
                 control={form.control}
                 name="title"

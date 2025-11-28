@@ -92,7 +92,15 @@ export default function ChildLockSetupPage() {
       <AnimatedBackground />
       
       <div className="relative z-10">
-        <header className="container mx-auto px-4 py-6 flex justify-end">
+        <header className="container mx-auto px-4 py-6 flex justify-between items-center">
+          <Button
+            variant="ghost"
+            onClick={() => setLocation("/")}
+            className="rounded-2xl text-white"
+            data-testid="button-back-home"
+          >
+            ← Back to Home
+          </Button>
           <ThemeToggle />
         </header>
 
@@ -103,25 +111,25 @@ export default function ChildLockSetupPage() {
             transition={{ duration: 0.4 }}
             className="w-full max-w-2xl"
           >
-            <Card className="rounded-3xl border-2">
+            <Card className="rounded-3xl border-2 text-card-foreground">
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Lock className="w-8 h-8 text-primary" />
+                <div className="mx-auto mb-4 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="font-heading text-3xl">Child Lock Setup</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="font-heading text-3xl text-white">Child Lock Setup</CardTitle>
+                <CardDescription className="text-base text-white/80">
                   Configure safety settings for your child's reading time
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-white">
                     <FormField
                       control={form.control}
                       name="pin"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base flex items-center gap-2">
+                          <FormLabel className="text-base flex items-center gap-2 text-white">
                             <Lock className="w-4 h-4" />
                             Parent PIN (4 digits)
                           </FormLabel>
@@ -153,7 +161,7 @@ export default function ChildLockSetupPage() {
                       name="parentName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base">
+                          <FormLabel className="text-base text-white">
                             Your Name (Parent)
                           </FormLabel>
                           <FormControl>
@@ -178,7 +186,7 @@ export default function ChildLockSetupPage() {
                       name="childName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base">
+                          <FormLabel className="text-base text-white">
                             Child's Name
                           </FormLabel>
                           <FormControl>
@@ -203,12 +211,12 @@ export default function ChildLockSetupPage() {
                       name="readingTimeLimit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base flex items-center gap-2 justify-between">
+                          <FormLabel className="text-base flex items-center gap-2 justify-between text-white">
                             <span className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               Reading Time Limit
                             </span>
-                            <span className="font-heading text-primary">{field.value} minutes</span>
+                            <span className="font-heading text-yellow-300">{field.value} minutes</span>
                           </FormLabel>
                           <FormControl>
                             <Slider
@@ -236,9 +244,9 @@ export default function ChildLockSetupPage() {
                       control={form.control}
                       name="fullscreenLockEnabled"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border p-6">
+                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-white/30 p-6 bg-white/10">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-base flex items-center gap-2">
+                            <FormLabel className="text-base flex items-center gap-2 text-white">
                               <Maximize className="w-4 h-4" />
                               Enable Fullscreen Lock
                             </FormLabel>

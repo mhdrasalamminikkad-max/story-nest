@@ -83,17 +83,17 @@ export default function AuthPage() {
             transition={{ duration: 0.4 }}
             className="w-full"
           >
-            <Card className="w-full max-w-md mx-auto rounded-3xl border-2">
+            <Card className="w-full max-w-md mx-auto rounded-3xl border-2 text-card-foreground">
               <CardHeader className="text-center space-y-3 sm:space-y-4">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   className="inline-block mx-auto"
                 >
-                  <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-primary mx-auto" />
+                  <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-white mx-auto" />
                 </motion.div>
-                <CardTitle className="font-heading text-2xl sm:text-3xl">{welcomeText}</CardTitle>
-                <CardDescription className="text-sm sm:text-base px-2">
+                <CardTitle className="font-heading text-2xl sm:text-3xl text-white">{welcomeText}</CardTitle>
+                <CardDescription className="text-sm sm:text-base px-2 text-white/80">
                   Sign in with Google to access magical bedtime stories
                 </CardDescription>
               </CardHeader>
@@ -102,7 +102,7 @@ export default function AuthPage() {
                   onClick={handleGoogleSignIn}
                   size="lg"
                   variant="outline"
-                  className="w-full rounded-2xl text-base sm:text-lg gap-3"
+                  className="w-full rounded-2xl text-base sm:text-lg gap-3 bg-white text-gray-800 hover:bg-white/90"
                   disabled={loading}
                   data-testid="button-google-signin"
                 >
@@ -110,7 +110,7 @@ export default function AuthPage() {
                   {loading ? "Signing in..." : "Continue with Google"}
                 </Button>
                 
-                <p className="text-xs sm:text-sm text-center text-muted-foreground px-2 sm:px-4">
+                <p className="text-xs sm:text-sm text-center text-white/70 px-2 sm:px-4">
                   By signing in, you agree to create a safe, magical reading environment for your child
                 </p>
               </CardContent>

@@ -122,7 +122,7 @@ export default function StoryExplorer() {
   };
 
   const handleStoryClick = (storyId: string) => {
-    setLocation(`/child-mode?storyId=${storyId}`);
+    setLocation(`/read-story?story=${storyId}`);
   };
 
   const getStepIcon = () => {

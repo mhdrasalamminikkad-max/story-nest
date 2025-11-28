@@ -88,7 +88,7 @@ export default function LibraryPage() {
                 key={story.id}
                 story={story}
                 showBookmark={true}
-                onRead={() => setLocation(`/child-mode?story=${story.id}`)}
+                onRead={() => setLocation(`/read-story?story=${story.id}`)}
               />
             ))}
           </div>
