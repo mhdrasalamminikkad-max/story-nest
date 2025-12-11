@@ -20,12 +20,26 @@ try {
     }
 
     // Use service account credentials
+    // Handle different private key formats (escaped newlines, JSON-escaped, etc.)
+    let formattedKey = privateKey;
+    // Replace literal \n with actual newlines
+    if (formattedKey.includes('\\n')) {
+      formattedKey = formattedKey.replace(/\\n/g, '\n');
+    }
+    // If the key was double-escaped or has \\\\n
+    if (formattedKey.includes('\\\\n')) {
+      formattedKey = formattedKey.replace(/\\\\n/g, '\n');
+    }
+    // Ensure proper PEM format - should start with -----BEGIN
+    if (!formattedKey.includes('-----BEGIN')) {
+      console.error("⚠ Private key does not appear to be in PEM format");
+    }
+    
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        // Replace escaped newlines with actual newlines
-        privateKey: privateKey.replace(/\\n/g, '\n'),
+        privateKey: formattedKey,
       }),
     });
     console.log("✓ Firebase Admin initialized with service account credentials");
