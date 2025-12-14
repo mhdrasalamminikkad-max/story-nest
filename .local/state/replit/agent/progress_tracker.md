@@ -37,3 +37,5 @@
 [x] 384. Updated ParentStoryReadPage to display PDF filling the entire screen (no box)
 [x] 385. Updated ChildModeReadPage to display PDF with larger height (calc(100vh - 250px))
 [x] 386. Restarted workflow - application running successfully on port 5000
+[x] 387. Fixed child_age column missing error - ran db:push to add column to database
+[x] 388. Restarted workflow - child lock setup now working
