@@ -21,18 +21,15 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
         onClick={() => onRead?.(story)}
         data-testid={`card-story-${story.id}`}
         aria-label={`Read ${story.title}`}
-        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         <div className="relative aspect-[3/4] overflow-hidden rounded-2xl">
-          <motion.img
+          <img
             src={story.imageUrl}
             alt={story.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:brightness-105"
             loading="lazy"
             data-testid={`img-story-${story.id}`}
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.3 }}
           />
           <motion.div
             className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100"
@@ -52,20 +49,18 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      whileHover={{ y: -8, scale: 1.02 }}
+      whileHover={{ y: -8 }}
       transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
     >
       <Card className="overflow-hidden rounded-3xl border-2 border-primary/10 hover-elevate h-full flex flex-col shadow-lg hover:shadow-2xl transition-all group" data-testid={`card-story-${story.id}`}>
         {/* Image Container */}
         <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
-          <motion.img
+          <img
             src={story.imageUrl}
             alt={story.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-105"
             loading="lazy"
             data-testid={`img-story-${story.id}`}
-            whileHover={{ scale: 1.15 }}
-            transition={{ duration: 0.4 }}
           />
           
           {/* Overlay Gradient on Hover */}
@@ -80,7 +75,7 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
           {showBookmark && (
             <motion.div
               className="absolute top-3 right-3"
-              whileHover={{ scale: 1.1, rotate: 10 }}
+              whileHover={{ rotate: 10 }}
               whileTap={{ scale: 0.9 }}
             >
               <Button
@@ -135,7 +130,6 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
         <CardFooter className="pt-0">
           <motion.div
             className="w-full"
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <Button

@@ -666,7 +666,6 @@ export default function ParentDashboard() {
                 className="cursor-pointer hover-elevate active-elevate-2 rounded-2xl transition-all"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
-                whileHover={{ scale: 1.05 }}
               >
                 <img 
                   src={tellMammaLogo} 
@@ -679,7 +678,7 @@ export default function ParentDashboard() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {parentSettings && (
-                <motion.div whileHover={{ scale: 1.05 }}>
+                <motion.div>
                   <Badge className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-bold border-2 border-yellow-400 dark:border-yellow-700 shadow-lg" data-testid="badge-coin-balance">
                     <Coins className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-bounce" />
                     <span>{parentSettings.coins}</span>
@@ -688,7 +687,7 @@ export default function ParentDashboard() {
                 </motion.div>
               )}
               <ThemeToggle />
-              <motion.div whileHover={{ scale: 1.1 }}>
+              <motion.div>
                 <Button
                   variant="outline"
                   size="icon"
@@ -700,7 +699,7 @@ export default function ParentDashboard() {
                   <Trophy className="w-5 h-5 text-yellow-500" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.1 }}>
+              <motion.div>
                 <Button
                   variant="outline"
                   size="icon"
@@ -799,7 +798,7 @@ export default function ParentDashboard() {
             </Card>
 
             <div className="hidden md:flex gap-3 flex-wrap w-full">
-              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={() => {
                     setEditingStory(null);
@@ -824,7 +823,7 @@ export default function ParentDashboard() {
                   Submit Story for Review
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/checkpoints")}
@@ -835,7 +834,7 @@ export default function ParentDashboard() {
                   Checkpoints & Rewards
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/pricing")}
@@ -846,7 +845,7 @@ export default function ParentDashboard() {
                   View Plans
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="flex-1 sm:flex-initial">
+              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={() => setLocation("/child-mode")}
                   className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
@@ -880,7 +879,7 @@ export default function ParentDashboard() {
             <TabsContent value="published">
               <motion.div className="mb-6 space-y-4">
                 <motion.div className="flex gap-3 flex-wrap">
-                  <motion.div whileHover={{ scale: 1.05 }}>
+                  <motion.div>
                     <Button
                       variant={filterBookmarked ? "default" : "outline"}
                       onClick={() => setFilterBookmarked(!filterBookmarked)}
@@ -894,7 +893,7 @@ export default function ParentDashboard() {
                 </motion.div>
                 
                 <div className="flex gap-3 flex-wrap">
-                  <motion.div className="relative flex-1 min-w-[200px]" whileHover={{ scale: 1.02 }}>
+                  <motion.div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary" />
                     <Input
                       placeholder="🔍 Search stories..."

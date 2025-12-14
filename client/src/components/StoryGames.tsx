@@ -571,7 +571,6 @@ function MemoryGame({ story, onWin }: { story: Story; onWin: () => void }) {
         {cards.map((card, i) => (
           <motion.div
             key={i}
-            whileHover={{ scale: card.isMatched ? 1 : 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleCardClick(i)}
             className={`aspect-square rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold cursor-pointer transition-all p-1 ${
@@ -626,7 +625,6 @@ function PuzzleGame({ story, onWin }: { story: Story; onWin: () => void }) {
           return (
             <motion.div
               key={piece.id}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handlePieceClick(i)}
               className={`aspect-square rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold cursor-pointer shadow-lg p-1 ${
@@ -718,10 +716,9 @@ function WordBuilderGame({ story, onWin }: { story: Story; onWin: () => void }) 
         {availableLetters.map((letter, i) => (
           <motion.div
             key={i}
-            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => handleLetterClick(i)}
-            className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center text-xl font-bold cursor-pointer shadow-lg"
+            className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 text-white flex items-center justify-center text-xl font-bold cursor-pointer shadow-lg hover-elevate"
             data-testid={`letter-available-${i}`}
           >
             {letter}

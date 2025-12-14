@@ -36,7 +36,6 @@ export default function HomePage() {
                 className="cursor-pointer hover-elevate active-elevate-2 rounded-2xl transition-all"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
-                whileHover={{ scale: 1.05 }}
               >
                 <img 
                   src={tellMammaLogo} 
@@ -93,8 +92,7 @@ export default function HomePage() {
             >
               {/* Badge */}
               <motion.div 
-                className="inline-flex items-center gap-3 bg-[#F5C518]/20 px-8 py-4 rounded-3xl border-2 border-[#F5C518]/50 shadow-xl"
-                whileHover={{ scale: 1.05 }}
+                className="inline-flex items-center gap-3 bg-[#F5C518]/20 px-8 py-4 rounded-3xl border-2 border-[#F5C518]/50 shadow-xl hover-elevate"
               >
                 <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                   <Sparkles className="w-6 h-6 text-[#E5683A] animate-pulse" />
@@ -158,7 +156,7 @@ export default function HomePage() {
                 <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
                     className="relative"
-                    whileHover={{ scale: 1.15, rotate: 10 }}
+                    whileHover={{ rotate: 10 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <motion.div 
@@ -190,8 +188,8 @@ export default function HomePage() {
                     {["Fairy Tales", "Adventures", "Educational"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer"
-                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
+                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer hover-elevate"
+                        whileHover={{ boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -240,7 +238,7 @@ export default function HomePage() {
                 <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
                     className="relative"
-                    whileHover={{ scale: 1.15, rotate: -10 }}
+                    whileHover={{ rotate: -10 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <motion.div 
@@ -272,8 +270,8 @@ export default function HomePage() {
                     {["Nursery Rhymes", "Songs", "Music"].map((tag, idx) => (
                       <motion.div
                         key={tag}
-                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer"
-                        whileHover={{ scale: 1.15, boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
+                        className="px-5 py-2 bg-[#F5C518] rounded-full text-sm font-bold text-gray-800 border border-[#D4A500] cursor-pointer hover-elevate"
+                        whileHover={{ boxShadow: "0 0 20px rgba(245, 197, 24, 0.6)" }}
                         whileTap={{ scale: 0.95 }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -315,7 +313,7 @@ export default function HomePage() {
                   <Card className="p-8 text-center space-y-6 h-full border-2 border-[#E5683A]/20 hover-elevate transition-all bg-white dark:bg-gray-900">
                     <motion.div 
                       className="w-16 h-16 bg-[#F5C518] rounded-3xl flex items-center justify-center mx-auto shadow-lg"
-                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      whileHover={{ rotate: 10 }}
                     >
                       <feature.icon className="w-8 h-8 text-gray-800" />
                     </motion.div>

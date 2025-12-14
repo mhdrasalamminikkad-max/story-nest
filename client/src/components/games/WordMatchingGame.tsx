@@ -92,7 +92,6 @@ export function WordMatchingGame({ storyId, storyTitle, storyContent, onComplete
           {wordPairs.map((pair, index) => (
             <motion.div
               key={index}
-              whileHover={{ scale: matchedPairs.has(index) ? 1 : 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Card
@@ -119,7 +118,6 @@ export function WordMatchingGame({ storyId, storyTitle, storyContent, onComplete
             return (
               <motion.div
                 key={index}
-                whileHover={{ scale: isMatched ? 1 : 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Card

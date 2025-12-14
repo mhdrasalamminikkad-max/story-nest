@@ -131,7 +131,6 @@ export function MemoryGame({ storyId, onComplete }: MemoryGameProps) {
           return (
             <motion.div
               key={card.id}
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Card

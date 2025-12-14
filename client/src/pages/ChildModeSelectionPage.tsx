@@ -157,7 +157,7 @@ export default function ChildModeSelectionPage() {
         <motion.button
           onClick={() => setShowPINDialog(true)}
           className="relative bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white px-7 py-3 rounded-full shadow-2xl font-bold text-lg flex items-center gap-3 border-3 border-white/50 overflow-hidden"
-          whileHover={{ scale: 1.15, boxShadow: "0 30px 60px rgba(239, 68, 68, 0.8)" }}
+          whileHover={{ boxShadow: "0 30px 60px rgba(239, 68, 68, 0.8)" }}
           whileTap={{ scale: 0.92 }}
           data-testid="button-exit-child-mode"
         >
@@ -266,7 +266,7 @@ export default function ChildModeSelectionPage() {
                 initial={{ opacity: 0, y: 60, scale: 0.7 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: index * 0.1, type: "spring", stiffness: 150, damping: 20 }}
-                whileHover={{ y: -25, scale: 1.08 }}
+                whileHover={{ y: -25 }}
                 data-testid={`card-story-${index}`}
                 className="relative group"
               >
@@ -303,7 +303,7 @@ export default function ChildModeSelectionPage() {
                       className="w-full h-full object-cover relative z-10"
                       loading="lazy"
                       data-testid={`img-story-${index}`}
-                      whileHover={{ scale: 1.2, rotate: 2 }}
+                      whileHover={{ rotate: 2 }}
                       transition={{ duration: 0.4 }}
                     />
 
@@ -314,7 +314,7 @@ export default function ChildModeSelectionPage() {
 
                     {/* Category Badge */}
                     <div className="absolute top-3 right-3 z-30">
-                      <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+                      <motion.div whileTap={{ scale: 0.85 }}>
                         <Badge className={`${categoryColors[story.category] || "bg-gray-500/20"} font-bold text-sm border-2 backdrop-blur-md shadow-lg`}>
                           {story.category}
                         </Badge>
@@ -360,7 +360,7 @@ export default function ChildModeSelectionPage() {
                     {/* MEGA ULTRA-BEAUTIFUL READ BUTTON */}
                     <motion.div
                       className="flex items-center justify-center gap-3 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-white px-7 py-5 rounded-2xl font-bold text-lg md:text-xl shadow-lg border-3 border-white/50 relative overflow-hidden group cursor-pointer"
-                      whileHover={{ scale: 1.12, boxShadow: "0 30px 60px rgba(139, 92, 246, 0.9)" }}
+                      whileHover={{ boxShadow: "0 30px 60px rgba(139, 92, 246, 0.9)" }}
                       whileTap={{ scale: 0.92 }}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
