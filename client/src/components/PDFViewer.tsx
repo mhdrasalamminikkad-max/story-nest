@@ -148,7 +148,7 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
 
   return (
     <div ref={containerRef} className="w-full flex flex-col gap-4" data-testid="pdf-viewer">
-      <div className="w-full overflow-auto bg-muted/30 rounded-lg flex items-center justify-center p-4" style={{ height }}>
+      <div className="w-full overflow-auto bg-muted/30 rounded-lg flex items-start justify-center p-4" style={{ height }}>
         <canvas ref={canvasRef} className="max-w-full h-auto" />
       </div>
       

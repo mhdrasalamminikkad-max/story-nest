@@ -103,12 +103,16 @@ export default function AdminPanel() {
   const { data: allStories = [] } = useQuery<Story[]>({
     queryKey: ["/api/admin/stories"],
     enabled: adminCheck?.isAdmin || false,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const { data: pendingStories = [], refetch: refetchPendingStories } = useQuery<Story[]>({
     queryKey: ["/api/admin/pending-stories"],
     enabled: adminCheck?.isAdmin || false,
-    refetchInterval: 10000, // Auto-refresh every 10 seconds
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchInterval: 5000, // Auto-refresh every 5 seconds for instant updates
   });
 
   const { data: users = [] } = useQuery<AdminUser[]>({

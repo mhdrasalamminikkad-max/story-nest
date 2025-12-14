@@ -69,10 +69,14 @@ export default function ParentDashboard() {
 
   const { data: stories = [], isLoading } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const { data: mySubmissions = [], isLoading: loadingSubmissions } = useQuery<Story[]>({
     queryKey: ["/api/stories/my-submissions"],
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const { data: bookmarks = [] } = useQuery<string[]>({

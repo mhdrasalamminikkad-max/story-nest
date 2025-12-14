@@ -79,12 +79,12 @@ export default function ParentStoryReadPage() {
     );
   }
 
-  // If story has PDF, show PDF viewer
+  // If story has PDF, show PDF viewer with Read to Me button
   if (currentStory.pdfUrl) {
     return (
       <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
@@ -97,7 +97,25 @@ export default function ParentStoryReadPage() {
             <h2 className="font-semibold text-lg truncate flex-1 text-center">
               {currentStory.title}
             </h2>
-            <div className="w-24"></div>
+            <Button
+              variant={isSpeaking ? "destructive" : "default"}
+              size="sm"
+              onClick={toggleSpeech}
+              data-testid="button-toggle-speech"
+              className="rounded-2xl"
+            >
+              {isSpeaking ? (
+                <>
+                  <VolumeX className="w-4 h-4 mr-2" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-4 h-4 mr-2" />
+                  Read to Me
+                </>
+              )}
+            </Button>
           </div>
         </div>
         <PDFViewer pdfUrl={currentStory.pdfUrl} />

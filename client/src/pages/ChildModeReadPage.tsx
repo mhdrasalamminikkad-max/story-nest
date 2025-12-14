@@ -33,6 +33,8 @@ export default function ChildModeReadPage() {
 
   const { data: stories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const { data: settings } = useQuery<ParentSettings>({

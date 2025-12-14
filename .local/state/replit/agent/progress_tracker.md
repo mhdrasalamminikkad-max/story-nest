@@ -14,3 +14,9 @@
 [x] 361. Added Firebase Admin credentials (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
 [x] 362. Firebase Admin initialized successfully with service account credentials
 [x] 363. Import migration completed - application fully functional
+[x] 364. Fixed story submission to show instantly in admin panel (staleTime: 0, refetchOnMount: always)
+[x] 365. Fixed story approval to be instant (refetchInterval: 5 seconds)
+[x] 366. Fixed slow story loading on dashboard (staleTime: 0, refetchOnMount: always)
+[x] 367. Fixed slow story loading in child lock mode (staleTime: 0, refetchOnMount: always)
+[x] 368. Fixed PDF viewer to start from top instead of center (items-start instead of items-center)
+[x] 369. Added Read to Me button in parent story reading section for PDF stories
