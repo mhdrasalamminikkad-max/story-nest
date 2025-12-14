@@ -33,8 +33,8 @@ export function TrialBanner() {
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-green-500/20">
-                <Sparkles className="w-5 h-5 text-green-500 animate-spin" />
+              <div className="p-2 rounded-full bg-green-500/20 animate-pulse">
+                <Sparkles className="w-5 h-5 text-green-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">
