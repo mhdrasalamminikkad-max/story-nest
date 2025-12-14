@@ -57,9 +57,9 @@ export default function LeaderboardPage() {
       return (
         <Card>
           <CardContent className="p-12 text-center">
-            <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">No rankings yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <Trophy className="w-12 h-12 mx-auto mb-3 text-[#febc2d]" />
+            <p className="text-black dark:text-black">No rankings yet</p>
+            <p className="text-sm text-black dark:text-black mt-1">
               Be the first to earn {scoreLabel}!
             </p>
           </CardContent>
