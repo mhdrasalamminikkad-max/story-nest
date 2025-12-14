@@ -42,6 +42,7 @@ export default function ChildLockSetupPage() {
       pin: "",
       parentName: "",
       childName: "",
+      childAge: 5,
       readingTimeLimit: 30,
       fullscreenLockEnabled: true,
       theme: "day" as const,
@@ -200,6 +201,34 @@ export default function ChildLockSetupPage() {
                           </FormControl>
                           <FormDescription>
                             This name will appear in welcome messages
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="childAge"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base text-white">
+                            Child's Age
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="1"
+                              max="18"
+                              placeholder="Enter child's age (1-18)"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              data-testid="input-child-age"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Child's age for age-appropriate content selection
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

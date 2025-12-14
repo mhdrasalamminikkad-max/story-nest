@@ -27,6 +27,7 @@ export const parentSettings = pgTable("parent_settings", {
   pinHash: text("pin_hash").notNull(),
   parentName: varchar("parent_name", { length: 50 }),
   childName: varchar("child_name", { length: 50 }),
+  childAge: integer("child_age"),
   readingTimeLimit: integer("reading_time_limit").notNull(),
   fullscreenLockEnabled: boolean("fullscreen_lock_enabled").notNull(),
   theme: varchar("theme", { length: 10 }).notNull(),
