@@ -25,3 +25,4 @@
 [x] 372. Import migration complete - all systems operational
 [x] 373. Re-added Firebase Admin secrets (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
 [x] 374. Firebase Admin initialized successfully - child lock setup now working
+[x] 375. Hardcoded Firebase credentials (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY) directly in server/firebase-admin.ts
