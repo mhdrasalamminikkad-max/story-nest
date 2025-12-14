@@ -1098,7 +1098,7 @@ export default function ParentDashboard() {
                         <Button
                           onClick={() => setShowEditPin(true)}
                           variant="outline"
-                          className="rounded-2xl w-full"
+                          className="rounded-2xl w-full bg-[#febc2d]"
                           data-testid="button-edit-child-lock"
                         >
                           <Lock className="w-4 h-4 mr-2" />
