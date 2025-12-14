@@ -45,9 +45,16 @@ StoryNest is a child-friendly, fully responsive web application built with React
 - **Security**: PINs hashed with PBKDF2 (10,000 iterations), Firebase ID tokens for authentication, Firestore security rules. Payment security includes a 7-layer verification process for Razorpay transactions.
 - **Subscription Middleware**: Protects routes requiring an active subscription, returning 403 if the trial is expired or no active subscription exists.
 
+## Recent Changes (December 14, 2025)
+- Completed full migration import (363 tasks)
+- Firebase Admin credentials configured and working
+- All packages installed and application running on port 5000
+- Progress tracked in `.local/state/replit/agent/progress_tracker.md`
+
 ## External Dependencies
 - **Firebase**: Authentication (Google Sign-In), Firestore (database), Firebase Admin SDK.
-  - Environment variables: `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_API_KEY`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`.
+  - Frontend env vars: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_MEASUREMENT_ID`
+  - Backend secrets (configured): `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`
 - **Razorpay**: Payment gateway for coin purchases (supports UPI, cards, wallets in India).
   - Environment variables: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`.
 - **Web Speech API**: For text-to-speech narration.
