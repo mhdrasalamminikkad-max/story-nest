@@ -50,9 +50,8 @@ export default function HomePage() {
                 {user ? (
                   <>
                     <Button
-                      variant="outline"
                       onClick={() => setLocation("/dashboard")}
-                      className="rounded-2xl font-semibold"
+                      className="rounded-2xl font-semibold bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90 hover:shadow-lg transition-all"
                       data-testid="button-dashboard"
                     >
                       <User className="w-4 h-4 mr-2" />
