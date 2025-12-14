@@ -45,6 +45,16 @@ export default function ChildModeReadPage() {
     queryKey: ["/api/checkpoints/progress"],
   });
 
+  const currentStoryFromList = stories[currentStoryIndex];
+  const currentStoryId = currentStoryFromList?.id;
+
+  const { data: storyDetails, isLoading: loadingDetails } = useQuery<Story>({
+    queryKey: ["/api/stories", currentStoryId],
+    enabled: !!currentStoryId,
+  });
+
+  const currentStory = storyDetails || currentStoryFromList;
+
   const trackStoryMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/checkpoints/track-story");
@@ -58,8 +68,6 @@ export default function ChildModeReadPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/checkpoints/progress"] });
     },
   });
-
-  const currentStory = stories[currentStoryIndex];
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -94,7 +102,6 @@ export default function ChildModeReadPage() {
         setIsFullscreen(true);
       }
     } catch (err) {
-      // Fullscreen request failed or denied
     }
   };
 
@@ -105,21 +112,19 @@ export default function ChildModeReadPage() {
       }
       setIsFullscreen(false);
     } catch (err) {
-      // Fullscreen exit failed
     }
   };
 
   const startReading = () => {
-    // Prioritize voiceoverUrl (parent's recorded voice) over audioUrl (AI/uploaded audio)
-    const audioSource = currentStory?.voiceoverUrl || currentStory?.audioUrl;
+    const audioSource = storyDetails?.voiceoverUrl || storyDetails?.audioUrl;
     
-    if (!currentStory || !audioSource) return;
+    if (!storyDetails || !audioSource) return;
 
     stopReading();
 
     let audioUrl = audioSource;
     if (audioSource.startsWith('http') || audioSource.startsWith('/')) {
-      audioUrl = currentStory.id ? `/api/audio-proxy/${currentStory.id}` : audioSource;
+      audioUrl = storyDetails.id ? `/api/audio-proxy/${storyDetails.id}` : audioSource;
     }
 
     const audio = new Audio(audioUrl);
@@ -247,7 +252,7 @@ export default function ChildModeReadPage() {
     setShowGames(false);
   };
 
-  if (!currentStory) {
+  if (!currentStoryFromList) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">No stories available. Please add stories first.</p>
@@ -255,13 +260,25 @@ export default function ChildModeReadPage() {
     );
   }
 
+  if (loadingDetails && !currentStory) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading story...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const hasAudio = storyDetails?.voiceoverUrl || storyDetails?.audioUrl;
+
   return (
     <div
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 relative overflow-hidden"
     >
       <div className="relative z-10 h-screen flex flex-col">
-        {/* Header */}
         <header className="p-3 sm:p-4 flex justify-between items-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex gap-2 sm:gap-3 items-center">
             {stories.length > 1 && (
@@ -289,7 +306,7 @@ export default function ChildModeReadPage() {
           </div>
 
           <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white text-center flex-1" data-testid="text-current-story-title">
-            {currentStory.title}
+            {currentStory?.title}
           </h2>
 
           <Button
@@ -303,7 +320,6 @@ export default function ChildModeReadPage() {
           </Button>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <AnimatePresence mode="wait">
             {showGames ? (
@@ -317,7 +333,7 @@ export default function ChildModeReadPage() {
               >
                 <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200 dark:border-gray-700">
                   <StoryGames 
-                    story={currentStory} 
+                    story={currentStory!} 
                     onComplete={handleGameComplete}
                     onNextStory={nextStory}
                   />
@@ -325,32 +341,29 @@ export default function ChildModeReadPage() {
               </motion.div>
             ) : (
               <motion.div
-                key={currentStory.id}
+                key={currentStory?.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="flex flex-col gap-6 max-w-4xl mx-auto"
               >
-                {/* Story Content Box */}
                 <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-md border border-gray-200 dark:border-gray-700">
                   <p 
                     className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-800 dark:text-gray-100 whitespace-pre-wrap"
                     data-testid="text-current-story-content"
                   >
-                    {currentStory.content}
+                    {currentStory?.content}
                   </p>
                 </div>
 
-                {/* PDF Viewer */}
-                {currentStory.pdfUrl && (
+                {storyDetails?.pdfUrl && (
                   <div className="w-full rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-                    <PDFViewer pdfUrl={`/api/pdf-proxy/${currentStory.id}`} height="500px" />
+                    <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} height="500px" />
                   </div>
                 )}
 
-                {/* Story Image */}
-                {currentStory.imageUrl && (
+                {currentStory?.imageUrl && (
                   <div className="flex justify-center">
                     <img
                       src={currentStory.imageUrl}
@@ -361,13 +374,11 @@ export default function ChildModeReadPage() {
                   </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-                  {/* Read Button */}
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={isReading ? stopReading : startReading}
-                    disabled={!currentStory.voiceoverUrl && !currentStory.audioUrl && !isReading}
+                    disabled={!hasAudio && !isReading}
                     data-testid="button-read-aloud"
                   >
                     <div className="flex items-center gap-2">
@@ -379,13 +390,12 @@ export default function ChildModeReadPage() {
                       ) : (
                         <>
                           <Volume2 className="w-6 h-6" />
-                          <span>{(currentStory.voiceoverUrl || currentStory.audioUrl) ? "Read to Me" : "No Recording"}</span>
+                          <span>{hasAudio ? "Read to Me" : "No Recording"}</span>
                         </>
                       )}
                     </div>
                   </Button>
 
-                  {/* I Completed Reading Button */}
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={handleFinishStory}
@@ -398,7 +408,6 @@ export default function ChildModeReadPage() {
                     </div>
                   </Button>
 
-                  {/* Play Games Button */}
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={handleFinishStory}
@@ -417,7 +426,6 @@ export default function ChildModeReadPage() {
         </main>
       </div>
 
-      {/* PIN Dialog */}
       <PINDialog
         open={showPINDialog}
         onOpenChange={setShowPINDialog}
@@ -426,7 +434,6 @@ export default function ChildModeReadPage() {
         description="Enter parent PIN to return to dashboard"
       />
 
-      {/* Rewards Dialog */}
       <RewardsDialog
         open={showRewardsDialog}
         onOpenChange={setShowRewardsDialog}

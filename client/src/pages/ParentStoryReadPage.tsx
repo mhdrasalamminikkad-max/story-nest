@@ -15,18 +15,22 @@ export default function ParentStoryReadPage() {
   const [showGames, setShowGames] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Get story ID from URL params
   const searchParams = new URLSearchParams(window.location.search);
   const storyId = searchParams.get("story");
 
-  const { data: stories = [], isLoading } = useQuery<Story[]>({
+  const { data: stories = [], isLoading: loadingList } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
   });
 
-  const currentStory = stories.find((s) => s.id === storyId);
+  const { data: storyDetails, isLoading: loadingDetails } = useQuery<Story>({
+    queryKey: ["/api/stories", storyId],
+    enabled: !!storyId,
+  });
+
+  const currentStory = storyDetails || stories.find((s) => s.id === storyId);
+  const isLoading = loadingList || (!!storyId && loadingDetails && !currentStory);
 
   useEffect(() => {
-    // Clean up speech and audio on unmount
     return () => {
       window.speechSynthesis.cancel();
       if (audioRef.current) {
@@ -37,13 +41,11 @@ export default function ParentStoryReadPage() {
   }, []);
 
   const toggleSpeech = () => {
-    if (!currentStory) return;
+    if (!storyDetails) return;
 
-    // Check if story has audio file (audioUrl or voiceoverUrl)
-    const audioSource = currentStory.audioUrl || currentStory.voiceoverUrl;
+    const audioSource = storyDetails.audioUrl || storyDetails.voiceoverUrl;
     
     if (audioSource) {
-      // Use audio file playback
       if (isPlaying && audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -56,13 +58,12 @@ export default function ParentStoryReadPage() {
         audioRef.current.play();
         setIsPlaying(true);
       }
-    } else if (currentStory.content) {
-      // Fallback to text-to-speech if no audio file but has content
+    } else if (storyDetails.content) {
       if (isSpeaking) {
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
       } else {
-        const utterance = new SpeechSynthesisUtterance(currentStory.content);
+        const utterance = new SpeechSynthesisUtterance(storyDetails.content);
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
@@ -83,7 +84,6 @@ export default function ParentStoryReadPage() {
     setLocation("/dashboard");
   };
 
-  // Show loading state while fetching stories
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -95,7 +95,6 @@ export default function ParentStoryReadPage() {
     );
   }
 
-  // Only show "not found" after loading is complete
   if (!currentStory) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -109,8 +108,7 @@ export default function ParentStoryReadPage() {
     );
   }
 
-  // If story has PDF, show PDF viewer with Read to Me button
-  if (currentStory.pdfUrl) {
+  if (storyDetails?.pdfUrl) {
     return (
       <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
@@ -125,7 +123,7 @@ export default function ParentStoryReadPage() {
               Back to Dashboard
             </Button>
             <h2 className="font-semibold text-lg truncate flex-1 text-center">
-              {currentStory.title}
+              {storyDetails.title}
             </h2>
             <Button
               variant={isAudioPlaying ? "destructive" : "default"}
@@ -148,7 +146,7 @@ export default function ParentStoryReadPage() {
             </Button>
           </div>
         </div>
-        <PDFViewer pdfUrl={currentStory.pdfUrl} />
+        <PDFViewer pdfUrl={storyDetails.pdfUrl} />
       </div>
     );
   }
@@ -156,7 +154,6 @@ export default function ParentStoryReadPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,7 +210,6 @@ export default function ParentStoryReadPage() {
           </div>
         </motion.div>
 
-        {/* Content Area - Story or Games */}
         <AnimatePresence mode="wait">
           {showGames ? (
             <motion.div
@@ -238,7 +234,6 @@ export default function ParentStoryReadPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-card rounded-3xl shadow-xl p-6 md:p-10 space-y-6"
             >
-              {/* Story Image */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -253,7 +248,6 @@ export default function ParentStoryReadPage() {
                 />
               </motion.div>
 
-              {/* Story Title */}
               <motion.h1
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -264,7 +258,6 @@ export default function ParentStoryReadPage() {
                 {currentStory.title}
               </motion.h1>
 
-              {/* Story Content */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

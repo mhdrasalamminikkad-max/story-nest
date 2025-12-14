@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Maximize, Minimize } from "lucide-react";
 import * as pdfjsLib from 'pdfjs-dist';
-// Import worker from local package using Vite's import
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// Configure worker using local file
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 interface PDFViewerProps {
@@ -16,12 +14,14 @@ interface PDFViewerProps {
 export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
   const [pdf, setPdf] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1.5);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -70,13 +70,11 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     };
   }, [pdfUrl]);
 
-  // Calculate scale based on container width
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        // Calculate scale so PDF fits nicely in container
-        const calculatedScale = Math.max(1, containerWidth / 400); // Base width 400px, scale up if larger
+        const calculatedScale = Math.max(1, containerWidth / 400);
         setScale(calculatedScale);
       }
     };
@@ -84,6 +82,15 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   useEffect(() => {
@@ -129,6 +136,18 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     }
   };
 
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && pdfContainerRef.current) {
+        await pdfContainerRef.current.requestFullscreen();
+      } else if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="w-full flex flex-col items-center justify-center bg-muted/30 rounded-lg p-8" style={{ height }} data-testid="pdf-viewer">
@@ -147,38 +166,63 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
   }
 
   return (
-    <div ref={containerRef} className="w-full flex flex-col gap-4" data-testid="pdf-viewer">
-      <div className="w-full overflow-auto bg-muted/30 rounded-lg flex items-start justify-center p-4" style={{ height }}>
+    <div 
+      ref={pdfContainerRef} 
+      className={`w-full flex flex-col gap-4 ${isFullscreen ? 'bg-background p-4' : ''}`} 
+      data-testid="pdf-viewer"
+    >
+      <div className="flex items-center justify-between gap-4 px-2">
+        <div className="flex items-center gap-2">
+          {totalPages > 1 && (
+            <>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={goToPrevPage}
+                disabled={currentPage === 1}
+                data-testid="button-prev-page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <span className="text-sm text-muted-foreground min-w-[80px] text-center">
+                Page {currentPage} of {totalPages}
+              </span>
+              
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                data-testid="button-next-page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+        </div>
+        
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={toggleFullscreen}
+          data-testid="button-fullscreen"
+        >
+          {isFullscreen ? (
+            <Minimize className="w-4 h-4" />
+          ) : (
+            <Maximize className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
+
+      <div 
+        ref={containerRef} 
+        className={`w-full overflow-auto bg-muted/30 rounded-lg flex items-start justify-center p-4 ${isFullscreen ? 'flex-1' : ''}`} 
+        style={{ height: isFullscreen ? 'calc(100vh - 80px)' : height }}
+      >
         <canvas ref={canvasRef} className="max-w-full h-auto" />
       </div>
-      
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={goToPrevPage}
-            disabled={currentPage === 1}
-            data-testid="button-prev-page"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={goToNextPage}
-            disabled={currentPage === totalPages}
-            data-testid="button-next-page"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

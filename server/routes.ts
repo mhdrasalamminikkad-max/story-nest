@@ -157,6 +157,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single story by ID with ALL fields (for story reader pages)
+  app.get("/api/stories/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const [story] = await db
+        .select()
+        .from(stories)
+        .where(and(eq(stories.id, id), eq(stories.status, "published")));
+      
+      if (!story) {
+        res.status(404).json({ error: "Story not found" });
+        return;
+      }
+      
+      const storyWithTimestamp = {
+        ...story,
+        createdAt: story.createdAt.getTime(),
+        reviewedAt: story.reviewedAt?.getTime() || null,
+      };
+      
+      res.json(storyWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching story:", error);
+      res.status(500).json({ error: "Failed to fetch story" });
+    }
+  });
+
   // Create new story (all stories require admin approval)
   app.post("/api/stories", authenticateUser, checkNotBlocked, async (req: AuthRequest, res) => {
     try {
