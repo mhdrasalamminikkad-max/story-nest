@@ -1105,7 +1105,7 @@ export default function ParentDashboard() {
                         </Button>
                       </div>
                       <div className="border-t pt-6">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-[#1a1c25]">
                           Your subscription details and preferences appear here. For more options, visit the Plans page.
                         </p>
                       </div>
