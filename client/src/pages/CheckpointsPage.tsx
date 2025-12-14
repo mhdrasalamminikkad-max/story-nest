@@ -276,7 +276,7 @@ export default function CheckpointsPage() {
               <CardContent className="pt-6">
                 <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No Checkpoints Yet</h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-black mb-6">
                   Create your first checkpoint to motivate your child's reading journey
                 </p>
                 <Button onClick={() => setIsDialogOpen(true)} className="rounded-2xl">
