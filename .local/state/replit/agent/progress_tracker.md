@@ -39,3 +39,5 @@
 [x] 386. Restarted workflow - application running successfully on port 5000
 [x] 387. Fixed child_age column missing error - ran db:push to add column to database
 [x] 388. Restarted workflow - child lock setup now working
+[x] 389. Fixed PDF to show instantly - PDF stories now show PDF immediately without text content box first
+[x] 390. Restarted workflow - all changes applied

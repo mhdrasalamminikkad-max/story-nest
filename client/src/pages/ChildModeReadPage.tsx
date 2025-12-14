@@ -339,6 +339,19 @@ export default function ChildModeReadPage() {
                   />
                 </div>
               </motion.div>
+            ) : storyDetails?.pdfUrl ? (
+              <motion.div
+                key={currentStory?.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-4 h-full"
+              >
+                <div className="flex-1">
+                  <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} fillScreen />
+                </div>
+              </motion.div>
             ) : (
               <motion.div
                 key={currentStory?.id}
@@ -356,12 +369,6 @@ export default function ChildModeReadPage() {
                     {currentStory?.content}
                   </p>
                 </div>
-
-                {storyDetails?.pdfUrl && (
-                  <div className="w-full">
-                    <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} height="calc(100vh - 250px)" />
-                  </div>
-                )}
 
                 {currentStory?.imageUrl && (
                   <div className="flex justify-center">
