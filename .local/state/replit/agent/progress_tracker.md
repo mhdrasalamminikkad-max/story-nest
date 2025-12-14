@@ -23,3 +23,5 @@
 [x] 370. Installed npm dependencies and restarted workflow
 [x] 371. Verified application is running correctly - homepage displays "Magical Bedtime Stories"
 [x] 372. Import migration complete - all systems operational
+[x] 373. Re-added Firebase Admin secrets (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
+[x] 374. Firebase Admin initialized successfully - child lock setup now working
