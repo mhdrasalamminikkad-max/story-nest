@@ -41,3 +41,4 @@
 [x] 388. Restarted workflow - child lock setup now working
 [x] 389. Fixed PDF to show instantly - PDF stories now show PDF immediately without text content box first
 [x] 390. Restarted workflow - all changes applied
+[x] 391. Added "Read to Me" button centered at bottom of screen for PDF stories

@@ -346,10 +346,32 @@ export default function ChildModeReadPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col gap-4 h-full"
+                className="flex flex-col h-full"
               >
-                <div className="flex-1">
+                <div className="flex-1 overflow-hidden">
                   <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} fillScreen />
+                </div>
+                <div className="flex justify-center py-4">
+                  <Button
+                    className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
+                    onClick={isReading ? stopReading : startReading}
+                    disabled={!hasAudio && !isReading}
+                    data-testid="button-read-aloud-pdf"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isReading ? (
+                        <>
+                          <VolumeX className="w-6 h-6" />
+                          <span>Stop Story</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-6 h-6" />
+                          <span>{hasAudio ? "Read to Me" : "No Recording"}</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
                 </div>
               </motion.div>
             ) : (
