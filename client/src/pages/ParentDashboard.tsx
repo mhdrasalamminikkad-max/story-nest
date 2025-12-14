@@ -656,7 +656,6 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen relative overflow-hidden pb-20 md:pb-0">
       <AnimatedBackground />
-      
       <div className="relative z-10">
         <MobileHeader title="Dashboard" />
         
@@ -1080,7 +1079,7 @@ export default function ParentDashboard() {
                   {parentSettings ? (
                     <>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">Current Coins Balance</p>
+                        <p className="text-sm font-medium text-[#1a1c25]">Current Coins Balance</p>
                         <p className="text-3xl font-bold text-primary flex items-center gap-2">
                           <Coins className="w-6 h-6" />
                           {parentSettings.coins}
@@ -1139,7 +1138,6 @@ export default function ParentDashboard() {
           </Tabs>
         </main>
       </div>
-
       <Dialog open={showAddStory || !!editingStory} onOpenChange={(open) => {
         if (!open) {
           setShowAddStory(false);
@@ -1515,7 +1513,6 @@ export default function ParentDashboard() {
           </Form>
         </DialogContent>
       </Dialog>
-
       <Dialog open={showEditPin} onOpenChange={setShowEditPin}>
         <DialogContent className="sm:max-w-md rounded-3xl" data-testid="dialog-edit-pin">
           <DialogHeader>
@@ -1600,7 +1597,6 @@ export default function ParentDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <MobileBottomNav />
     </div>
   );
