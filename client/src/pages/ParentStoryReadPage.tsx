@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, ChevronLeft, ArrowLeft, Gamepad2, BookOpen } from "lucide-react";
@@ -11,7 +11,9 @@ import { StoryGames } from "@/components/StoryGames";
 export default function ParentStoryReadPage() {
   const [location, setLocation] = useLocation();
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [showGames, setShowGames] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Get story ID from URL params
   const searchParams = new URLSearchParams(window.location.search);
@@ -24,29 +26,57 @@ export default function ParentStoryReadPage() {
   const currentStory = stories.find((s) => s.id === storyId);
 
   useEffect(() => {
-    // Clean up speech on unmount
+    // Clean up speech and audio on unmount
     return () => {
       window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, []);
 
   const toggleSpeech = () => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    } else if (currentStory) {
-      const utterance = new SpeechSynthesisUtterance(currentStory.content);
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
+    if (!currentStory) return;
 
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
+    // Check if story has audio file (audioUrl or voiceoverUrl)
+    const audioSource = currentStory.audioUrl || currentStory.voiceoverUrl;
+    
+    if (audioSource) {
+      // Use audio file playback
+      if (isPlaying && audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        if (!audioRef.current) {
+          audioRef.current = new Audio(audioSource);
+          audioRef.current.onended = () => setIsPlaying(false);
+          audioRef.current.onerror = () => setIsPlaying(false);
+        }
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } else if (currentStory.content) {
+      // Fallback to text-to-speech if no audio file but has content
+      if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+      } else {
+        const utterance = new SpeechSynthesisUtterance(currentStory.content);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+      }
     }
   };
+  
+  const isAudioPlaying = isPlaying || isSpeaking;
 
   const handleBack = () => {
     window.speechSynthesis.cancel();
@@ -98,13 +128,13 @@ export default function ParentStoryReadPage() {
               {currentStory.title}
             </h2>
             <Button
-              variant={isSpeaking ? "destructive" : "default"}
+              variant={isAudioPlaying ? "destructive" : "default"}
               size="sm"
               onClick={toggleSpeech}
               data-testid="button-toggle-speech"
               className="rounded-2xl"
             >
-              {isSpeaking ? (
+              {isAudioPlaying ? (
                 <>
                   <VolumeX className="w-4 h-4 mr-2" />
                   Stop
@@ -144,12 +174,12 @@ export default function ParentStoryReadPage() {
 
           <div className="flex gap-2 flex-wrap">
             <Button
-              variant={isSpeaking ? "destructive" : "default"}
+              variant={isAudioPlaying ? "destructive" : "default"}
               onClick={toggleSpeech}
               data-testid="button-toggle-speech"
               className="rounded-2xl"
             >
-              {isSpeaking ? (
+              {isAudioPlaying ? (
                 <>
                   <VolumeX className="w-4 h-4 mr-2" />
                   Stop Reading

@@ -26,3 +26,6 @@
 [x] 373. Re-added Firebase Admin secrets (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
 [x] 374. Firebase Admin initialized successfully - child lock setup now working
 [x] 375. Hardcoded Firebase credentials (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY) directly in server/firebase-admin.ts
+[x] 376. Removed voiceover recording section from story adding form in ParentDashboard.tsx
+[x] 377. Increased audio file upload limit from 5MB to 50MB
+[x] 378. Fixed "Read to Me" button in ParentStoryReadPage.tsx to use audioUrl/voiceoverUrl when available

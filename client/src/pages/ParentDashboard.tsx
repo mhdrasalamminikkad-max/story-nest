@@ -459,12 +459,12 @@ export default function ParentDashboard() {
       return;
     }
 
-    // Check file size (limit to 5MB for base64 storage)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Check file size (limit to 50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: "Audio must be smaller than 5MB",
+        description: "Audio must be smaller than 50MB",
         variant: "destructive",
         duration: 4000,
       });
@@ -1436,80 +1436,6 @@ export default function ParentDashboard() {
                         {...field}
                         data-testid="input-story-content"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={"voiceoverUrl" as any}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Voice Recording (Optional for Draft, Required for Review)</FormLabel>
-                    <FormControl>
-                      <div className="space-y-3">
-                        {!audioUrl && !isRecording && (
-                          <Button
-                            type="button"
-                            onClick={startRecording}
-                            variant="outline"
-                            className="rounded-2xl w-full"
-                            data-testid="button-start-recording"
-                          >
-                            <Mic className="w-4 h-4 mr-2" />
-                            Start Recording Voiceover
-                          </Button>
-                        )}
-                        
-                        {isRecording && (
-                          <div className="p-4 border-2 border-primary rounded-2xl bg-primary/5">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                                <span className="font-medium">Recording...</span>
-                              </div>
-                              <Button
-                                type="button"
-                                onClick={stopRecording}
-                                variant="destructive"
-                                size="sm"
-                                className="rounded-2xl"
-                                data-testid="button-stop-recording"
-                              >
-                                <Square className="w-4 h-4 mr-2" />
-                                Stop
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {audioUrl && !isRecording && (
-                          <div className="p-4 border-2 rounded-2xl space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Volume2 className="w-4 h-4 text-primary" />
-                                <span className="font-medium">Voiceover Ready</span>
-                              </div>
-                              <Button
-                                type="button"
-                                onClick={deleteRecording}
-                                variant="ghost"
-                                size="sm"
-                                className="rounded-2xl"
-                                data-testid="button-delete-recording"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                            <audio src={audioUrl} controls className="w-full" data-testid="audio-player" />
-                            <p className="text-xs text-muted-foreground">
-                              Required: Your voiceover will be played when children read this story
-                            </p>
-                          </div>
-                        )}
-                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
