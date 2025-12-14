@@ -956,7 +956,7 @@ export default function ParentDashboard() {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                   <Card className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 text-center py-16 shadow-lg">
                     <CardContent className="pt-8">
-                      <p className="text-xl font-semibold text-foreground">
+                      <p className="text-xl font-semibold text-white">
                         {filterBookmarked ? "No bookmarked stories yet" : "No published stories yet"}
                       </p>
                     </CardContent>
