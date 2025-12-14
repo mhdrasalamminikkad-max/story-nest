@@ -40,7 +40,7 @@ export function TrialBanner() {
                 <h3 className="font-semibold text-lg mb-1">
                   ✨ Active Subscription
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-white">
                   {subscriptionStatus.activePassEndDate ? (
                     <>
                       Your subscription is active until{" "}
