@@ -41,7 +41,7 @@ export default function HomePage() {
                 <img 
                   src={tellMammaLogo} 
                   alt="TELL MAMMA" 
-                  className="h-12 sm:h-14 w-auto object-contain"
+                  className="h-12 sm:h-14 w-auto object-contain rounded-xl"
                 />
               </motion.div>
 

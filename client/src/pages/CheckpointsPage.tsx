@@ -118,7 +118,7 @@ export default function CheckpointsPage() {
               <img 
                 src={tellMammaLogo} 
                 alt="TELL MAMMA" 
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-10 sm:h-12 w-auto object-contain rounded-xl"
               />
             </div>
             <Button

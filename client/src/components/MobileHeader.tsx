@@ -27,7 +27,7 @@ export function MobileHeader({ title, showSearch = false, onSearch }: MobileHead
           <img 
             src={tellMammaLogo} 
             alt="TELL MAMMA" 
-            className="h-10 w-auto object-contain"
+            className="h-10 w-auto object-contain rounded-xl"
           />
         )}
         <ThemeToggle />
