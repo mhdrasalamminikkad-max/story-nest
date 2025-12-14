@@ -8,3 +8,6 @@
 [x] 355. Ran database migration (npm run db:push) - tables created successfully
 [x] 356. Restarted workflow - application running on port 5000
 [x] 357. Verified all changes - app loads correctly with new childAge field hardcoded and saved to database
+[x] 358. Installed required packages (npm install) - all dependencies installed
+[x] 359. Restarted workflow - application running successfully on port 5000
+[x] 360. Verified project is working - homepage displays correctly with Tell Mamma bedtime stories interface
