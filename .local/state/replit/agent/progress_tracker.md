@@ -20,3 +20,6 @@
 [x] 367. Fixed slow story loading in child lock mode (staleTime: 0, refetchOnMount: always)
 [x] 368. Fixed PDF viewer to start from top instead of center (items-start instead of items-center)
 [x] 369. Added Read to Me button in parent story reading section for PDF stories
+[x] 370. Installed npm dependencies and restarted workflow
+[x] 371. Verified application is running correctly - homepage displays "Magical Bedtime Stories"
+[x] 372. Import migration complete - all systems operational
