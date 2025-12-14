@@ -42,3 +42,5 @@
 [x] 389. Fixed PDF to show instantly - PDF stories now show PDF immediately without text content box first
 [x] 390. Restarted workflow - all changes applied
 [x] 391. Added "Read to Me" button centered at bottom of screen for PDF stories
+[x] 392. Fixed PDF scrolling in child mode - changed overflow-hidden to overflow-auto
+[x] 393. Moved "Read to Me" button to bottom of screen in parent story section

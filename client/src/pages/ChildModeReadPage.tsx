@@ -348,10 +348,10 @@ export default function ChildModeReadPage() {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col h-full"
               >
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-auto">
                   <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} fillScreen />
                 </div>
-                <div className="flex justify-center py-4">
+                <div className="flex justify-center py-4 sticky bottom-0 bg-gradient-to-t from-purple-100 via-pink-100/80 to-transparent dark:from-purple-950 dark:via-pink-950/80 dark:to-transparent">
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
                     onClick={isReading ? stopReading : startReading}

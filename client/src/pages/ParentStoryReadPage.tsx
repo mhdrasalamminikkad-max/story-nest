@@ -125,28 +125,33 @@ export default function ParentStoryReadPage() {
             <h2 className="font-semibold text-lg truncate flex-1 text-center">
               {storyDetails.title}
             </h2>
-            <Button
-              variant={isAudioPlaying ? "destructive" : "default"}
-              size="sm"
-              onClick={toggleSpeech}
-              data-testid="button-toggle-speech"
-              className="rounded-2xl"
-            >
-              {isAudioPlaying ? (
-                <>
-                  <VolumeX className="w-4 h-4 mr-2" />
-                  Stop
-                </>
-              ) : (
-                <>
-                  <Volume2 className="w-4 h-4 mr-2" />
-                  Read to Me
-                </>
-              )}
-            </Button>
+            <div className="w-[140px]"></div>
           </div>
         </div>
-        <PDFViewer pdfUrl={storyDetails.pdfUrl} fillScreen />
+        <div className="flex-1 overflow-auto">
+          <PDFViewer pdfUrl={storyDetails.pdfUrl} fillScreen />
+        </div>
+        <div className="sticky bottom-0 flex justify-center py-4 bg-background/95 backdrop-blur-sm border-t">
+          <Button
+            variant={isAudioPlaying ? "destructive" : "default"}
+            size="lg"
+            onClick={toggleSpeech}
+            data-testid="button-toggle-speech"
+            className="rounded-2xl px-8 py-6"
+          >
+            {isAudioPlaying ? (
+              <>
+                <VolumeX className="w-5 h-5 mr-2" />
+                Stop
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-5 h-5 mr-2" />
+                Read to Me
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     );
   }
