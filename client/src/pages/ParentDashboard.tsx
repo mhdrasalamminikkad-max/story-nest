@@ -1087,7 +1087,7 @@ export default function ParentDashboard() {
                       </div>
                       <Button 
                         onClick={() => setLocation("/pricing")}
-                        className="rounded-2xl w-full bg-[#febc2d]"
+                        className="rounded-2xl w-full bg-[#febc2d] text-[#1a1c25]"
                         data-testid="button-buy-coins-settings"
                       >
                         <CreditCard className="w-4 h-4 mr-2" />

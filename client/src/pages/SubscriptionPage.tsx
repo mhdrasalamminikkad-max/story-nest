@@ -74,7 +74,7 @@ export default function SubscriptionPage() {
             className="text-center py-12"
           >
             <h1 className="font-heading text-4xl md:text-5xl mb-4 text-foreground">
-              Choose Your Plan
+              Choose Your <span className="text-[#febc2d]">Plan</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
               Unlock unlimited bedtime stories and premium features for your family
@@ -106,7 +106,7 @@ export default function SubscriptionPage() {
                         <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
                           <CardTitle className="font-heading text-2xl">{plan.name}</CardTitle>
                           {plan.billingPeriod === "yearly" && (
-                            <Badge variant="default">Best Value</Badge>
+                            <Badge className="bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/80">Best Value</Badge>
                           )}
                         </div>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
 
                       <CardFooter>
                         <Button
-                          className="w-full rounded-2xl"
+                          className="w-full rounded-2xl bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90"
                           size="lg"
                           onClick={() => {
                             setLocation(`/payment?planId=${plan.id}`);
@@ -169,9 +169,9 @@ export default function SubscriptionPage() {
               >
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center gap-2 mb-4">
-                    <Coins className="w-8 h-8 text-primary" />
+                    <Coins className="w-8 h-8 text-[#febc2d]" />
                     <h2 className="font-heading text-3xl md:text-4xl text-foreground">
-                      Buy Coins
+                      Buy <span className="text-[#febc2d]">Coins</span>
                     </h2>
                   </div>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -192,7 +192,7 @@ export default function SubscriptionPage() {
                           <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
                             <CardTitle className="font-heading text-2xl">{pkg.name}</CardTitle>
                             {pkg.coins >= 500 && (
-                              <Badge variant="default">
+                              <Badge className="bg-[#febc2d] text-[#1a1c25]">
                                 <Sparkles className="w-3 h-3 mr-1" />
                                 Popular
                               </Badge>
@@ -206,9 +206,9 @@ export default function SubscriptionPage() {
                                   ₹{pkg.price}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1 bg-primary/10 rounded-2xl px-3 py-1.5">
-                                <Coins className="w-5 h-5 text-primary" />
-                                <span className="text-lg font-bold text-primary" data-testid={`text-coin-amount-${index}`}>
+                              <div className="flex items-center gap-1 bg-[#febc2d]/10 rounded-2xl px-3 py-1.5">
+                                <Coins className="w-5 h-5 text-[#febc2d]" />
+                                <span className="text-lg font-bold text-[#febc2d]" data-testid={`text-coin-amount-${index}`}>
                                   {pkg.coins}
                                 </span>
                               </div>
@@ -240,9 +240,8 @@ export default function SubscriptionPage() {
 
                         <CardFooter>
                           <Button
-                            className="w-full rounded-2xl"
+                            className="w-full rounded-2xl bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90"
                             size="lg"
-                            variant="outline"
                             onClick={() => {
                               setLocation(`/payment?coinPackageId=${pkg.id}`);
                             }}
