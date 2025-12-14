@@ -11,27 +11,20 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem("storynest-theme");
-    return (saved as Theme) || "day";
-  });
+  const [theme, setThemeState] = useState<Theme>("night");
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === "night") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("storynest-theme", theme);
-  }, [theme]);
+    root.classList.add("dark");
+    localStorage.setItem("storynest-theme", "night");
+  }, []);
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+    setThemeState("night");
   };
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === "day" ? "night" : "day"));
+    // Night mode only - do nothing
   };
 
   return (
