@@ -103,19 +103,19 @@ export default function SubscriptionPage() {
                   >
                     <Card className="h-full flex flex-col" data-testid={`card-plan-${index}`}>
                       <CardHeader>
-                        <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                        <div className="text-center mb-4">
                           <CardTitle className="font-heading text-2xl">{plan.name}</CardTitle>
                           {plan.billingPeriod === "yearly" && (
-                            <Badge className="bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/80">Best Value</Badge>
+                            <Badge className="bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/80 mt-2 inline-block">Best Value</Badge>
                           )}
                         </div>
-                        <CardDescription className="text-base">{plan.description}</CardDescription>
+                        <CardDescription className="text-base text-center">{plan.description}</CardDescription>
                         <div className="pt-4">
-                          <div className="flex items-baseline gap-1">
+                          <div className="flex items-baseline justify-between">
                             <span className="text-4xl font-bold text-foreground" data-testid={`text-price-${index}`}>
                               ₹{plan.price}
                             </span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-black dark:text-black font-medium">
                               {getPeriodLabel(plan.billingPeriod)}
                             </span>
                           </div>
@@ -127,13 +127,13 @@ export default function SubscriptionPage() {
                           {plan.features.map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-start gap-2" data-testid={`feature-${index}-${featureIndex}`}>
                               <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-muted-foreground">{feature}</span>
+                              <span className="text-sm text-black dark:text-black">{feature}</span>
                             </li>
                           ))}
                           {plan.maxStories && (
                             <li className="flex items-start gap-2">
                               <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-sm text-black dark:text-black">
                                 Up to {plan.maxStories} stories
                               </span>
                             </li>
