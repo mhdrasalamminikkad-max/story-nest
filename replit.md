@@ -46,10 +46,12 @@ StoryNest is a child-friendly, fully responsive web application built with React
 - **Subscription Middleware**: Protects routes requiring an active subscription, returning 403 if the trial is expired or no active subscription exists.
 
 ## Recent Changes (December 14, 2025)
-- Completed full migration import (363 tasks)
+- **Story API Optimization**: Created GET /api/stories/:id endpoint to fetch full story details (including PDF/audio URLs) on demand, preventing large payload issues
+- **On-Demand Story Loading**: ParentStoryReadPage and ChildModeReadPage now fetch full story details when viewing, keeping list queries fast
+- **Fullscreen PDF Viewer**: Added fullscreen capability to PDFViewer component using document.requestFullscreen API
+- **UI/UX Polish**: Removed hover scale animations that caused layout shifts, replaced with stable hover-elevate/active-elevate-2 utility classes
 - Firebase Admin credentials configured and working
 - All packages installed and application running on port 5000
-- Progress tracked in `.local/state/replit/agent/progress_tracker.md`
 
 ## External Dependencies
 - **Firebase**: Authentication (Google Sign-In), Firestore (database), Firebase Admin SDK.
