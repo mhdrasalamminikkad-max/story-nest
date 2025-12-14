@@ -358,8 +358,8 @@ export default function ChildModeReadPage() {
                 </div>
 
                 {storyDetails?.pdfUrl && (
-                  <div className="w-full rounded-xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700">
-                    <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} height="500px" />
+                  <div className="w-full">
+                    <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} height="calc(100vh - 250px)" />
                   </div>
                 )}
 

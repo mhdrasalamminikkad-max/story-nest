@@ -9,9 +9,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 interface PDFViewerProps {
   pdfUrl: string;
   height?: string;
+  fillScreen?: boolean;
 }
 
-export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
+export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
@@ -148,9 +149,18 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
     }
   }, []);
 
+  const containerHeight = fillScreen ? 'calc(100vh - 120px)' : height;
+  const containerClasses = fillScreen 
+    ? 'w-full flex flex-col flex-1' 
+    : 'w-full flex flex-col gap-4';
+
   if (loading) {
     return (
-      <div className="w-full flex flex-col items-center justify-center bg-muted/30 rounded-lg p-8" style={{ height }} data-testid="pdf-viewer">
+      <div 
+        className={`w-full flex flex-col items-center justify-center ${fillScreen ? 'flex-1' : 'bg-muted/30 rounded-lg p-8'}`} 
+        style={{ height: fillScreen ? undefined : height }} 
+        data-testid="pdf-viewer"
+      >
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mb-4" />
         <p className="text-muted-foreground">Loading PDF...</p>
       </div>
@@ -159,7 +169,11 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
 
   if (error) {
     return (
-      <div className="w-full flex flex-col items-center justify-center bg-destructive/10 rounded-lg p-8" style={{ height }} data-testid="pdf-viewer">
+      <div 
+        className={`w-full flex flex-col items-center justify-center ${fillScreen ? 'flex-1' : 'bg-destructive/10 rounded-lg p-8'}`} 
+        style={{ height: fillScreen ? undefined : height }} 
+        data-testid="pdf-viewer"
+      >
         <p className="text-destructive">{error}</p>
       </div>
     );
@@ -168,10 +182,10 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
   return (
     <div 
       ref={pdfContainerRef} 
-      className={`w-full flex flex-col gap-4 ${isFullscreen ? 'bg-background p-4' : ''}`} 
+      className={`${containerClasses} ${isFullscreen ? 'bg-background p-4' : ''}`} 
       data-testid="pdf-viewer"
     >
-      <div className="flex items-center justify-between gap-4 px-2">
+      <div className="flex items-center justify-between gap-4 px-2 py-2">
         <div className="flex items-center gap-2">
           {totalPages > 1 && (
             <>
@@ -218,8 +232,8 @@ export function PDFViewer({ pdfUrl, height = "600px" }: PDFViewerProps) {
 
       <div 
         ref={containerRef} 
-        className={`w-full overflow-auto bg-muted/30 rounded-lg flex items-start justify-center p-4 ${isFullscreen ? 'flex-1' : ''}`} 
-        style={{ height: isFullscreen ? 'calc(100vh - 80px)' : height }}
+        className={`w-full overflow-auto flex items-start justify-center ${fillScreen ? 'flex-1' : 'bg-muted/30 rounded-lg p-4'} ${isFullscreen ? 'flex-1' : ''}`} 
+        style={{ height: isFullscreen ? 'calc(100vh - 80px)' : (fillScreen ? undefined : height) }}
       >
         <canvas ref={canvasRef} className="max-w-full h-auto" />
       </div>
