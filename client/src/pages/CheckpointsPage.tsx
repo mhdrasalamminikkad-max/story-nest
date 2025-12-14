@@ -140,7 +140,7 @@ export default function CheckpointsPage() {
               <Target className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-heading font-bold">Checkpoints & Rewards</h1>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-black">
               Set reading goals and rewards for your child to earn
             </p>
           </div>
