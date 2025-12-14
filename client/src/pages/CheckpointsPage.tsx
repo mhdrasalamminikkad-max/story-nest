@@ -274,7 +274,7 @@ export default function CheckpointsPage() {
           ) : checkpoints.length === 0 ? (
             <Card className="text-center py-12 bg-white border-2 border-orange-500">
               <CardContent className="pt-6">
-                <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No Checkpoints Yet</h3>
                 <p className="text-black mb-6">
                   Create your first checkpoint to motivate your child's reading journey
