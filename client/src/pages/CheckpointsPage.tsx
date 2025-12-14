@@ -272,7 +272,7 @@ export default function CheckpointsPage() {
               <p className="text-muted-foreground">Loading checkpoints...</p>
             </div>
           ) : checkpoints.length === 0 ? (
-            <Card className="text-center py-12">
+            <Card className="text-center py-12 bg-white border-2 border-orange-500">
               <CardContent className="pt-6">
                 <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No Checkpoints Yet</h3>
