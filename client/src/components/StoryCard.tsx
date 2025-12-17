@@ -116,7 +116,7 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
         {/* Content */}
         <CardContent className="flex-1 pb-3">
           <motion.p 
-            className="text-sm text-muted-foreground line-clamp-3"
+            className="text-sm line-clamp-3 text-[#fbf7ec]"
             data-testid={`text-story-summary-${story.id}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
