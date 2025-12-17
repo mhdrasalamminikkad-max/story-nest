@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Medal, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Trophy, Medal, Star, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface LeaderboardEntry {
@@ -24,6 +26,8 @@ const RANK_ICONS = {
 };
 
 export default function LeaderboardPage() {
+  const [, setLocation] = useLocation();
+  
   const { data: childrenLeaderboard = [], isLoading: loadingChildren } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/leaderboard/children"],
   });
@@ -133,6 +137,16 @@ export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/")}
+          className="mb-2"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Hall of Fame
