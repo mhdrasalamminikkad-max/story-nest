@@ -87,7 +87,7 @@ export default function SubscriptionPage() {
             ) : plans.length === 0 ? (
               <Card className="max-w-md mx-auto">
                 <CardContent className="pt-6">
-                  <p className="text-muted-foreground" data-testid="text-no-plans">
+                  <p className="text-white" data-testid="text-no-plans">
                     No subscription plans available at the moment. Please check back later!
                   </p>
                 </CardContent>
