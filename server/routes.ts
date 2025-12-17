@@ -395,6 +395,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add coins to user's own account
+  app.post("/api/add-coins", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { amount } = req.body;
+
+      if (typeof amount !== "number" || amount <= 0) {
+        res.status(400).json({ error: "amount must be a positive number" });
+        return;
+      }
+
+      const [settings] = await db
+        .select({ coins: parentSettings.coins })
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+
+      if (!settings) {
+        res.status(404).json({ error: "Settings not found" });
+        return;
+      }
+
+      const newCoins = (settings.coins ?? 0) + amount;
+
+      const [updated] = await db
+        .update(parentSettings)
+        .set({ coins: newCoins })
+        .where(eq(parentSettings.userId, userId))
+        .returning();
+
+      res.json({ success: true, coinsAdded: amount, totalCoins: updated.coins });
+    } catch (error) {
+      console.error("Error adding coins:", error);
+      res.status(500).json({ error: "Failed to add coins" });
+    }
+  });
+
   app.post("/api/verify-pin", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;

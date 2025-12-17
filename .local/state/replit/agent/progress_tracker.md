@@ -48,3 +48,7 @@
 [x] 395. Restarted workflow - application running successfully on port 5000
 [x] 396. Verified project is working - Firebase Admin initialized, database tables created
 [x] 397. Import migration completed - all systems operational
+[x] 398. Added back button to LeaderboardPage with navigation to home
+[x] 399. Changed "No subscription plans" text color to white on SubscriptionPage
+[x] 400. Created POST /api/add-coins endpoint to add coins to user account
+[x] 401. Restarted workflow - all changes applied
