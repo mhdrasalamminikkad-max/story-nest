@@ -339,7 +339,7 @@ export default function ChildModeReadPage() {
                   />
                 </div>
               </motion.div>
-            ) : storyDetails?.pdfUrl ? (
+            ) : currentStory?.pdfUrl || storyDetails?.pdfUrl ? (
               <motion.div
                 key={currentStory?.id}
                 initial={{ opacity: 0 }}
@@ -349,7 +349,7 @@ export default function ChildModeReadPage() {
                 className="flex flex-col h-full"
               >
                 <div className="flex-1 overflow-auto">
-                  <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails.id}`} fillScreen />
+                  <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails?.id || currentStory?.id}`} fillScreen />
                 </div>
                 <div className="flex justify-center py-4 sticky bottom-0 bg-gradient-to-t from-purple-100 via-pink-100/80 to-transparent dark:from-purple-950 dark:via-pink-950/80 dark:to-transparent">
                   <Button

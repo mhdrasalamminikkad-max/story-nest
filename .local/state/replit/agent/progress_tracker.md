@@ -52,3 +52,7 @@
 [x] 399. Changed "No subscription plans" text color to white on SubscriptionPage
 [x] 400. Created POST /api/add-coins endpoint to add coins to user account
 [x] 401. Restarted workflow - all changes applied
+[x] 402. Updated ParentStoryReadPage to instantly load PDF without image
+[x] 403. Updated ChildModeReadPage to instantly load PDF without image
+[x] 404. Restarted workflow - PDF instant loading working
+[x] 405. All requested features completed

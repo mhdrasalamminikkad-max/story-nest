@@ -108,52 +108,55 @@ export default function ParentStoryReadPage() {
     );
   }
 
-  if (storyDetails?.pdfUrl) {
-    return (
-      <div className="h-screen flex flex-col bg-background">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
+  if (currentStory?.pdfUrl || storyDetails?.pdfUrl) {
+    const pdfUrl = storyDetails?.pdfUrl || (currentStory?.pdfUrl ? `${currentStory.pdfUrl}` : null);
+    if (pdfUrl) {
+      return (
+        <div className="h-screen flex flex-col bg-background">
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
+            <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2 flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                data-testid="button-back"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <h2 className="font-semibold text-lg truncate flex-1 text-center">
+                {storyDetails?.title || currentStory?.title}
+              </h2>
+              <div className="w-[140px]"></div>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <PDFViewer pdfUrl={pdfUrl} fillScreen />
+          </div>
+          <div className="sticky bottom-0 flex justify-center py-4 bg-background/95 backdrop-blur-sm border-t">
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              data-testid="button-back"
+              variant={isAudioPlaying ? "destructive" : "default"}
+              size="lg"
+              onClick={toggleSpeech}
+              data-testid="button-toggle-speech"
+              className="rounded-2xl px-8 py-6"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {isAudioPlaying ? (
+                <>
+                  <VolumeX className="w-5 h-5 mr-2" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-5 h-5 mr-2" />
+                  Read to Me
+                </>
+              )}
             </Button>
-            <h2 className="font-semibold text-lg truncate flex-1 text-center">
-              {storyDetails.title}
-            </h2>
-            <div className="w-[140px]"></div>
           </div>
         </div>
-        <div className="flex-1 overflow-auto">
-          <PDFViewer pdfUrl={storyDetails.pdfUrl} fillScreen />
-        </div>
-        <div className="sticky bottom-0 flex justify-center py-4 bg-background/95 backdrop-blur-sm border-t">
-          <Button
-            variant={isAudioPlaying ? "destructive" : "default"}
-            size="lg"
-            onClick={toggleSpeech}
-            data-testid="button-toggle-speech"
-            className="rounded-2xl px-8 py-6"
-          >
-            {isAudioPlaying ? (
-              <>
-                <VolumeX className="w-5 h-5 mr-2" />
-                Stop
-              </>
-            ) : (
-              <>
-                <Volume2 className="w-5 h-5 mr-2" />
-                Read to Me
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    );
+      );
+    }
   }
 
   return (
