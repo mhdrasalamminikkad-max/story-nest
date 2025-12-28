@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import type { ParentSettings } from "@shared/schema";
-import tellMammaLogo from "@assets/stock_images/professional_tell_ma_9329e1f3.jpg";
+import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102_1766900751369.jpeg";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
