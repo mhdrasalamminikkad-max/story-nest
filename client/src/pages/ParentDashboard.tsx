@@ -32,7 +32,7 @@ import foxImage from "@assets/generated_images/Fox_reading_by_candlelight_2780dc
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Progress } from "@/components/ui/progress";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102_1766900751369.jpeg";
+import tellMammaLogo from "@assets/ic_launcher_1766900793361.png";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();

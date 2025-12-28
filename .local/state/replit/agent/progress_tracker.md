@@ -91,4 +91,5 @@
 [x] 438. Replaced random screenshot logo with professional Tell Mamma logo across all pages
 [x] 439. Removed childAge column definition from database schema to fix "column does not exist" error
 [x] 440. Firebase Admin and database now working correctly - app ready for production use
-[x] 441. Updated app logo to use the official Tell Mamma branding image across all pages (HomePage, ParentDashboard, CheckpointsPage, SubscriptionPage, MobileHeader)
+[x] 441. Updated app logo to use the official Tell Mamma branding image across all pages
+[x] 442. Updated app logo to use the app launcher icon across all pages (HomePage, ParentDashboard, CheckpointsPage, SubscriptionPage, MobileHeader)

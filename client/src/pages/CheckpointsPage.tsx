@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import type { Checkpoint } from "@shared/schema";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102_1766900751369.jpeg";
+import tellMammaLogo from "@assets/ic_launcher_1766900793361.png";
 
 type CheckpointWithProgress = Checkpoint & {
   currentProgress: number;
