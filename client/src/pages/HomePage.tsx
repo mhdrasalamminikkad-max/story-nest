@@ -13,10 +13,13 @@ import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jp
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false;
   
   const { data: parentSettings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in memory for 10 minutes
   });
   
   const welcomeText = parentSettings?.childName 
@@ -125,7 +128,7 @@ export default function HomePage() {
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.7, delay: 0.1 }}
               viewport={{ once: true }}
             >
               <Card
@@ -134,13 +137,17 @@ export default function HomePage() {
                 data-testid="card-explore-stories"
               >
                 {/* Animated Background Gradient */}
+                {!prefersReducedMotion && (
                 <motion.div 
                   className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"
                   animate={{ opacity: [0.8, 1, 0.8] }}
                   transition={{ duration: 4, repeat: Infinity }}
                 />
+                )}
                 
                 {/* Decorative Blurs */}
+                {!prefersReducedMotion && (
+                <>
                 <motion.div 
                   className="absolute -top-20 -right-20 w-64 h-64 bg-[#F5C518]/20 rounded-full blur-3xl"
                   animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
@@ -151,27 +158,35 @@ export default function HomePage() {
                   animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
                   transition={{ duration: 8, repeat: Infinity }}
                 />
+                </>
+                )}
                 
                 {/* Content */}
                 <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
                     className="relative"
-                    whileHover={{ rotate: 10 }}
+                    whileHover={!prefersReducedMotion ? { rotate: 10 } : {}}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
+                    {!prefersReducedMotion && (
                     <motion.div 
                       className="absolute inset-0 bg-[#F5C518]/30 rounded-full blur-2xl"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity }}
                     />
+                    )}
                     <motion.div 
                       className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#F5C518] flex items-center justify-center shadow-2xl"
-                      animate={{ y: [0, -8, 0] }}
+                      animate={!prefersReducedMotion ? { y: [0, -8, 0] } : {}}
                       transition={{ duration: 3, repeat: Infinity }}
                     >
+                      {!prefersReducedMotion ? (
                       <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
                         <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
                       </motion.div>
+                      ) : (
+                      <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
+                      )}
                     </motion.div>
                   </motion.div>
                   
@@ -207,7 +222,7 @@ export default function HomePage() {
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.7, delay: 0.2 }}
               viewport={{ once: true }}
             >
               <Card
@@ -216,13 +231,17 @@ export default function HomePage() {
                 data-testid="card-rhymes"
               >
                 {/* Animated Background Gradient */}
+                {!prefersReducedMotion && (
                 <motion.div 
                   className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"
                   animate={{ opacity: [0.8, 1, 0.8] }}
                   transition={{ duration: 4, repeat: Infinity, delay: 1 }}
                 />
+                )}
                 
                 {/* Decorative Blurs */}
+                {!prefersReducedMotion && (
+                <>
                 <motion.div 
                   className="absolute -top-20 -right-20 w-64 h-64 bg-[#F5C518]/20 rounded-full blur-3xl"
                   animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
@@ -233,27 +252,35 @@ export default function HomePage() {
                   animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
                   transition={{ duration: 8, repeat: Infinity, delay: 1 }}
                 />
+                </>
+                )}
                 
                 {/* Content */}
                 <div className="relative p-10 sm:p-14 flex flex-col items-center justify-center text-center space-y-8 min-h-[400px] sm:min-h-[450px]">
                   <motion.div
                     className="relative"
-                    whileHover={{ rotate: -10 }}
+                    whileHover={!prefersReducedMotion ? { rotate: -10 } : {}}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
+                    {!prefersReducedMotion && (
                     <motion.div 
                       className="absolute inset-0 bg-[#F5C518]/30 rounded-full blur-2xl"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 3, repeat: Infinity, delay: 1 }}
                     />
+                    )}
                     <motion.div 
                       className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-[#F5C518] flex items-center justify-center shadow-2xl"
-                      animate={{ y: [0, -8, 0] }}
+                      animate={!prefersReducedMotion ? { y: [0, -8, 0] } : {}}
                       transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
                     >
+                      {!prefersReducedMotion ? (
                       <motion.div animate={{ rotate: [0, -360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}>
                         <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
                       </motion.div>
+                      ) : (
+                      <Music2 className="w-14 h-14 sm:w-16 sm:h-16 text-gray-800" />
+                      )}
                     </motion.div>
                   </motion.div>
                   

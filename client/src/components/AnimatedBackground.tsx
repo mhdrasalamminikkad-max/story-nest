@@ -4,8 +4,11 @@ import { Moon, Star, Sparkles } from "lucide-react";
 
 export function AnimatedBackground() {
   const { theme } = useTheme();
+  
+  // Check if user prefers reduced motion
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const stars = Array.from({ length: 80 }, (_, i) => ({
+  const stars = Array.from({ length: prefersReducedMotion ? 0 : 30 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -14,7 +17,7 @@ export function AnimatedBackground() {
     delay: Math.random() * 2,
   }));
 
-  const clouds = Array.from({ length: 12 }, (_, i) => ({
+  const clouds = Array.from({ length: prefersReducedMotion ? 0 : 5 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 60 + 10,
@@ -22,7 +25,7 @@ export function AnimatedBackground() {
     duration: Math.random() * 40 + 50,
   }));
 
-  const floatingElements = Array.from({ length: 15 }, (_, i) => ({
+  const floatingElements = Array.from({ length: prefersReducedMotion ? 0 : 8 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
