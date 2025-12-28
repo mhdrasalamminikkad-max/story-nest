@@ -87,3 +87,4 @@
 [x] 434. Restarted workflow - homepage loading optimizations applied successfully
 [x] 435. Homepage performance improvements complete - page loads faster with reduced animation overhead
 [x] 436. Configured WebSocket/HMR for Vite development server with proper host and port settings
+[x] 437. Fixed HMR WebSocket error - removed explicit HMR config to allow Vite auto-detection
