@@ -5,3 +5,4 @@
 [x] 444. Built web app for Capacitor (npm run build)
 [x] 445. Synced Capacitor with new mobile app icons
 [x] 446. Mobile app launcher icon now displays Tell Mamma branding on phone home screen
+[x] 447. Changed "Your story is being reviewed by an admin" text color to white in ParentDashboard

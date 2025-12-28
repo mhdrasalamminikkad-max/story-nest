@@ -1043,7 +1043,7 @@ export default function ParentDashboard() {
                             </>
                           )}
                           {story.status === "pending_review" && (
-                            <p className="text-sm text-muted-foreground italic">
+                            <p className="text-sm text-white italic">
                               Your story is being reviewed by an admin
                             </p>
                           )}
