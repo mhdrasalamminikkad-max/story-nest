@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
+import tellMammaLogo from "@assets/stock_images/professional_tell_ma_9329e1f3.jpg";
 
 interface MobileHeaderProps {
   title?: string;

@@ -9,7 +9,7 @@ import { Check, ArrowLeft, Coins, Sparkles, BookOpen, Heart } from "lucide-react
 import { motion } from "framer-motion";
 import type { PublicSubscriptionPlan, PublicCoinPackage } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102.jpeg";
+import tellMammaLogo from "@assets/stock_images/professional_tell_ma_9329e1f3.jpg";
 
 export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
