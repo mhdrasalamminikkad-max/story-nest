@@ -11,6 +11,7 @@ import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, pl
 import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { initializeWebSocket, wsManager } from "./websocket";
 
 // Helper function to filter out blob URLs and only allow Firebase storage URLs
 function filterBlobUrl(url: string | undefined | null): string | undefined {
@@ -2328,6 +2329,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket
+  initializeWebSocket(httpServer);
 
   return httpServer;
 }
