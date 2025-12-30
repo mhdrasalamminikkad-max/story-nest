@@ -49,39 +49,38 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+      whileHover={{ y: -12 }}
+      transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
+      className="h-full"
     >
-      <Card className="overflow-hidden rounded-3xl border-2 border-primary/10 hover-elevate h-full flex flex-col shadow-lg hover:shadow-2xl transition-all group" data-testid={`card-story-${story.id}`}>
+      <Card className="overflow-hidden rounded-[2.5rem] border-none bg-orange-500 hover-elevate h-full flex flex-col shadow-2xl transition-all group relative" data-testid={`card-story-${story.id}`}>
+        {/* Glassmorphism Effect Overlay */}
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
         {/* Image Container */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+        <div className="relative aspect-[4/3] overflow-hidden m-3 rounded-[2rem] shadow-inner">
           <img
             src={story.imageUrl}
             alt={story.title}
-            className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-105"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
             loading="lazy"
             data-testid={`img-story-${story.id}`}
           />
           
-          {/* Overlay Gradient on Hover */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent"
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          />
+          {/* Subtle Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
 
-          {/* Bookmark Button */}
+          {/* Bookmark Button - Float Style */}
           {showBookmark && (
             <motion.div
-              className="absolute top-3 right-3"
-              whileHover={{ rotate: 10 }}
+              className="absolute top-4 right-4"
+              whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
             >
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="icon"
-                className="rounded-2xl shadow-lg"
+                className="rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40 shadow-xl"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleBookmark?.(story);
@@ -89,65 +88,43 @@ export function StoryCard({ story, onRead, onToggleBookmark, showBookmark = true
                 data-testid={`button-bookmark-${story.id}`}
               >
                 {story.isBookmarked ? (
-                  <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 0.6 }}>
-                    <BookmarkCheck className="h-4 w-4" fill="currentColor" />
-                  </motion.div>
+                  <BookmarkCheck className="h-5 w-5 fill-white" />
                 ) : (
-                  <Bookmark className="h-4 w-4" />
+                  <Bookmark className="h-5 w-5" />
                 )}
               </Button>
             </motion.div>
           )}
         </div>
 
-        {/* Header */}
-        <CardHeader className="pb-2">
+        {/* Content Section */}
+        <div className="flex-1 flex flex-col p-6 pt-2">
           <motion.h3 
-            className="font-heading text-xl text-card-foreground line-clamp-2 group-hover:text-primary transition-colors" 
+            className="font-heading text-2xl text-white mb-3 line-clamp-1 drop-shadow-sm" 
             data-testid={`text-story-title-${story.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
           >
             {story.title}
           </motion.h3>
-        </CardHeader>
 
-        {/* Content */}
-        <CardContent className="flex-1 pb-3">
           <motion.p 
-            className="text-sm line-clamp-3 text-[#fbf7ec]"
+            className="text-white/90 text-sm line-clamp-2 mb-6 font-medium leading-relaxed"
             data-testid={`text-story-summary-${story.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
           >
             {story.summary}
           </motion.p>
-        </CardContent>
 
-        {/* Footer */}
-        <CardFooter className="pt-0">
-          <motion.div
-            className="w-full"
-            whileTap={{ scale: 0.98 }}
-          >
+          <div className="mt-auto">
             <Button
               onClick={() => onRead?.(story)}
-              className="w-full rounded-2xl bg-gradient-to-r from-primary to-secondary hover:shadow-lg font-bold text-white"
+              className="w-full h-14 rounded-full bg-white text-orange-600 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 font-bold text-lg shadow-xl border-none group/btn"
               data-testid={`button-read-${story.id}`}
             >
-              <motion.div
-                animate={{ y: [0, -2, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="flex items-center"
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Read Story
-              </motion.div>
+              <BookOpen className="w-5 h-5 mr-3 transition-transform group-hover/btn:rotate-12" />
+              Read Story
+              <Sparkles className="w-4 h-4 ml-2 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
             </Button>
-          </motion.div>
-        </CardFooter>
+          </div>
+        </div>
       </Card>
     </motion.div>
   );
