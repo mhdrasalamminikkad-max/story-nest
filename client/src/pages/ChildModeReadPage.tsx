@@ -268,13 +268,15 @@ export default function ChildModeReadPage() {
 
   const handlePdfLoaded = () => {
     setPdfLoaded(true);
-    // Only auto-start if not already reading
-    if (storyDetails && !isReading && !audioRef.current) {
-      const hasAudio = storyDetails.voiceoverUrl || storyDetails.audioUrl;
-      if (hasAudio) {
-        startReading();
+    // Use a small timeout to ensure state is settled
+    setTimeout(() => {
+      if (storyDetails && !isReading && !audioRef.current) {
+        const hasAudio = storyDetails.voiceoverUrl || storyDetails.audioUrl;
+        if (hasAudio) {
+          startReading();
+        }
       }
-    }
+    }, 500);
   };
 
   if (!currentStoryFromList) {

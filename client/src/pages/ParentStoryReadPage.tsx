@@ -109,13 +109,15 @@ export default function ParentStoryReadPage() {
   }
 
   const handlePdfLoaded = () => {
-    if (storyDetails) {
-      const audioSource = storyDetails.audioUrl || storyDetails.voiceoverUrl;
-      // Use the existing toggleSpeech logic to avoid duplicate audio objects
-      if (audioSource && !isPlaying && !isAudioPlaying) {
-        toggleSpeech();
+    // Use a small timeout to ensure state is settled
+    setTimeout(() => {
+      if (storyDetails) {
+        const audioSource = storyDetails.audioUrl || storyDetails.voiceoverUrl;
+        if (audioSource && !isPlaying && !isSpeaking && !audioRef.current) {
+          toggleSpeech();
+        }
       }
-    }
+    }, 500);
   };
 
   if (currentStory?.pdfUrl || storyDetails?.pdfUrl) {
