@@ -231,10 +231,10 @@ export default function SubscriptionPage() {
               )}
 
               {subscriptionStatus.hasActivePass && subscriptionStatus.activePassEndDate && (
-                <div className="flex items-center gap-2 p-3 bg-white/10 rounded-md border border-white/20">
+                <div className="flex items-center gap-2 p-3 bg-green-500 rounded-md shadow-lg border border-green-400">
                   <Check className="w-4 h-4 text-white" />
-                  <p className="text-sm text-white">
-                    Active until <span className="font-semibold">{formatDate(subscriptionStatus.activePassEndDate)}</span>
+                  <p className="text-sm text-white font-medium">
+                    Active until <span className="font-bold underline">{formatDate(subscriptionStatus.activePassEndDate)}</span>
                   </p>
                 </div>
               )}
