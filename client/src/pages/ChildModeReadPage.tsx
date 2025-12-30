@@ -411,17 +411,6 @@ export default function ChildModeReadPage() {
                   </p>
                 </div>
 
-                {currentStory?.imageUrl && (
-                  <div className="flex justify-center">
-                    <img
-                      src={currentStory.imageUrl}
-                      alt={currentStory.title}
-                      className="w-full max-w-md h-auto rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 object-cover"
-                      data-testid="img-current-story"
-                    />
-                  </div>
-                )}
-
                 <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
                   <Button
                     className="rounded-2xl text-lg sm:text-xl px-8 sm:px-10 py-6 sm:py-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all"
