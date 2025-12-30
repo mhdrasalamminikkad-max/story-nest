@@ -266,7 +266,7 @@ export default function SubscriptionPage() {
                 <CardFooter>
                   <Button
                     className="w-full"
-                    onClick={() => navigate("/purchase-plan")}
+                    onClick={() => navigate("/pricing")}
                     data-testid="button-purchase-plan"
                   >
                     View Plans
