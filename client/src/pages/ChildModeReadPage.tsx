@@ -268,9 +268,8 @@ export default function ChildModeReadPage() {
 
   const handlePdfLoaded = () => {
     setPdfLoaded(true);
-    setShouldAutoStartReading(true);
-    // Force start reading if storyDetails is already available
-    if (storyDetails) {
+    // Only auto-start if not already reading
+    if (storyDetails && !isReading && !audioRef.current) {
       const hasAudio = storyDetails.voiceoverUrl || storyDetails.audioUrl;
       if (hasAudio) {
         startReading();

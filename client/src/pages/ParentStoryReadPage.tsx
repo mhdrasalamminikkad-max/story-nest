@@ -111,14 +111,9 @@ export default function ParentStoryReadPage() {
   const handlePdfLoaded = () => {
     if (storyDetails) {
       const audioSource = storyDetails.audioUrl || storyDetails.voiceoverUrl;
-      if (audioSource && !isPlaying) {
-        if (!audioRef.current) {
-          audioRef.current = new Audio(audioSource);
-          audioRef.current.onended = () => setIsPlaying(false);
-          audioRef.current.onerror = () => setIsPlaying(false);
-        }
-        audioRef.current.play().catch(console.error);
-        setIsPlaying(true);
+      // Use the existing toggleSpeech logic to avoid duplicate audio objects
+      if (audioSource && !isPlaying && !isAudioPlaying) {
+        toggleSpeech();
       }
     }
   };
