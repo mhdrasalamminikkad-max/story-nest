@@ -200,50 +200,49 @@ export default function SubscriptionPage() {
         </div>
 
         {subscriptionStatus && (
-          <Card className="mb-6 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border-violet-500/20">
+          <Card className="mb-6 bg-orange-500 border-none">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-violet-500" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Sparkles className="w-5 h-5 text-white" />
                 Your Status
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Subscription Status</p>
-                  <p className="text-lg font-semibold capitalize">{subscriptionStatus.status}</p>
+                  <p className="text-sm text-white/80">Subscription Status</p>
+                  <p className="text-lg font-semibold capitalize text-white">{subscriptionStatus.status}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Coin Balance</p>
+                  <p className="text-sm text-white/80">Coin Balance</p>
                   <div className="flex items-center gap-2">
-                    <Coins className="w-5 h-5 text-amber-500" />
-                    <p className="text-lg font-semibold">{subscriptionStatus.coins}</p>
+                    <p className="text-lg font-semibold text-white">{subscriptionStatus.coins}</p>
                   </div>
                 </div>
               </div>
 
               {subscriptionStatus.status === "trial" && subscriptionStatus.trialDaysRemaining !== undefined && (
-                <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-md border border-blue-500/20">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <p className="text-sm">
+                <div className="flex items-center gap-2 p-3 bg-white/10 rounded-md border border-white/20">
+                  <Clock className="w-4 h-4 text-white" />
+                  <p className="text-sm text-white">
                     <span className="font-semibold">{subscriptionStatus.trialDaysRemaining} days</span> remaining in your free trial
                   </p>
                 </div>
               )}
 
               {subscriptionStatus.hasActivePass && subscriptionStatus.activePassEndDate && (
-                <div className="flex items-center gap-2 p-3 bg-green-500/10 rounded-md border border-green-500/20">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <p className="text-sm">
+                <div className="flex items-center gap-2 p-3 bg-white/10 rounded-md border border-white/20">
+                  <Check className="w-4 h-4 text-white" />
+                  <p className="text-sm text-white">
                     Active until <span className="font-semibold">{formatDate(subscriptionStatus.activePassEndDate)}</span>
                   </p>
                 </div>
               )}
 
               {subscriptionStatus.status === "expired" && (
-                <div className="p-3 bg-destructive/10 rounded-md border border-destructive/20">
-                  <p className="text-sm text-destructive">
-                    Your trial has expired. Purchase coins and redeem a pass to continue using TELL MAMMA.
+                <div className="p-3 bg-white/10 rounded-md border border-white/20">
+                  <p className="text-sm text-white">
+                    Your trial has expired. Purchase a plan to continue using TELL MAMMA.
                   </p>
                 </div>
               )}
@@ -254,46 +253,31 @@ export default function SubscriptionPage() {
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div>
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Coins className="w-6 h-6 text-amber-500" />
-              Buy Coins
+              Purchase Plan
             </h2>
             <div className="grid gap-4">
-              {coinPackages.map((pkg) => (
-                <Card key={pkg.id} className="hover-elevate" data-testid={`card-coinpackage-${pkg.id}`}>
-                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                    <div>
-                      <CardTitle className="text-lg">{pkg.name}</CardTitle>
-                      <CardDescription>{pkg.description}</CardDescription>
-                    </div>
-                    <Badge variant="secondary" className="text-lg">
-                      <Coins className="w-4 h-4 mr-1" />
-                      {pkg.coins}
-                    </Badge>
-                  </CardHeader>
-                  <CardFooter className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-2xl font-bold">
-                      ₹{pkg.price}
-                    </span>
-                    <Button
-                      onClick={() => purchaseCoinsMutation.mutate(pkg.id)}
-                      disabled={purchaseCoinsMutation.isPending}
-                      data-testid={`button-buy-coins-${pkg.id}`}
-                    >
-                      {purchaseCoinsMutation.isPending && selectedCoinPackage === pkg.id
-                        ? "Processing..."
-                        : "Buy Now"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+              <Card className="hover-elevate">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                  <div>
+                    <CardTitle className="text-lg">Premium Membership</CardTitle>
+                    <CardDescription>Get full access to all features</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    onClick={() => navigate("/purchase-plan")}
+                    data-testid="button-purchase-plan"
+                  >
+                    View Plans
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold mb-4">Redeem Passes</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Use your coins to activate time-based passes
-            </p>
+            <h2 className="text-2xl font-bold mb-4">Available Passes</h2>
             <div className="grid gap-4">
               {plans.map((plan) => {
                 const coinCost = getPlanCost(plan.id);
