@@ -13,14 +13,17 @@ interface PDFViewerProps {
   onPdfLoaded?: () => void;
 }
 
+// Static cache for PDF documents to enable instant loading
+const pdfCache = new Map<string, any>();
+
 export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfLoaded }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
-  const [pdf, setPdf] = useState<any>(null);
+  const [pdf, setPdf] = useState<any>(pdfCache.get(pdfUrl) || null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(pdfCache.get(pdfUrl)?.numPages || 0);
+  const [loading, setLoading] = useState(!pdfCache.has(pdfUrl));
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1.5);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -30,37 +33,43 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
     let loadingTask: any = null;
 
     const loadPDF = async () => {
+      // If already in cache, just update the state and return
+      if (pdfCache.has(pdfUrl)) {
+        const cachedPdf = pdfCache.get(pdfUrl);
+        setPdf(cachedPdf);
+        setTotalPages(cachedPdf.numPages);
+        setLoading(false);
+        if (onPdfLoaded) onPdfLoaded();
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-
-        console.log('Loading PDF from:', pdfUrl);
 
         loadingTask = pdfjsLib.getDocument({
           url: pdfUrl,
           withCredentials: false,
           isEvalSupported: false,
           cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+          // Optimization: Disable font face for faster loading if possible
+          disableFontFace: true,
         });
         
         const pdfDoc = await loadingTask.promise;
 
         if (isMounted) {
-          console.log('PDF loaded successfully, pages:', pdfDoc.numPages);
+          pdfCache.set(pdfUrl, pdfDoc);
           setPdf(pdfDoc);
           setTotalPages(pdfDoc.numPages);
           setLoading(false);
-          // Notify parent component that PDF has loaded
           if (onPdfLoaded) {
-            setTimeout(onPdfLoaded, 100);
+            setTimeout(onPdfLoaded, 0);
           }
         }
       } catch (err: any) {
         if (isMounted) {
-          const errorMsg = err?.message || JSON.stringify(err) || 'Unknown error';
-          console.error('Error loading PDF - Full Error:', err);
-          console.error('Error Message:', errorMsg);
-          setError(`Unable to load PDF: ${errorMsg}`);
+          setError(`Unable to load PDF: ${err?.message || 'Unknown error'}`);
           setLoading(false);
         }
       }
@@ -70,11 +79,8 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
 
     return () => {
       isMounted = false;
-      if (loadingTask) {
-        loadingTask.destroy();
-      }
     };
-  }, [pdfUrl]);
+  }, [pdfUrl, onPdfLoaded]);
 
   useEffect(() => {
     const handleResize = () => {
