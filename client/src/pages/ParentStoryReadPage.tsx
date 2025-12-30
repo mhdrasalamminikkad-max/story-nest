@@ -108,6 +108,21 @@ export default function ParentStoryReadPage() {
     );
   }
 
+  const handlePdfLoaded = () => {
+    if (storyDetails) {
+      const audioSource = storyDetails.audioUrl || storyDetails.voiceoverUrl;
+      if (audioSource && !isPlaying) {
+        if (!audioRef.current) {
+          audioRef.current = new Audio(audioSource);
+          audioRef.current.onended = () => setIsPlaying(false);
+          audioRef.current.onerror = () => setIsPlaying(false);
+        }
+        audioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
+    }
+  };
+
   if (currentStory?.pdfUrl || storyDetails?.pdfUrl) {
     const pdfUrl = storyDetails?.pdfUrl || (currentStory?.pdfUrl ? `${currentStory.pdfUrl}` : null);
     if (pdfUrl) {
@@ -131,7 +146,7 @@ export default function ParentStoryReadPage() {
             </div>
           </div>
           <div className="flex-1 overflow-auto">
-            <PDFViewer pdfUrl={pdfUrl} fillScreen />
+            <PDFViewer pdfUrl={pdfUrl} fillScreen onPdfLoaded={handlePdfLoaded} />
           </div>
           <div className="sticky bottom-0 flex justify-center py-4 bg-background/95 backdrop-blur-sm border-t">
             <Button

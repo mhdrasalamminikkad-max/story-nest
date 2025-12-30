@@ -269,6 +269,13 @@ export default function ChildModeReadPage() {
   const handlePdfLoaded = () => {
     setPdfLoaded(true);
     setShouldAutoStartReading(true);
+    // Force start reading if storyDetails is already available
+    if (storyDetails) {
+      const hasAudio = storyDetails.voiceoverUrl || storyDetails.audioUrl;
+      if (hasAudio) {
+        startReading();
+      }
+    }
   };
 
   if (!currentStoryFromList) {
