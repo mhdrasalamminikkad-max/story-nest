@@ -16,13 +16,23 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw } from "lucide-react";
+import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Story, SubscriptionPlan, InsertSubscriptionPlan, CoinSettings, PlanCoinCost } from "@shared/schema";
+import type { Story, SubscriptionPlan, InsertSubscriptionPlan, CoinSettings, PlanCoinCost, StoryCategory, StoryType } from "@shared/schema";
 import { insertStorySchema, insertSubscriptionPlanSchema, updateCoinSettingsSchema } from "@shared/schema";
+
+interface CategoryMutationData {
+  name: string;
+  slug: string;
+}
+
+interface TypeMutationData {
+  name: string;
+  slug: string;
+}
 
 interface AdminStats {
   totalUsers: number;
@@ -142,6 +152,60 @@ export default function AdminPanel() {
   const { data: planCoinCosts = [] } = useQuery<PlanCoinCost[]>({
     queryKey: ["/api/admin/plan-coin-costs"],
     enabled: adminCheck?.isAdmin || false,
+  });
+
+  const { data: categories = [], refetch: refetchCategories } = useQuery<StoryCategory[]>({
+    queryKey: ["/api/admin/categories"],
+    enabled: adminCheck?.isAdmin || false,
+  });
+
+  const { data: storyTypes = [], refetch: refetchStoryTypes } = useQuery<StoryType[]>({
+    queryKey: ["/api/admin/story-types"],
+    enabled: adminCheck?.isAdmin || false,
+  });
+
+  const addCategoryMutation = useMutation({
+    mutationFn: async (data: CategoryMutationData) => {
+      const res = await apiRequest("POST", "/api/admin/categories", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
+      toast({ title: "Category added" });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/categories/${id}`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/categories"] });
+      toast({ title: "Category deleted" });
+    },
+  });
+
+  const addTypeMutation = useMutation({
+    mutationFn: async (data: TypeMutationData) => {
+      const res = await apiRequest("POST", "/api/admin/story-types", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/story-types"] });
+      toast({ title: "Story type added" });
+    },
+  });
+
+  const deleteTypeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/story-types/${id}`);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/story-types"] });
+      toast({ title: "Story type deleted" });
+    },
   });
 
   // All mutations must be defined here, before any conditional returns
@@ -543,7 +607,119 @@ export default function AdminPanel() {
                   <Coins className="w-4 h-4 mr-2" />
                   Coin System
                 </TabsTrigger>
+                <TabsTrigger value="controls" data-testid="tab-controls">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Story Controls
+                </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="controls">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Story Categories</CardTitle>
+                      <CardDescription>Manage categories available for stories</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex gap-2">
+                          <Input id="new-category-name" placeholder="Category Name" />
+                          <Button 
+                            onClick={() => {
+                              const nameInput = document.getElementById('new-category-name') as HTMLInputElement;
+                              if (nameInput.value) {
+                                addCategoryMutation.mutate({ 
+                                  name: nameInput.value, 
+                                  slug: nameInput.value.toLowerCase().replace(/\s+/g, '-') 
+                                });
+                                nameInput.value = '';
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Name</TableHead>
+                              <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {categories.map((cat) => (
+                              <TableRow key={cat.id}>
+                                <TableCell>{cat.name}</TableCell>
+                                <TableCell className="text-right">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => deleteCategoryMutation.mutate(cat.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Story Types</CardTitle>
+                      <CardDescription>Manage types/genres available for stories</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex gap-2">
+                          <Input id="new-type-name" placeholder="Type Name" />
+                          <Button 
+                            onClick={() => {
+                              const nameInput = document.getElementById('new-type-name') as HTMLInputElement;
+                              if (nameInput.value) {
+                                addTypeMutation.mutate({ 
+                                  name: nameInput.value, 
+                                  slug: nameInput.value.toLowerCase().replace(/\s+/g, '-') 
+                                });
+                                nameInput.value = '';
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Name</TableHead>
+                              <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {storyTypes.map((type) => (
+                              <TableRow key={type.id}>
+                                <TableCell>{type.name}</TableCell>
+                                <TableCell className="text-right">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => deleteTypeMutation.mutate(type.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
 
               <TabsContent value="review">
                 <Card>

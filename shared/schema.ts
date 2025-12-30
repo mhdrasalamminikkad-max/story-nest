@@ -1,5 +1,39 @@
 import { z } from "zod";
 
+// Story Category schema
+export const storyCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean().default(true),
+  createdAt: z.number(),
+});
+
+export const insertStoryCategorySchema = storyCategorySchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type StoryCategory = z.infer<typeof storyCategorySchema>;
+export type InsertStoryCategory = z.infer<typeof insertStoryCategorySchema>;
+
+// Story Type schema
+export const storyTypeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean().default(true),
+  createdAt: z.number(),
+});
+
+export const insertStoryTypeSchema = storyTypeSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type StoryType = z.infer<typeof storyTypeSchema>;
+export type InsertStoryType = z.infer<typeof insertStoryTypeSchema>;
+
 // Story schema for bedtime stories
 export const storySchema = z.object({
   id: z.string(),
@@ -13,8 +47,8 @@ export const storySchema = z.object({
   audioUrl: z.string().optional(),
   audience: z.enum(["parent", "child", "both"]),
   language: z.enum(["english", "malayalam"]),
-  category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"]),
-  storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"]),
+  category: z.string(),
+  storyType: z.string(),
   status: z.enum(["published", "pending_review", "rejected", "draft"]),
   approvedBy: z.string().optional(),
   rejectionReason: z.string().optional(),
@@ -39,8 +73,8 @@ export const insertStorySchema = storySchema.omit({
   audioUrl: z.string().optional(),
   audience: z.enum(["parent", "child", "both"], { required_error: "Please select an audience" }),
   language: z.enum(["english", "malayalam"], { required_error: "Please select a language" }),
-  category: z.enum(["islamic", "history", "moral", "adventure", "educational", "fairy-tale"], { required_error: "Please select a category" }),
-  storyType: z.enum(["islamic", "lesson", "history", "fairy-tale", "adventure", "educational", "moral", "mythology", "science"], { required_error: "Please select a story type" }),
+  category: z.string().min(1, "Please select a category"),
+  storyType: z.string().min(1, "Please select a story type"),
 });
 
 export const reviewStorySchema = z.object({

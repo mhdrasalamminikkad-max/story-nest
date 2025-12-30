@@ -1,5 +1,5 @@
 import { pgTable, text, varchar, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 
 export const stories = pgTable("stories", {
   id: varchar("id").primaryKey(),
@@ -142,6 +142,22 @@ export const readingSessions = pgTable("reading_sessions", {
   storyId: varchar("story_id").notNull(),
   readingDate: timestamp("reading_date").notNull().default(sql`now()`),
   durationMinutes: integer("duration_minutes").notNull(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+export const storyCategories = pgTable("story_categories", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+export const storyTypes = pgTable("story_types", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
