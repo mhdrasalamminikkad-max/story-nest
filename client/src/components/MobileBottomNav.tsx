@@ -25,12 +25,12 @@ export function MobileBottomNav() {
               onClick={() => setLocation(item.path)}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${
                 isActive 
-                  ? "text-primary" 
-                  : "text-muted-foreground hover-elevate"
+                  ? "text-white" 
+                  : "text-white hover-elevate"
               }`}
               data-testid={`nav-${item.label.toLowerCase()}`}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "fill-primary/20" : ""}`} />
+              <Icon className={`w-6 h-6 ${isActive ? "fill-white/20" : ""}`} />
               <span className="text-xs font-medium">{item.label}</span>
             </button>
           );
