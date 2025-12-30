@@ -222,10 +222,13 @@ export default function SubscriptionPage() {
               </div>
 
               {subscriptionStatus.status === "trial" && subscriptionStatus.trialDaysRemaining !== undefined && (
-                <div className="flex items-center gap-2 p-3 bg-white/10 rounded-md border border-white/20">
-                  <Clock className="w-4 h-4 text-white" />
-                  <p className="text-sm text-white">
-                    <span className="font-semibold">{subscriptionStatus.trialDaysRemaining} days</span> remaining in your free trial
+                <div className="flex items-center gap-3 p-3 bg-white/10 rounded-md border border-white/20">
+                  <div className="bg-white/20 p-2 rounded-full shadow-inner">
+                    <Clock className="w-5 h-5 text-white animate-pulse" />
+                  </div>
+                  <p className="text-sm text-white font-medium">
+                    <span className="font-bold text-lg mr-1">{subscriptionStatus.trialDaysRemaining} days</span> 
+                    <span className="opacity-90">remaining in your free trial</span>
                   </p>
                 </div>
               )}
