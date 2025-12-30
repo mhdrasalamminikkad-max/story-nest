@@ -5,11 +5,13 @@ StoryNest is a child-friendly, fully responsive web application built with React
 
 ## User Preferences
 - PDF.js library implementation is PERMANENT - do not modify without explicit user request
+- **Database Connection**: The project is PERMANENTLY configured to use an external PostgreSQL database hosted on Render: `postgresql://tellmamma_user:hz8AGCHI31lctLaGaXc4l4wI1uAO90vt@dpg-d4vvhi1r0fns739u6ahg-a.virginia-postgres.render.com/tellmamma`. DO NOT change this unless explicitly requested by the user.
 
 ## System Architecture
 ### Tech Stack
 - **Frontend**: React + Vite, TailwindCSS, Framer Motion, Shadcn UI
 - **Backend**: Express.js, Firebase Authentication, Firestore
+- **Database**: External PostgreSQL (Render) via Drizzle ORM
 - **Features**: Web Speech API (Read Aloud), Fullscreen API (Child Mode)
 - **Fonts**: Fredoka One (headings), Poppins (body text)
 
