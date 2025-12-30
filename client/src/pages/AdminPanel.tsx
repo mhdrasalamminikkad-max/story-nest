@@ -32,6 +32,13 @@ interface AdminStats {
   recentStoriesCount: number;
 }
 
+interface ReviewMutationData {
+  id: string;
+  action: "approve" | "reject";
+  rejectionReason?: string;
+  coinsReward?: number;
+}
+
 interface AdminUser {
   userId: string;
   readingTimeLimit: number;
@@ -55,6 +62,8 @@ export default function AdminPanel() {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [features, setFeatures] = useState<string[]>([""]);
+  const [approvingStory, setApprovingStory] = useState<Story | null>(null);
+  const [coinsToReward, setCoinsToReward] = useState<number>(10);
   
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -590,7 +599,10 @@ export default function AdminPanel() {
                               </div>
                               <div className="flex gap-2 flex-wrap">
                                 <Button
-                                  onClick={() => reviewStoryMutation.mutate({ id: story.id, action: "approve" })}
+                                  onClick={() => {
+                                    setApprovingStory(story);
+                                    setCoinsToReward(10);
+                                  }}
                                   disabled={reviewStoryMutation.isPending}
                                   className="rounded-2xl"
                                   data-testid={`button-approve-${story.id}`}
@@ -1024,6 +1036,79 @@ export default function AdminPanel() {
         </main>
       </div>
 
+      {/* Approve Story Dialog with Coin Reward */}
+      <Dialog open={!!approvingStory} onOpenChange={(open) => {
+        if (!open) {
+          setApprovingStory(null);
+          setCoinsToReward(10);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md rounded-3xl" data-testid="dialog-approve-story">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Approve Story
+            </DialogTitle>
+            <DialogDescription>
+              Approve "{approvingStory?.title}" and reward the author with coins.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Coins className="w-4 h-4 text-yellow-500" />
+                Coins to Reward
+              </label>
+              <Input
+                type="number"
+                min={0}
+                max={1000}
+                value={coinsToReward}
+                onChange={(e) => setCoinsToReward(Math.max(0, parseInt(e.target.value) || 0))}
+                className="rounded-2xl text-center text-lg font-bold"
+                data-testid="input-coins-reward"
+              />
+              <p className="text-xs text-muted-foreground">
+                These coins will be instantly added to the author's account
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setApprovingStory(null);
+                setCoinsToReward(10);
+              }}
+              className="rounded-2xl"
+              data-testid="button-cancel-approve"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (approvingStory) {
+                  reviewStoryMutation.mutate({
+                    id: approvingStory.id,
+                    action: "approve",
+                    coinsReward: coinsToReward,
+                  });
+                  setApprovingStory(null);
+                  setCoinsToReward(10);
+                }
+              }}
+              disabled={reviewStoryMutation.isPending}
+              className="rounded-2xl bg-green-600 hover:bg-green-700"
+              data-testid="button-confirm-approve"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Approve & Award {coinsToReward} Coins
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Story Dialog */}
       <Dialog open={!!reviewingStory} onOpenChange={(open) => {
         if (!open) {
           setReviewingStory(null);

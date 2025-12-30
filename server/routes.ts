@@ -655,6 +655,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Approve story and award coins (used from admin dashboard)
+  app.post("/api/stories/:id/approve", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const adminId = req.userId!;
+      const { id } = req.params;
+      const { coinsReward = 10 } = req.body;
+
+      // Verify story exists and is pending review
+      const [story] = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.id, id));
+
+      if (!story) {
+        res.status(404).json({ error: "Story not found" });
+        return;
+      }
+
+      if (story.status !== "pending_review") {
+        res.status(400).json({ error: "Story is not pending review" });
+        return;
+      }
+
+      const now = new Date();
+
+      // Update story to published with coin reward
+      const [updatedStory] = await db
+        .update(stories)
+        .set({
+          status: "published",
+          approvedBy: adminId,
+          reviewedAt: now,
+          rejectionReason: null,
+          coinsReward: coinsReward,
+        })
+        .where(eq(stories.id, id))
+        .returning();
+
+      // Award coins to the story author
+      if (coinsReward > 0) {
+        await db
+          .update(parentSettings)
+          .set({ 
+            coins: sql`${parentSettings.coins} + ${coinsReward}` 
+          })
+          .where(eq(parentSettings.userId, story.userId));
+      }
+
+      const storyWithTimestamp = {
+        ...updatedStory,
+        createdAt: updatedStory.createdAt.getTime(),
+        reviewedAt: updatedStory.reviewedAt?.getTime() || null,
+      };
+      
+      res.json({ 
+        ...storyWithTimestamp, 
+        coinsAwarded: coinsReward,
+        message: `Story approved and ${coinsReward} coins awarded to author` 
+      });
+    } catch (error) {
+      console.error("Error approving story:", error);
+      res.status(500).json({ error: "Failed to approve story" });
+    }
+  });
+
   // Admin: Review story (approve or reject)
   app.post("/api/admin/review-story/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
@@ -688,20 +753,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.status = "published";
         updateData.rejectionReason = null;
         
+        // Get coins to award (from request or default from settings)
+        let coinsToAward = reviewData.coinsReward;
+        
+        if (coinsToAward === undefined) {
+          const [settings] = await db
+            .select()
+            .from(coinSettings)
+            .limit(1);
+          coinsToAward = settings?.coinsPerStory || 10;
+        }
+        
+        // Store the coins reward on the story
+        updateData.coinsReward = coinsToAward;
+        
         // Award coins to the story author when approved
-        const [settings] = await db
-          .select()
-          .from(coinSettings)
-          .limit(1);
-        
-        const coinsToAward = settings?.coinsPerStory || 10;
-        
-        await db
-          .update(parentSettings)
-          .set({ 
-            coins: sql`${parentSettings.coins} + ${coinsToAward}` 
-          })
-          .where(eq(parentSettings.userId, story.userId));
+        if (coinsToAward > 0) {
+          await db
+            .update(parentSettings)
+            .set({ 
+              coins: sql`${parentSettings.coins} + ${coinsToAward}` 
+            })
+            .where(eq(parentSettings.userId, story.userId));
+        }
       } else {
         // Rejected - set back to draft for editing
         updateData.status = "draft";

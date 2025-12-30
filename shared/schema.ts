@@ -18,6 +18,7 @@ export const storySchema = z.object({
   status: z.enum(["published", "pending_review", "rejected", "draft"]),
   approvedBy: z.string().optional(),
   rejectionReason: z.string().optional(),
+  coinsReward: z.number().default(10),
   createdAt: z.number(),
   reviewedAt: z.number().optional(),
   isBookmarked: z.boolean().optional(),
@@ -45,6 +46,7 @@ export const insertStorySchema = storySchema.omit({
 export const reviewStorySchema = z.object({
   action: z.enum(["approve", "reject"]),
   rejectionReason: z.string().optional(),
+  coinsReward: z.number().min(0).optional(),
 });
 
 export type Story = z.infer<typeof storySchema>;
