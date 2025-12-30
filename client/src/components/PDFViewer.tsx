@@ -10,9 +10,10 @@ interface PDFViewerProps {
   pdfUrl: string;
   height?: string;
   fillScreen?: boolean;
+  onPdfLoaded?: () => void;
 }
 
-export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false }: PDFViewerProps) {
+export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfLoaded }: PDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
@@ -49,6 +50,10 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false }: PDFV
           setPdf(pdfDoc);
           setTotalPages(pdfDoc.numPages);
           setLoading(false);
+          // Notify parent component that PDF has loaded
+          if (onPdfLoaded) {
+            setTimeout(onPdfLoaded, 100);
+          }
         }
       } catch (err: any) {
         if (isMounted) {

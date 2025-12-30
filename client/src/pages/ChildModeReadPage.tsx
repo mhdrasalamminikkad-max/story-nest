@@ -24,6 +24,8 @@ export default function ChildModeReadPage() {
   const [newlyEarnedRewards, setNewlyEarnedRewards] = useState<string[]>([]);
   const [showGames, setShowGames] = useState(false);
   const [storyCompleted, setStoryCompleted] = useState(false);
+  const [pdfLoaded, setPdfLoaded] = useState(false);
+  const [shouldAutoStartReading, setShouldAutoStartReading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const handlersRef = useRef<{
@@ -252,6 +254,23 @@ export default function ChildModeReadPage() {
     setShowGames(false);
   };
 
+  // Auto-start reading when PDF loads
+  useEffect(() => {
+    if (pdfLoaded && shouldAutoStartReading && storyDetails) {
+      const hasAudio = storyDetails.voiceoverUrl || storyDetails.audioUrl;
+      if (hasAudio) {
+        startReading();
+      }
+      setShouldAutoStartReading(false);
+      setPdfLoaded(false);
+    }
+  }, [pdfLoaded, shouldAutoStartReading, storyDetails]);
+
+  const handlePdfLoaded = () => {
+    setPdfLoaded(true);
+    setShouldAutoStartReading(true);
+  };
+
   if (!currentStoryFromList) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -349,7 +368,7 @@ export default function ChildModeReadPage() {
                 className="flex flex-col h-full"
               >
                 <div className="flex-1 overflow-auto">
-                  <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails?.id || currentStory?.id}`} fillScreen />
+                  <PDFViewer pdfUrl={`/api/pdf-proxy/${storyDetails?.id || currentStory?.id}`} fillScreen onPdfLoaded={handlePdfLoaded} />
                 </div>
                 <div className="flex justify-center py-4 sticky bottom-0 bg-gradient-to-t from-purple-100 via-pink-100/80 to-transparent dark:from-purple-950 dark:via-pink-950/80 dark:to-transparent">
                   <Button
