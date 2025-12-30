@@ -18,6 +18,7 @@ export const stories = pgTable("stories", {
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   approvedBy: varchar("approved_by"),
   rejectionReason: text("rejection_reason"),
+  coinsReward: integer("coins_reward").notNull().default(10),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   reviewedAt: timestamp("reviewed_at"),
 });

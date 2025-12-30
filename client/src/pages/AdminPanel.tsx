@@ -34,6 +34,13 @@ interface TypeMutationData {
   slug: string;
 }
 
+interface ReviewMutationData {
+  id: string;
+  action: "approve" | "reject";
+  rejectionReason?: string;
+  coinsReward?: number;
+}
+
 interface AdminStats {
   totalUsers: number;
   totalStories: number;
@@ -232,8 +239,8 @@ export default function AdminPanel() {
   });
 
   const reviewStoryMutation = useMutation({
-    mutationFn: async ({ id, action, rejectionReason }: { id: string; action: "approve" | "reject"; rejectionReason?: string }) => {
-      const res = await apiRequest("POST", `/api/admin/review-story/${id}`, { action, rejectionReason });
+    mutationFn: async ({ id, action, rejectionReason, coinsReward }: ReviewMutationData) => {
+      const res = await apiRequest("POST", `/api/admin/review-story/${id}`, { action, rejectionReason, coinsReward });
       return await res.json();
     },
     onSuccess: (_, variables) => {
