@@ -7,8 +7,8 @@ import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, re
 import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
 import { db } from "./db";
-import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions, storyCategories, storyTypes } from "./db/schema";
-import { eq, and, desc, sql, asc } from "drizzle-orm";
+import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions } from "./db/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { initializeWebSocket, wsManager } from "./websocket";
@@ -364,6 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pinHash,
           parentName: settingsData.parentName,
           childName: settingsData.childName,
+          childAge: settingsData.childAge,
           readingTimeLimit: settingsData.readingTimeLimit,
           fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
           theme: settingsData.theme,
@@ -380,6 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             pinHash,
             parentName: settingsData.parentName,
             childName: settingsData.childName,
+            childAge: settingsData.childAge,
             readingTimeLimit: settingsData.readingTimeLimit,
             fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
             theme: settingsData.theme,
@@ -569,7 +571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = req.body;
 
       // Only allow updating specific fields
-      const allowedFields = ["childName", "readingTimeLimit", "theme", "fullscreenLockEnabled"];
+      const allowedFields = ["childName", "childAge", "readingTimeLimit", "theme", "fullscreenLockEnabled"];
       const updateData: any = {};
       
       for (const field of allowedFields) {
@@ -634,117 +636,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Story Categories Endpoints
-  app.get("/api/admin/categories", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const categories = await db.select().from(storyCategories).orderBy(asc(storyCategories.name));
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch categories" });
-    }
-  });
-
-  app.post("/api/admin/categories", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { name, slug } = req.body;
-      const [category] = await db.insert(storyCategories).values({
-        id: `cat-${Date.now()}`,
-        name,
-        slug,
-        isActive: true,
-      }).returning();
-      res.json(category);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create category" });
-    }
-  });
-
-  app.patch("/api/admin/categories/:id", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updates = req.body;
-      const [category] = await db.update(storyCategories).set(updates).where(eq(storyCategories.id, id)).returning();
-      res.json(category);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update category" });
-    }
-  });
-
-  app.delete("/api/admin/categories/:id", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      await db.delete(storyCategories).where(eq(storyCategories.id, id));
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete category" });
-    }
-  });
-
-  // Story Types Endpoints
-  app.get("/api/admin/story-types", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const types = await db.select().from(storyTypes).orderBy(asc(storyTypes.name));
-      res.json(types);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch story types" });
-    }
-  });
-
-  app.post("/api/admin/story-types", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { name, slug } = req.body;
-      const [type] = await db.insert(storyTypes).values({
-        id: `type-${Date.now()}`,
-        name,
-        slug,
-        isActive: true,
-      }).returning();
-      res.json(type);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create story type" });
-    }
-  });
-
-  app.patch("/api/admin/story-types/:id", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updates = req.body;
-      const [type] = await db.update(storyTypes).set(updates).where(eq(storyTypes.id, id)).returning();
-      res.json(type);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update story type" });
-    }
-  });
-
-  app.delete("/api/admin/story-types/:id", authenticateUser, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      await db.delete(storyTypes).where(eq(storyTypes.id, id));
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete story type" });
-    }
-  });
-
-  // Public category/type endpoints
-  app.get("/api/categories", async (req, res) => {
-    try {
-      const categories = await db.select().from(storyCategories).where(eq(storyCategories.isActive, true)).orderBy(asc(storyCategories.name));
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch categories" });
-    }
-  });
-
-  app.get("/api/story-types", async (req, res) => {
-    try {
-      const types = await db.select().from(storyTypes).where(eq(storyTypes.isActive, true)).orderBy(asc(storyTypes.name));
-      res.json(types);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch story types" });
-    }
-  });
-
   // Admin: Get pending stories for review
   app.get("/api/admin/pending-stories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
@@ -763,71 +654,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching pending stories:", error);
       res.status(500).json({ error: "Failed to fetch pending stories" });
-    }
-  });
-
-  // Approve story and award coins (used from admin dashboard)
-  app.post("/api/stories/:id/approve", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
-    try {
-      const adminId = req.userId!;
-      const { id } = req.params;
-      const { coinsReward = 10 } = req.body;
-
-      // Verify story exists and is pending review
-      const [story] = await db
-        .select()
-        .from(stories)
-        .where(eq(stories.id, id));
-
-      if (!story) {
-        res.status(404).json({ error: "Story not found" });
-        return;
-      }
-
-      if (story.status !== "pending_review") {
-        res.status(400).json({ error: "Story is not pending review" });
-        return;
-      }
-
-      const now = new Date();
-
-      // Update story to published with coin reward
-      const [updatedStory] = await db
-        .update(stories)
-        .set({
-          status: "published",
-          approvedBy: adminId,
-          reviewedAt: now,
-          rejectionReason: null,
-          coinsReward: coinsReward,
-        })
-        .where(eq(stories.id, id))
-        .returning();
-
-      // Award coins to the story author
-      if (coinsReward > 0) {
-        await db
-          .update(parentSettings)
-          .set({ 
-            coins: sql`${parentSettings.coins} + ${coinsReward}` 
-          })
-          .where(eq(parentSettings.userId, story.userId));
-      }
-
-      const storyWithTimestamp = {
-        ...updatedStory,
-        createdAt: updatedStory.createdAt.getTime(),
-        reviewedAt: updatedStory.reviewedAt?.getTime() || null,
-      };
-      
-      res.json({ 
-        ...storyWithTimestamp, 
-        coinsAwarded: coinsReward,
-        message: `Story approved and ${coinsReward} coins awarded to author` 
-      });
-    } catch (error) {
-      console.error("Error approving story:", error);
-      res.status(500).json({ error: "Failed to approve story" });
     }
   });
 
@@ -864,29 +690,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.status = "published";
         updateData.rejectionReason = null;
         
-        // Get coins to award (from request or default from settings)
-        let coinsToAward = reviewData.coinsReward;
-        
-        if (coinsToAward === undefined) {
-          const [settings] = await db
-            .select()
-            .from(coinSettings)
-            .limit(1);
-          coinsToAward = settings?.coinsPerStory || 10;
-        }
-        
-        // Store the coins reward on the story
-        updateData.coinsReward = coinsToAward;
-        
         // Award coins to the story author when approved
-        if (coinsToAward > 0) {
-          await db
-            .update(parentSettings)
-            .set({ 
-              coins: sql`${parentSettings.coins} + ${coinsToAward}` 
-            })
-            .where(eq(parentSettings.userId, story.userId));
-        }
+        const [settings] = await db
+          .select()
+          .from(coinSettings)
+          .limit(1);
+        
+        const coinsToAward = settings?.coinsPerStory || 10;
+        
+        await db
+          .update(parentSettings)
+          .set({ 
+            coins: sql`${parentSettings.coins} + ${coinsToAward}` 
+          })
+          .where(eq(parentSettings.userId, story.userId));
       } else {
         // Rejected - set back to draft for editing
         updateData.status = "draft";

@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const settingsSchema = z.object({
   childName: z.string().min(1, "Child name is required"),
+  childAge: z.coerce.number().min(1, "Child age must be at least 1").max(18, "Child age cannot exceed 18"),
   readingTimeLimit: z.coerce.number().min(5, "Must be at least 5 minutes").max(120, "Must be 120 minutes or less"),
   theme: z.enum(["day", "night"]),
   fullscreenLockEnabled: z.boolean(),
@@ -63,17 +64,20 @@ export default function SettingsPage() {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       childName: settings?.childName || "",
+      childAge: settings?.childAge || 5,
       readingTimeLimit: settings?.readingTimeLimit || 30,
       theme: (settings?.theme as "day" | "night") || "day",
       fullscreenLockEnabled: settings?.fullscreenLockEnabled || false,
     },
     values: settings ? {
       childName: settings.childName || "",
+      childAge: settings.childAge || 5,
       readingTimeLimit: settings.readingTimeLimit || 30,
       theme: (settings.theme as "day" | "night") || "day",
       fullscreenLockEnabled: settings.fullscreenLockEnabled || false,
     } : {
       childName: "",
+      childAge: 5,
       readingTimeLimit: 30,
       theme: "day",
       fullscreenLockEnabled: false,
@@ -186,6 +190,27 @@ export default function SettingsPage() {
                           placeholder="Enter your child's name"
                           {...field}
                           data-testid="input-child-name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={settingsForm.control}
+                  name="childAge"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Child's Age</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="18"
+                          placeholder="Enter child's age (1-18)"
+                          {...field}
+                          data-testid="input-child-age"
                         />
                       </FormControl>
                       <FormMessage />

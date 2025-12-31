@@ -1,5 +1,5 @@
 import { pgTable, text, varchar, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
-import { sql, relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export const stories = pgTable("stories", {
   id: varchar("id").primaryKey(),
@@ -18,7 +18,6 @@ export const stories = pgTable("stories", {
   status: varchar("status", { length: 20 }).notNull().default("draft"),
   approvedBy: varchar("approved_by"),
   rejectionReason: text("rejection_reason"),
-  coinsReward: integer("coins_reward").notNull().default(10),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   reviewedAt: timestamp("reviewed_at"),
 });
@@ -28,6 +27,7 @@ export const parentSettings = pgTable("parent_settings", {
   pinHash: text("pin_hash").notNull(),
   parentName: varchar("parent_name", { length: 50 }),
   childName: varchar("child_name", { length: 50 }),
+  childAge: integer("child_age"),
   readingTimeLimit: integer("reading_time_limit").notNull(),
   fullscreenLockEnabled: boolean("fullscreen_lock_enabled").notNull(),
   theme: varchar("theme", { length: 10 }).notNull(),
@@ -143,22 +143,6 @@ export const readingSessions = pgTable("reading_sessions", {
   storyId: varchar("story_id").notNull(),
   readingDate: timestamp("reading_date").notNull().default(sql`now()`),
   durationMinutes: integer("duration_minutes").notNull(),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-});
-
-export const storyCategories = pgTable("story_categories", {
-  id: varchar("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-});
-
-export const storyTypes = pgTable("story_types", {
-  id: varchar("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

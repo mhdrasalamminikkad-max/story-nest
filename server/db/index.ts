@@ -3,6 +3,7 @@ import pkg from "pg";
 const { Pool } = pkg;
 import * as schema from "./schema";
 
-const EXTERNAL_DB_URL = "postgresql://tellmamma_user:hz8AGCHI31lctLaGaXc4l4wI1uAO90vt@dpg-d4vvhi1r0fns739u6ahg-a.virginia-postgres.render.com/tellmamma";
-const pool = new Pool({ connectionString: process.env.DATABASE_URL || EXTERNAL_DB_URL });
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://tellmamma_user:hz8AGCHI31lctLaGaXc4l4wI1uAO90vt@dpg-d4vvhi1r0fns739u6ahg-a.virginia-postgres.render.com/tellmamma";
+
+const pool = new Pool({ connectionString: DATABASE_URL });
 export const db = drizzle(pool, { schema });
