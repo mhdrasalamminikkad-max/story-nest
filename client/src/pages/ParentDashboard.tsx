@@ -87,6 +87,14 @@ export default function ParentDashboard() {
     queryKey: ["/api/admin/check"],
   });
 
+  const { data: categories = [] } = useQuery<any[]>({
+    queryKey: ["/api/categories"],
+  });
+
+  const { data: storyTypes = [] } = useQuery<any[]>({
+    queryKey: ["/api/story-types"],
+  });
+
   const { data: parentSettings, isLoading: settingsLoading } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
   });
@@ -1237,12 +1245,11 @@ export default function ParentDashboard() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="islamic">Islamic</SelectItem>
-                        <SelectItem value="history">History</SelectItem>
-                        <SelectItem value="moral">Moral Lessons</SelectItem>
-                        <SelectItem value="adventure">Adventure</SelectItem>
-                        <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.slug}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1263,15 +1270,11 @@ export default function ParentDashboard() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="islamic">Islamic</SelectItem>
-                        <SelectItem value="lesson">Lesson</SelectItem>
-                        <SelectItem value="history">History</SelectItem>
-                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
-                        <SelectItem value="adventure">Adventure</SelectItem>
-                        <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="moral">Moral</SelectItem>
-                        <SelectItem value="mythology">Mythology</SelectItem>
-                        <SelectItem value="science">Science</SelectItem>
+                        {storyTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.slug}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
