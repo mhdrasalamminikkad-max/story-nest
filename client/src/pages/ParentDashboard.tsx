@@ -1085,12 +1085,12 @@ export default function ParentDashboard() {
                         </p>
                       </div>
                       <Button 
-                        onClick={() => setLocation("/pricing")}
+                        onClick={() => setShowAddStory(true)}
                         className="rounded-2xl w-full bg-[#febc2d] text-[#1a1c25]"
-                        data-testid="button-buy-coins-settings"
+                        data-testid="button-earn-coins-settings"
                       >
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        Buy More Coins
+                        <Coins className="w-4 h-4 mr-2" />
+                        Earn More Coins
                       </Button>
                       <div className="border-t pt-6">
                         <Button
