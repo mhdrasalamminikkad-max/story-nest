@@ -103,12 +103,12 @@ export default function LeaderboardPage() {
                     </div>
                     
                     <div className="flex-1">
-                      <p className="font-semibold text-lg">
+                      <p className="font-semibold text-lg text-white">
                         {isParentLeaderboard 
                           ? `Parent of ${entry.childName || "Anonymous"}` 
                           : entry.childName || "Anonymous"}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/80">
                         {score} {scoreLabel}
                       </p>
                     </div>
