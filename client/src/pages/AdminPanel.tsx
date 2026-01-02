@@ -1441,12 +1441,11 @@ export default function AdminPanel() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="islamic">Islamic</SelectItem>
-                        <SelectItem value="history">History</SelectItem>
-                        <SelectItem value="moral">Moral</SelectItem>
-                        <SelectItem value="adventure">Adventure</SelectItem>
-                        <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.slug}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1467,15 +1466,11 @@ export default function AdminPanel() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="islamic">Islamic</SelectItem>
-                        <SelectItem value="lesson">Lesson</SelectItem>
-                        <SelectItem value="history">History</SelectItem>
-                        <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
-                        <SelectItem value="adventure">Adventure</SelectItem>
-                        <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="moral">Moral</SelectItem>
-                        <SelectItem value="mythology">Mythology</SelectItem>
-                        <SelectItem value="science">Science</SelectItem>
+                        {storyTypes.map((type) => (
+                          <SelectItem key={type.id} value={type.slug}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

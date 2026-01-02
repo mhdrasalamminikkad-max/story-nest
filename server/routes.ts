@@ -26,8 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allCategories = await db
         .select({ category: stories.category })
-        .from(stories)
-        .where(eq(stories.status, "published"));
+        .from(stories);
       
       // Extract unique categories
       const uniqueCategories = [...new Set(allCategories.map(s => s.category))].map(cat => ({
@@ -46,8 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allStories = await db
         .select({ storyType: stories.storyType })
-        .from(stories)
-        .where(eq(stories.status, "published"));
+        .from(stories);
       
       // Extract unique story types
       const uniqueTypes = [...new Set(allStories.map(s => s.storyType))].map(type => ({
