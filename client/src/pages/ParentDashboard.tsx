@@ -413,8 +413,10 @@ export default function ParentDashboard() {
     // Create blob URL immediately for instant display
     const blobUrl = URL.createObjectURL(file);
     setPdfFile({ name: file.name, data: blobUrl });
+    // Instantly set the blob URL to form for immediate usage/preview
+    (form.setValue as any)('pdfUrl', blobUrl);
 
-    // Convert to base64 instantly (no upload needed)
+    // Convert to base64 instantly (in background)
     setPdfUploading(true);
     try {
       const reader = new FileReader();
