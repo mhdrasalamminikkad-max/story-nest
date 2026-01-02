@@ -1461,6 +1461,44 @@ export default function ParentDashboard() {
                             <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors" />
                           </button>
                         ))}
+                        <button
+                          key="custom-image"
+                          type="button"
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                  field.onChange(reader.result as string);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            };
+                            input.click();
+                          }}
+                          className={`relative rounded-2xl overflow-hidden border-4 border-dashed transition-all flex flex-col items-center justify-center gap-2 aspect-[4/3] bg-muted/50 ${
+                            !imageOptions.some(opt => opt.url === field.value) ? "border-primary" : "border-muted-foreground/20"
+                          }`}
+                          data-testid="button-image-custom"
+                        >
+                          {!imageOptions.some(opt => opt.url === field.value) && field.value && field.value.startsWith('data:image') ? (
+                            <>
+                              <img src={field.value} alt="Custom" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <Upload className="w-6 h-6 text-white" />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-8 h-8 text-muted-foreground" />
+                              <span className="text-xs font-medium text-muted-foreground">Upload Photo</span>
+                            </>
+                          )}
+                        </button>
                       </div>
                     </FormControl>
                     <FormMessage />
