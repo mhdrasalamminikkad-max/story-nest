@@ -83,8 +83,8 @@ export default function ParentDashboard() {
     queryKey: ["/api/bookmarks"],
   });
 
-  const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
-    queryKey: ["/api/admin/check"],
+  const { data: parentSettings, isLoading: settingsLoading } = useQuery<ParentSettings>({
+    queryKey: ["/api/parent-settings"],
   });
 
   const { data: categories = [] } = useQuery<any[]>({
@@ -95,16 +95,16 @@ export default function ParentDashboard() {
     queryKey: ["/api/story-types"],
   });
 
-  const { data: parentSettings, isLoading: settingsLoading } = useQuery<ParentSettings>({
-    queryKey: ["/api/parent-settings"],
-  });
-
   // Redirect to setup if user hasn't completed setup
   useEffect(() => {
     if (!settingsLoading && !parentSettings) {
       setLocation("/setup");
     }
   }, [settingsLoading, parentSettings, setLocation]);
+
+  const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ["/api/admin/check"],
+  });
 
   const storiesWithBookmarks = stories.map(story => ({
     ...story,

@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (req, res) => {
     try {
       const allCategories = await db
-        .select()
+        .select({ category: stories.category })
         .from(stories)
         .where(eq(stories.status, "published"));
       
@@ -45,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/story-types", async (req, res) => {
     try {
       const allStories = await db
-        .select()
+        .select({ storyType: stories.storyType })
         .from(stories)
         .where(eq(stories.status, "published"));
       
