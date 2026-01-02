@@ -87,7 +87,7 @@ export default function LeaderboardPage() {
               transition={{ delay: index * 0.1 }}
             >
               <Card 
-                className="hover-elevate" 
+                className="hover-elevate bg-white border-gray-200" 
                 data-testid={`leaderboard-rank-${rank}`}
               >
                 <CardContent className="p-4">
@@ -97,18 +97,18 @@ export default function LeaderboardPage() {
                         <RankIcon className={`w-8 h-8 ${rankColor}`} />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                          <span className="font-bold text-sm">{rank}</span>
+                          <span className="font-bold text-sm text-black">{rank}</span>
                         </div>
                       )}
                     </div>
                     
                     <div className="flex-1">
-                      <p className="font-semibold text-lg text-white">
+                      <p className="font-semibold text-lg text-black">
                         {isParentLeaderboard 
                           ? `Parent of ${entry.childName || "Anonymous"}` 
                           : entry.childName || "Anonymous"}
                       </p>
-                      <p className="text-sm text-white/80">
+                      <p className="text-sm text-gray-600">
                         {score} {scoreLabel}
                       </p>
                     </div>
