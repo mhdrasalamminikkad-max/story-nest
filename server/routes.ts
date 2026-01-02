@@ -21,45 +21,6 @@ function filterBlobUrl(url: string | undefined | null): string | undefined {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Story Categories & Types endpoints for public use
-  app.get("/api/categories", async (req, res) => {
-    try {
-      const allCategories = await db
-        .select({ category: stories.category })
-        .from(stories);
-      
-      // Extract unique categories
-      const uniqueCategories = [...new Set(allCategories.map(s => s.category))].map(cat => ({
-        id: cat,
-        name: cat.charAt(0).toUpperCase() + cat.slice(1),
-        slug: cat
-      }));
-      
-      res.json(uniqueCategories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch categories" });
-    }
-  });
-
-  app.get("/api/story-types", async (req, res) => {
-    try {
-      const allStories = await db
-        .select({ storyType: stories.storyType })
-        .from(stories);
-      
-      // Extract unique story types
-      const uniqueTypes = [...new Set(allStories.map(s => s.storyType))].map(type => ({
-        id: type,
-        name: type.charAt(0).toUpperCase() + type.slice(1),
-        slug: type
-      }));
-      
-      res.json(uniqueTypes);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch story types" });
-    }
-  });
-
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
     try {
