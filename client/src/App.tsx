@@ -24,6 +24,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import RhymesPage from "@/pages/RhymesPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import ParentStoryReadPage from "@/pages/ParentStoryReadPage";
+import ChildMode from "@/pages/ChildMode";
 import NotFound from "@/pages/not-found";
 import {
   Dialog,
@@ -108,6 +109,7 @@ function Router() {
         <Route path="/leaderboard" component={LeaderboardPage} />
         <Route path="/read-story" component={ParentStoryReadPage} />
         <Route path="/rhymes" component={RhymesPage} />
+        <Route path="/child" component={ChildMode} />
         <Route component={NotFound} />
       </Switch>
 
