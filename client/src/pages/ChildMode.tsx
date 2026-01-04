@@ -103,22 +103,49 @@ export default function ChildMode() {
       }
     };
 
+    const handleKeyDownCapture = (e: KeyboardEvent) => {
+      // Strictly block Escape at the earliest possible moment
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.log("Strictly blocked Escape in capture phase");
+        
+        // Re-force fullscreen if it was escaped (some browsers trigger esc before event)
+        if (!document.fullscreenElement && hasEntered && !isExiting) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        return false;
+      }
+      
+      // Block other dangerous keys too
+      const blockedKeys = ['F5', 'F11', 'F12'];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    };
+
     const handleContextMenu = (e: MouseEvent) => {
       if (hasEntered && !isExiting) {
         e.preventDefault();
       }
     };
 
-    // Use capture phase (true) to intercept events before they reach other handlers
+    // Use capture phase (true) for all critical lock handlers
     window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keydown', handleKeyDownCapture, true);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('contextmenu', handleContextMenu, true);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keydown', handleKeyDownCapture, true);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('contextmenu', handleContextMenu, true);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [hasEntered, isExiting]);
