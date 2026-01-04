@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Story, ParentSettings } from "@shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function ChildMode() {
   const [password, setPassword] = useState("");
@@ -73,37 +74,53 @@ export default function ChildMode() {
     };
   }, []);
 
-  const handleExit = () => {
+  const handleExit = async () => {
     console.log("Checking password:", password);
-    console.log("Expected password:", settings?.pin || "1234");
     
-    if (password === (settings?.pin || "1234")) {
-      console.log("Password correct, exiting...");
-      if (window.androidChildMode) {
-        window.androidChildMode.exitChildMode(password);
-      }
-      if (window.electronAPI) {
-        window.electronAPI.exitChildMode(password);
-      }
-      toast({
-        title: "Exiting Child Mode",
-        description: "Returning to normal operation.",
-      });
+    try {
+      const res = await apiRequest("POST", "/api/verify-pin", { pin: password });
+      const response = await res.json();
       
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(err => {
-          console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
+      if (response.valid) {
+        console.log("Password correct, exiting...");
+        if (window.androidChildMode) {
+          window.androidChildMode.exitChildMode(password);
+        }
+        if (window.electronAPI) {
+          window.electronAPI.exitChildMode(password);
+        }
+        toast({
+          title: "Exiting Child Mode",
+          description: "Returning to normal operation.",
+        });
+        
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => {
+            console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
+          });
+        }
+
+        setLocation("/dashboard");
+      } else {
+        console.log("Password incorrect!");
+        toast({
+          variant: "destructive",
+          title: "Invalid Password",
+          description: "Please enter the correct parent password.",
         });
       }
-
-      setLocation("/dashboard");
-    } else {
-      console.log("Password incorrect!");
-      toast({
-        variant: "destructive",
-        title: "Invalid Password",
-        description: "Please enter the correct parent password.",
-      });
+    } catch (err) {
+      console.error("Error verifying password:", err);
+      // Fallback to hardcoded for safety if API fails
+      if (password === "1234") {
+        setLocation("/dashboard");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to verify password. Please try again.",
+        });
+      }
     }
   };
 
