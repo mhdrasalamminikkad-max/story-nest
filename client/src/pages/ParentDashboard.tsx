@@ -288,6 +288,16 @@ export default function ParentDashboard() {
     },
   });
 
+  const enterChildMode = () => {
+    // Request fullscreen if possible
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    }
+    setLocation("/child-mode");
+  };
+
   const handleSignOut = () => {
     fakeAuth.signOut();
     setLocation("/");
@@ -796,7 +806,7 @@ export default function ParentDashboard() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setLocation("/child-mode")}
+                    onClick={enterChildMode}
                     className="rounded-xl col-span-2"
                     data-testid="button-child-mode"
                   >
@@ -857,7 +867,7 @@ export default function ParentDashboard() {
               </motion.div>
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
-                  onClick={() => setLocation("/child-mode")}
+                  onClick={enterChildMode}
                   className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
                   data-testid="button-child-mode-desktop"
                 >
