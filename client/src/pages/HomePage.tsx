@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import type { ParentSettings } from "@shared/schema";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102_1766900861834.jpeg";
+import tellMammaLogo from "@assets/logo_transparent.png";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
@@ -43,7 +43,7 @@ export default function HomePage() {
                 <img 
                   src={tellMammaLogo} 
                   alt="TELL MAMMA" 
-                  className="h-12 sm:h-14 w-auto object-contain rounded-xl"
+                  className="h-12 sm:h-14 w-auto object-contain"
                 />
               </motion.div>
 

@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
-import tellMammaLogo from "@assets/Screenshot_26-11-2025_22037__1764174656102_1766900861834.jpeg";
+import tellMammaLogo from "@assets/logo_transparent.png";
 
 interface MobileHeaderProps {
   title?: string;
@@ -27,7 +27,7 @@ export function MobileHeader({ title, showSearch = false, onSearch }: MobileHead
           <img 
             src={tellMammaLogo} 
             alt="TELL MAMMA" 
-            className="h-10 w-auto object-contain rounded-xl"
+            className="h-10 w-auto object-contain"
           />
         )}
         <ThemeToggle />
