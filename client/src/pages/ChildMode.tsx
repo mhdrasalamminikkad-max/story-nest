@@ -40,6 +40,14 @@ export default function ChildMode() {
   });
 
   useEffect(() => {
+    // Attempt full screen on mount
+    const element = document.documentElement;
+    if (element.requestFullscreen) {
+      element.requestFullscreen().catch(err => {
+        console.warn(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    }
+
     // Enter Child Mode on mount
     if (window.Capacitor || window.androidChildMode) {
       console.log("Entering Child Mode (Android)");
@@ -76,6 +84,13 @@ export default function ChildMode() {
         title: "Exiting Child Mode",
         description: "Returning to normal operation.",
       });
+      
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => {
+          console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
+        });
+      }
+
       setLocation("/dashboard");
     } else {
       toast({
