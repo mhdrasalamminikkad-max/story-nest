@@ -28,6 +28,7 @@ export default function ChildMode() {
   const [password, setPassword] = useState("");
   const [isExiting, setIsExiting] = useState(false);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [hasEntered, setHasEntered] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -39,27 +40,27 @@ export default function ChildMode() {
     queryKey: ["/api/parent-settings"],
   });
 
-  useEffect(() => {
-    // Attempt full screen on mount
+  const handleEnterMagicWorld = () => {
     const element = document.documentElement;
     if (element.requestFullscreen) {
       element.requestFullscreen().catch(err => {
         console.warn(`Error attempting to enable full-screen mode: ${err.message}`);
       });
     }
-
-    // Enter Child Mode on mount
+    setHasEntered(true);
+    
+    // Enter Child Mode on native platforms
     if (window.Capacitor || window.androidChildMode) {
-      console.log("Entering Child Mode (Android)");
       if (window.androidChildMode) {
         window.androidChildMode.enterChildMode();
       }
     }
-    
     if (window.electronAPI) {
       window.electronAPI.enterChildMode();
     }
+  };
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.altKey && e.key === 'F4') || (e.ctrlKey && e.key === 'w')) {
         e.preventDefault();
@@ -119,6 +120,37 @@ export default function ChildMode() {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 overflow-hidden z-[9999]">
+      <AnimatePresence>
+        {!hasEntered && (
+          <motion.div 
+            className="fixed inset-0 bg-white dark:bg-gray-900 z-[10002] flex items-center justify-center p-4"
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="text-center space-y-8 max-w-lg">
+              <motion.div 
+                animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="text-9xl"
+              >
+                ✨
+              </motion.div>
+              <h1 className="text-5xl font-black font-heading text-purple-600">Enter Magic World</h1>
+              <p className="text-xl text-muted-foreground font-medium">
+                Click the button below to start your magical adventure in full screen!
+              </p>
+              <Button 
+                size="lg" 
+                className="w-full h-20 text-2xl font-black rounded-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-2xl hover:scale-105 transition-transform"
+                onClick={handleEnterMagicWorld}
+              >
+                Start Magic
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Background Decorations */}
       <div className="absolute inset-0 pointer-events-none">
         {floatingElements.map((elem) => (
