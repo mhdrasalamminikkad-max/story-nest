@@ -51,7 +51,7 @@ export default function ChildModeSelectionPage() {
   };
 
   const handleStoryClick = (story: Story) => {
-    setLocation(`/child-mode-read?story=${story.id}`);
+    setLocation(`/child?story=${story.id}`);
   };
 
   const categoryColors: Record<string, string> = {
