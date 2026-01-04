@@ -103,11 +103,22 @@ export default function ChildMode() {
       }
     };
 
-    // Auto-reentry loop for fullscreen
+    // Auto-reentry loop for fullscreen and location
     const reentryInterval = setInterval(() => {
-      if (hasEntered && !document.fullscreenElement && !isExiting) {
+      const isIncorrectPath = window.location.pathname !== '/child/read';
+      const isNotFullscreen = !document.fullscreenElement;
+
+      if (hasEntered && !isExiting && (isNotFullscreen || isIncorrectPath)) {
+        console.log("Security loop: Correcting state...");
+        
+        // 1. Force path back to child reading space if they tried to navigate away
+        if (isIncorrectPath) {
+          window.history.replaceState(null, '', '/child/read');
+        }
+
+        // 2. Force fullscreen back
         document.documentElement.requestFullscreen().catch(() => {
-          // Silent catch to avoid console spam
+          // Browser policy might block without interaction, but interval keeps trying
         });
       }
     }, 1000);
