@@ -1,0 +1,73 @@
+You are a senior React / Next.js developer.
+
+I already have an existing React / Next.js web application.
+DO NOT rebuild the project.
+ONLY ADD a “Child Mode” feature.
+
+FEATURE DESCRIPTION:
+- Child Mode applies ONLY on one page (/child or ChildMode component)
+- When Child Mode page mounts:
+  - App becomes strictly non-exitable
+  - Exit is allowed ONLY via Parent Password
+- All other pages must work normally
+
+TARGET PLATFORMS:
+1) Android (WebView)
+2) PC (Electron)
+
+--------------------
+ANDROID REQUIREMENTS
+--------------------
+- Use existing Android WebView wrapper
+- Enable Lock Task Mode ONLY when Child Mode page is opened
+- Disable back button ONLY during Child Mode
+- Prevent Home / Recent / App switching during Child Mode
+- Exit Lock Task Mode ONLY after correct parent password
+- Expose ONLY these JS interfaces:
+    - enterChildMode()
+    - exitChildMode(password)
+
+--------------------
+PC (ELECTRON) REQUIREMENTS
+--------------------
+- Modify existing Electron app
+- Enable kiosk + fullscreen ONLY when Child Mode page is active
+- Block Alt+F4 and window close ONLY during Child Mode
+- Exit kiosk ONLY after correct parent password
+- Use IPC bridge with minimal changes
+
+--------------------
+WEB (REACT / NEXT.JS)
+--------------------
+- Add logic ONLY to the Child Mode page/component
+- On component mount:
+    call enterChildMode()
+- On component unmount:
+    do nothing (exit requires password)
+- Add “Exit Child Mode” button
+- Prompt for parent password and call exitChildMode(password)
+- Block keyboard shortcuts ONLY while Child Mode component is mounted
+- Do NOT affect global app behavior
+
+--------------------
+SECURITY
+--------------------
+- Validate parent password in native layer
+- Use placeholder password "1234"
+- Clearly mark where production auth should go
+
+--------------------
+OUTPUT EXPECTED
+--------------------
+- ONLY modified or new files
+- React / Next.js code snippets (hooks preferred)
+- Android native snippets (Java/Kotlin)
+- Electron snippets (main.js, preload.js)
+- Clear comments showing WHERE to paste the code
+- No full project rewrite
+- No unnecessary explanation
+
+FOCUS ON:
+- Minimal changes
+- Clean integration
+- Production-safe approach
