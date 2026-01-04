@@ -120,124 +120,137 @@ export default function ChildMode() {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 overflow-hidden z-[9999]">
-      <AnimatePresence>
-        {!hasEntered && (
+      <AnimatePresence mode="wait">
+        {!hasEntered ? (
           <motion.div 
-            className="fixed inset-0 bg-white dark:bg-gray-900 z-[10002] flex items-center justify-center p-4"
+            key="splash"
+            className="fixed inset-0 bg-white dark:bg-gray-900 z-[10005] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="text-center space-y-8 max-w-lg">
+            <div className="text-center space-y-8 max-w-lg w-full">
               <motion.div 
-                animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }}
+                animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity }}
-                className="text-9xl"
+                className="text-9xl mb-4"
               >
                 ✨
               </motion.div>
-              <h1 className="text-5xl font-black font-heading text-purple-600">Enter Magic World</h1>
-              <p className="text-xl text-muted-foreground font-medium">
-                Click the button below to start your magical adventure in full screen!
+              <h1 className="text-5xl md:text-7xl font-black font-heading text-purple-600 drop-shadow-lg">
+                Enter Magic World
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground font-medium">
+                Your magical adventure is ready! Click below to start in full screen.
               </p>
               <Button 
                 size="lg" 
-                className="w-full h-20 text-2xl font-black rounded-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-2xl hover:scale-105 transition-transform"
+                className="w-full h-24 text-3xl font-black rounded-[2rem] bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 shadow-[0_20px_50px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-95 transition-all"
                 onClick={handleEnterMagicWorld}
+                data-testid="button-start-magic"
               >
-                Start Magic
+                Start Magic ✨
               </Button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full w-full"
+          >
+            {/* Background Decorations */}
+            <div className="absolute inset-0 pointer-events-none">
+              {floatingElements.map((elem) => (
+                <motion.div
+                  key={elem.id}
+                  className="absolute opacity-20"
+                  style={{ left: `${elem.x}%`, top: `${elem.y}%` }}
+                  animate={{
+                    y: [0, -30, 0],
+                    rotate: [0, 360],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 5 + Math.random() * 5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  {elem.type === 'star' && <Star size={elem.size} fill="currentColor" className="text-yellow-400" />}
+                  {elem.type === 'heart' && <Heart size={elem.size} fill="currentColor" className="text-pink-400" />}
+                  {elem.type === 'sparkles' && <Sparkles size={elem.size} className="text-purple-400" />}
+                  {elem.type === 'music' && <Music size={elem.size} className="text-blue-400" />}
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="relative h-full flex flex-col p-4 md:p-8 overflow-y-auto">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-8">
+                <motion.h1 
+                  className="text-4xl md:text-6xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-heading"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  {settings?.childName ? `Hello, ${settings.childName}!` : "Magic Stories!"}
+                </motion.h1>
+                
+                <Button 
+                  variant="outline" 
+                  className="rounded-full px-6 py-2 border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                  onClick={() => setIsExiting(true)}
+                  data-testid="button-exit-child-mode"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Exit Mode
+                </Button>
+              </div>
+
+              {/* Stories Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 pb-20">
+                {stories.map((story, idx) => (
+                  <motion.div
+                    key={story.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="relative group cursor-pointer"
+                    onClick={() => setSelectedStory(story)}
+                  >
+                    <Card className="h-full overflow-hidden border-4 border-white/50 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2 bg-white/80 backdrop-blur-sm">
+                      <div className="h-48 overflow-hidden relative">
+                        <img src={story.imageUrl} className="w-full h-full object-cover" alt={story.title} />
+                        <div className="absolute top-2 right-2">
+                          <Badge className={`${categoryColors[story.category] || "bg-gray-500/20"} border-2 font-bold`}>
+                            {story.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="text-xl font-bold mb-2 font-heading line-clamp-1">{story.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{story.summary}</p>
+                        <Button className="w-full rounded-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500">
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Read Now
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Background Decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        {floatingElements.map((elem) => (
-          <motion.div
-            key={elem.id}
-            className="absolute opacity-20"
-            style={{ left: `${elem.x}%`, top: `${elem.y}%` }}
-            animate={{
-              y: [0, -30, 0],
-              rotate: [0, 360],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 5 + Math.random() * 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            {elem.type === 'star' && <Star size={elem.size} fill="currentColor" className="text-yellow-400" />}
-            {elem.type === 'heart' && <Heart size={elem.size} fill="currentColor" className="text-pink-400" />}
-            {elem.type === 'sparkles' && <Sparkles size={elem.size} className="text-purple-400" />}
-            {elem.type === 'music' && <Music size={elem.size} className="text-blue-400" />}
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="relative h-full flex flex-col p-4 md:p-8 overflow-y-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <motion.h1 
-            className="text-4xl md:text-6xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-heading"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            {settings?.childName ? `Hello, ${settings.childName}!` : "Magic Stories!"}
-          </motion.h1>
-          
-          <Button 
-            variant="outline" 
-            className="rounded-full px-6 py-2 border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-            onClick={() => setIsExiting(true)}
-            data-testid="button-exit-child-mode"
-          >
-            <Lock className="w-4 h-4 mr-2" />
-            Exit Mode
-          </Button>
-        </div>
-
-        {/* Stories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1">
-          {stories.map((story, idx) => (
-            <motion.div
-              key={story.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="relative group cursor-pointer"
-              onClick={() => setSelectedStory(story)}
-            >
-              <Card className="h-full overflow-hidden border-4 border-white/50 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2 bg-white/80 backdrop-blur-sm">
-                <div className="h-48 overflow-hidden relative">
-                  <img src={story.imageUrl} className="w-full h-full object-cover" alt={story.title} />
-                  <div className="absolute top-2 right-2">
-                    <Badge className={`${categoryColors[story.category]} border-2 font-bold`}>
-                      {story.category}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="text-xl font-bold mb-2 font-heading line-clamp-1">{story.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{story.summary}</p>
-                  <Button className="w-full rounded-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500">
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Read Now
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
       {/* Exit Dialog */}
       <AnimatePresence>
         {isExiting && (
           <motion.div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[10000]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[10010]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -281,7 +294,7 @@ export default function ChildMode() {
       <AnimatePresence>
         {selectedStory && (
           <motion.div 
-            className="fixed inset-0 bg-white z-[10001] overflow-y-auto"
+            className="fixed inset-0 bg-white dark:bg-gray-900 z-[10020] overflow-y-auto"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -312,4 +325,5 @@ export default function ChildMode() {
     </div>
   );
 }
+
 
