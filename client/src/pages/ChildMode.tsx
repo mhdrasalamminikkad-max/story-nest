@@ -63,37 +63,39 @@ export default function ChildMode() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Disable ESC key
-      if (e.key === 'Escape') {
+      // List of keys to strictly block
+      const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
+      
+      if (blockedKeys.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
+        console.log(`Blocked key: ${e.key}`);
       }
       
       // Disable system shortcuts (Alt+F4, Ctrl+W, Ctrl+R, etc.)
-      if (
-        (e.altKey && e.key === 'F4') || 
-        (e.ctrlKey && (e.key === 'w' || e.key === 'r' || e.key === 'n' || e.key === 't')) ||
-        (e.metaKey && (e.key === 'w' || e.key === 'r' || e.key === 'n' || e.key === 't')) ||
-        e.key === 'F5' ||
-        e.key === 'F11' ||
-        e.key === 'F12'
-      ) {
+      const isSystemShortcut = 
+        (e.altKey && (e.key === 'F4' || e.key === 'Tab')) || 
+        ((e.ctrlKey || e.metaKey) && ['w', 'r', 'n', 't', 'p', 'l', 'f'].includes(e.key.toLowerCase()));
+
+      if (isSystemShortcut) {
         e.preventDefault();
         e.stopPropagation();
+        console.log(`Blocked system shortcut: ${e.key}`);
       }
     };
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasEntered && !isExiting) {
         e.preventDefault();
-        e.returnValue = '';
-        return '';
+        // Standard way to trigger a confirmation dialog
+        e.returnValue = 'Magic world is still open! Are you sure you want to leave?';
+        return e.returnValue;
       }
     };
 
     const handleFullscreenChange = () => {
       if (hasEntered && !document.fullscreenElement && !isExiting) {
-        // Re-request fullscreen if child tries to exit via ESC (if browser allows)
+        console.log("Detecting exit from fullscreen, attempting re-entry...");
         const element = document.documentElement;
         element.requestFullscreen().catch(() => {
           console.warn("Fullscreen re-entry denied by browser policy");
@@ -101,6 +103,7 @@ export default function ChildMode() {
       }
     };
 
+    // Use capture phase (true) to intercept events before they reach other handlers
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
