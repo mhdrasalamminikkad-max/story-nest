@@ -74,8 +74,10 @@ export default function ChildMode() {
   }, []);
 
   const handleExit = () => {
-    console.log("Password entered:", password);
-    if (password === "1234") {
+    console.log("Checking password:", password);
+    console.log("Expected password:", settings?.pin || "1234");
+    
+    if (password === (settings?.pin || "1234")) {
       console.log("Password correct, exiting...");
       if (window.androidChildMode) {
         window.androidChildMode.exitChildMode(password);
