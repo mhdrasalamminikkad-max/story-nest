@@ -63,16 +63,54 @@ export default function ChildMode() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.altKey && e.key === 'F4') || (e.ctrlKey && e.key === 'w')) {
+      // Disable ESC key
+      if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      // Disable system shortcuts (Alt+F4, Ctrl+W, Ctrl+R, etc.)
+      if (
+        (e.altKey && e.key === 'F4') || 
+        (e.ctrlKey && (e.key === 'w' || e.key === 'r' || e.key === 'n' || e.key === 't')) ||
+        (e.metaKey && (e.key === 'w' || e.key === 'r' || e.key === 'n' || e.key === 't')) ||
+        e.key === 'F5' ||
+        e.key === 'F11' ||
+        e.key === 'F12'
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasEntered && !isExiting) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
     };
-  }, []);
+
+    const handleFullscreenChange = () => {
+      if (hasEntered && !document.fullscreenElement && !isExiting) {
+        // Re-request fullscreen if child tries to exit via ESC (if browser allows)
+        const element = document.documentElement;
+        element.requestFullscreen().catch(() => {
+          console.warn("Fullscreen re-entry denied by browser policy");
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [hasEntered, isExiting]);
 
   const handleExit = async () => {
     console.log("Checking password:", password);
