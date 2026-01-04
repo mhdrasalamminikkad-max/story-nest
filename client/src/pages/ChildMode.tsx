@@ -103,6 +103,15 @@ export default function ChildMode() {
       }
     };
 
+    // Auto-reentry loop for fullscreen
+    const reentryInterval = setInterval(() => {
+      if (hasEntered && !document.fullscreenElement && !isExiting) {
+        document.documentElement.requestFullscreen().catch(() => {
+          // Silent catch to avoid console spam
+        });
+      }
+    }, 1000);
+
     const handleKeyDownCapture = (e: KeyboardEvent) => {
       // Strictly block Escape at the earliest possible moment
       if (e.key === 'Escape') {
@@ -134,7 +143,6 @@ export default function ChildMode() {
       }
     };
 
-    // Use capture phase (true) for all critical lock handlers
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keydown', handleKeyDownCapture, true);
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -142,6 +150,7 @@ export default function ChildMode() {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
+      clearInterval(reentryInterval);
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keydown', handleKeyDownCapture, true);
       window.removeEventListener('beforeunload', handleBeforeUnload);
