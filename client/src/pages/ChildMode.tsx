@@ -74,7 +74,9 @@ export default function ChildMode() {
   }, []);
 
   const handleExit = () => {
+    console.log("Password entered:", password);
     if (password === "1234") {
+      console.log("Password correct, exiting...");
       if (window.androidChildMode) {
         window.androidChildMode.exitChildMode(password);
       }
@@ -94,6 +96,7 @@ export default function ChildMode() {
 
       setLocation("/dashboard");
     } else {
+      console.log("Password incorrect!");
       toast({
         variant: "destructive",
         title: "Invalid Password",
@@ -280,8 +283,14 @@ export default function ChildMode() {
                     autoFocus
                   />
                   <div className="flex gap-2">
-                    <Button variant="ghost" className="flex-1 rounded-xl" onClick={() => setIsExiting(false)}>Cancel</Button>
-                    <Button className="flex-1 rounded-xl bg-purple-600" onClick={handleExit}>Confirm</Button>
+                    <Button variant="ghost" className="flex-1 rounded-xl" onClick={() => {
+                      setIsExiting(false);
+                      setPassword("");
+                    }}>Cancel</Button>
+                    <Button className="flex-1 rounded-xl bg-purple-600" onClick={() => {
+                      console.log("Checking password:", password);
+                      handleExit();
+                    }}>Confirm</Button>
                   </div>
                 </CardContent>
               </Card>

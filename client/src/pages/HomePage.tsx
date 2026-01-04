@@ -60,7 +60,7 @@ export default function HomePage() {
                       <span className="hidden sm:inline">Dashboard</span>
                     </Button>
                     <Button
-                      onClick={() => setLocation("/child-mode")}
+                      onClick={() => setLocation("/child")}
                       className="rounded-2xl font-semibold bg-[#F5C518] text-gray-900 hover:bg-[#F5C518]/90 hover:shadow-lg transition-all border-[#D4A500]"
                       data-testid="button-child-mode"
                     >
