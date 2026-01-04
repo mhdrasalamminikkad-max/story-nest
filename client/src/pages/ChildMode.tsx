@@ -103,14 +103,22 @@ export default function ChildMode() {
       }
     };
 
+    const handleContextMenu = (e: MouseEvent) => {
+      if (hasEntered && !isExiting) {
+        e.preventDefault();
+      }
+    };
+
     // Use capture phase (true) to intercept events before they reach other handlers
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [hasEntered, isExiting]);
