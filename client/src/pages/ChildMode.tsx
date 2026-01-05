@@ -145,36 +145,63 @@ export default function ChildMode() {
       return false;
     };
 
-    // Aggressive polling mechanism - checks every 100ms
-    let pollInterval: ReturnType<typeof setInterval> | null = null;
-    
+    // Enforce fullscreen function
     const enforceFullscreen = async () => {
       // Check if we've exited fullscreen
       if (!document.fullscreenElement) {
-        console.log('[Child Mode] Fullscreen lost! Forcing re-entry immediately...');
+        console.log('[Child Mode] Fullscreen lost! Forcing re-entry...');
         try {
           if (document.documentElement.requestFullscreen) {
-            await document.documentElement.requestFullscreen();
-            console.log('[Child Mode] Re-entered fullscreen successfully');
+            await document.documentElement.requestFullscreen().catch(err => {
+              console.error('[Child Mode] requestFullscreen error:', err);
+            });
+            console.log('[Child Mode] Re-entered fullscreen');
           }
         } catch (err) {
           console.error('[Child Mode] Failed to re-enter fullscreen:', err);
         }
       }
       
-      // Keep window focused on child mode element
+      // Keep window focused
       if (document.hidden) {
-        console.log('[Child Mode] Window lost focus, refocusing...');
+        console.log('[Child Mode] Document hidden, focusing window...');
         window.focus();
       }
     };
+
+    // Aggressive polling - checks every 50ms
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
     
     const startFullscreenPolling = () => {
-      // Check every 100ms (10 times per second) for ultra-responsive trap
-      pollInterval = setInterval(enforceFullscreen, 100);
-      
-      // Also run immediately on start
+      pollInterval = setInterval(enforceFullscreen, 50); // Check every 50ms
+      // Run immediately on start
       enforceFullscreen();
+    };
+
+    // Handle any user interaction - immediately enforce fullscreen
+    const handleUserInteraction = async () => {
+      console.log('[Child Mode] User interaction detected, enforcing fullscreen...');
+      await enforceFullscreen();
+    };
+
+    // Handle visibility changes (tab switching, window minimizing, etc.)
+    const handleVisibilityChange = async () => {
+      if (document.hidden) {
+        console.log('[Child Mode] Tab hidden, will re-enter on focus');
+      } else {
+        console.log('[Child Mode] Tab visible again, enforcing fullscreen...');
+        await enforceFullscreen();
+      }
+    };
+
+    // Handle window blur/focus
+    const handleWindowBlur = () => {
+      console.log('[Child Mode] Window blurred');
+    };
+
+    const handleWindowFocus = async () => {
+      console.log('[Child Mode] Window focused, enforcing fullscreen...');
+      await enforceFullscreen();
     };
 
     // Add event listeners with capture phase
@@ -184,6 +211,17 @@ export default function ChildMode() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
+
+    // Add interaction handlers - force fullscreen on ANY user action
+    document.addEventListener('click', handleUserInteraction, true);
+    document.addEventListener('touchstart', handleUserInteraction, true);
+    document.addEventListener('mousedown', handleUserInteraction, true);
+    document.addEventListener('touchend', handleUserInteraction, true);
+    
+    // Handle visibility and focus changes
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('blur', handleWindowBlur);
 
     // Start aggressive polling
     startFullscreenPolling();
@@ -200,6 +238,15 @@ export default function ChildMode() {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
+      
+      document.removeEventListener('click', handleUserInteraction, true);
+      document.removeEventListener('touchstart', handleUserInteraction, true);
+      document.removeEventListener('mousedown', handleUserInteraction, true);
+      document.removeEventListener('touchend', handleUserInteraction, true);
+      
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('blur', handleWindowBlur);
     };
   }, [hasEntered]);
 
