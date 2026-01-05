@@ -6,7 +6,6 @@ export interface GoogleUser {
   displayName: string;
   photoUrl?: string;
   idToken?: string;
-  accessToken?: string;
 }
 
 interface AuthContextType {
@@ -38,36 +37,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { Capacitor } = await import("@capacitor/core");
       
       if (Capacitor.isNativePlatform()) {
-        // Native: Call custom Google Sign-In plugin
-        const { GoogleSignInPlugin } = await import("@capacitor/core");
-        
+        // Native Android: Use custom Google Sign-In plugin
         try {
-          const result = await GoogleSignInPlugin.signInWithGoogle({
+          // Call the native plugin
+          const result = await (window as any).GoogleSignInPlugin?.signInWithGoogle({
             clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           });
           
-          const googleUser: GoogleUser = {
-            id: result.id,
-            email: result.email,
-            displayName: result.displayName,
-            photoUrl: result.photoUrl,
-            idToken: result.idToken,
-            accessToken: result.accessToken,
-          };
-          
-          setUser(googleUser);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
-          setLoading(false);
-          return googleUser;
+          if (result) {
+            const googleUser: GoogleUser = {
+              id: result.id,
+              email: result.email,
+              displayName: result.displayName,
+              photoUrl: result.photoUrl,
+              idToken: result.idToken,
+            };
+            
+            setUser(googleUser);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
+            setLoading(false);
+            return googleUser;
+          }
         } catch (nativeError) {
-          console.log("Native sign-in error, trying web flow:", nativeError);
+          console.log("Native sign-in error:", nativeError);
         }
       }
     } catch (e) {
       console.log("Capacitor not available");
     }
     
-    // Web: OAuth popup
+    // Web: Google OAuth popup
     try {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const scope = "openid profile email";
@@ -107,8 +106,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (Capacitor.isNativePlatform()) {
         try {
-          const { GoogleSignInPlugin } = await import("@capacitor/core");
-          await GoogleSignInPlugin.signOut();
+          // Call native sign-out
+          await (window as any).GoogleSignInPlugin?.signOut();
         } catch (e) {
           console.error("Native sign-out error:", e);
         }
