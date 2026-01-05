@@ -1,0 +1,64 @@
+You are a senior React / Next.js + Capacitor developer.
+
+I already have an existing React / Next.js web application.
+DO NOT rebuild the project.
+ONLY ADD a “Child Mode” feature using Capacitor.
+
+GOAL:
+- Enable a STRICT non-exitable Child Mode
+- Locking applies ONLY on the Child Mode page/component
+- Exit allowed ONLY via Parent Password
+- All other pages must behave normally
+
+TARGET PLATFORM:
+- ANDROID via Capacitor (WebView)
+- (iOS optional, but focus on Android implementation)
+
+-------------------------
+CAPACITOR REQUIREMENTS
+-------------------------
+- Use Capacitor with existing React / Next.js app
+- Create a CUSTOM Capacitor plugin named `ChildMode`
+- Expose ONLY these methods to the web:
+    - enterChildMode()
+    - exitChildMode(password)
+
+-------------------------
+ANDROID REQUIREMENTS
+-------------------------
+- Implement Lock Task Mode inside the Capacitor plugin
+- Enable Lock Task Mode ONLY when Child Mode page loads
+- Disable Android back button ONLY during Child Mode
+- Prevent Home / Recent / App switching during Child Mode
+- Exit Lock Task Mode ONLY after correct parent password
+- Validate password in native Android layer
+- Use demo password "1234"
+- Clearly comment where production auth should go
+
+-------------------------
+REACT / NEXT.JS REQUIREMENTS
+-------------------------
+- Add logic ONLY to the Child Mode page/component
+- On component mount:
+    - call ChildMode.enterChildMode()
+- Add an “Exit Child Mode” button
+- Prompt for parent password
+- Call ChildMode.exitChildMode(password)
+- Block keyboard shortcuts ONLY while Child Mode component is mounted
+- Do NOT affect any other page or global behavior
+
+-------------------------
+OUTPUT EXPECTED
+-------------------------
+- ONLY new or modified files
+- Capacitor plugin files:
+    - Android (Java/Kotlin)
+- React / Next.js code snippets (hooks preferred)
+- Clear comments showing WHERE to paste code
+- No full project rewrite
+- No unnecessary explanation
+
+FOCUS ON:
+- Minimal changes
+- Clean integration
+- Production-safe implementation
