@@ -47,6 +47,47 @@ export default function ChildModeReadPage() {
     queryKey: ["/api/checkpoints/progress"],
   });
 
+  // Block keyboard shortcuts in child mode read page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Block ESC, F11, F12, F5
+      const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // Block system shortcuts
+      if (e.altKey && (e.key === 'F4' || e.key === 'Tab')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && ['w', 'r', 'q', 'n', 't', 'p'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('contextmenu', handleContextMenu, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('contextmenu', handleContextMenu, true);
+    };
+  }, []);
+
   const currentStoryFromList = stories[currentStoryIndex];
   const currentStoryId = currentStoryFromList?.id;
 

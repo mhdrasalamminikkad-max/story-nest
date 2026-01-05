@@ -56,21 +56,41 @@ function enableChildMode() {
   
   // Register global shortcuts to block
   globalShortcut.register('Alt+F4', () => {
-    // Block Alt+F4 during Child Mode
+    console.log('[Electron] Alt+F4 blocked in Child Mode');
     return false;
   });
   
   globalShortcut.register('CommandOrControl+Q', () => {
-    // Block Cmd/Ctrl+Q during Child Mode
+    console.log('[Electron] Ctrl+Q / Cmd+Q blocked in Child Mode');
     return false;
   });
   
   globalShortcut.register('CommandOrControl+W', () => {
-    // Block Cmd/Ctrl+W during Child Mode
+    console.log('[Electron] Ctrl+W / Cmd+W blocked in Child Mode');
     return false;
   });
   
-  console.log('[Electron] Child Mode enabled - kiosk mode active');
+  globalShortcut.register('Escape', () => {
+    console.log('[Electron] ESC blocked in Child Mode');
+    return false;
+  });
+  
+  globalShortcut.register('F11', () => {
+    console.log('[Electron] F11 blocked in Child Mode');
+    return false;
+  });
+  
+  globalShortcut.register('F12', () => {
+    console.log('[Electron] F12 blocked in Child Mode');
+    return false;
+  });
+  
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    console.log('[Electron] DevTools blocked in Child Mode');
+    return false;
+  });
+  
+  console.log('[Electron] Child Mode enabled - kiosk mode active with keyboard blocking');
 }
 
 /**
