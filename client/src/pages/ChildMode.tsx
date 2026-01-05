@@ -145,35 +145,49 @@ export default function ChildMode() {
       return false;
     };
 
-    // Monitor fullscreen changes - if user exits fullscreen, re-enter
-    const handleFullscreenChange = async () => {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        console.log('[Child Mode] Fullscreen exited, re-entering...');
-        try {
-          await document.documentElement.requestFullscreen();
-        } catch (err) {
-          console.warn('[Child Mode] Could not re-enter fullscreen:', err);
+    // Polling mechanism to ensure fullscreen stays active
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    
+    const startFullscreenPolling = () => {
+      pollInterval = setInterval(async () => {
+        // Check if we've exited fullscreen
+        if (!document.fullscreenElement) {
+          console.log('[Child Mode] Fullscreen lost detected, re-entering...');
+          try {
+            if (document.documentElement.requestFullscreen) {
+              await document.documentElement.requestFullscreen();
+              console.log('[Child Mode] Successfully re-entered fullscreen');
+            }
+          } catch (err) {
+            console.error('[Child Mode] Failed to re-enter fullscreen:', err);
+          }
         }
-      }
+      }, 500); // Check every 500ms
     };
 
-    // Add event listeners with capture phase to intercept before other handlers
+    // Add event listeners with capture phase
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('keyup', handleKeyUp, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
-    document.addEventListener('fullscreenchange', handleFullscreenChange, true);
+
+    // Start polling for fullscreen exit
+    startFullscreenPolling();
     
     return () => {
+      // Stop polling
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+
       document.removeEventListener('keydown', handleKeyDown, true);
       document.removeEventListener('keyup', handleKeyUp, true);
       document.removeEventListener('contextmenu', handleContextMenu, true);
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange, true);
     };
   }, [hasEntered]);
 

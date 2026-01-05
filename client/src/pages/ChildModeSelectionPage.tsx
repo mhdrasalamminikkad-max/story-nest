@@ -78,16 +78,24 @@ export default function ChildModeSelectionPage() {
       return false;
     };
 
-    // Monitor fullscreen changes - if user exits fullscreen, re-enter
-    const handleFullscreenChange = async () => {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-        console.log('[Child Mode Selection] Fullscreen exited, re-entering...');
-        try {
-          await document.documentElement.requestFullscreen();
-        } catch (err) {
-          console.warn('[Child Mode Selection] Could not re-enter fullscreen:', err);
+    // Polling mechanism to ensure fullscreen stays active
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    
+    const startFullscreenPolling = () => {
+      pollInterval = setInterval(async () => {
+        // Check if we've exited fullscreen
+        if (!document.fullscreenElement) {
+          console.log('[Child Mode Selection] Fullscreen lost detected, re-entering...');
+          try {
+            if (document.documentElement.requestFullscreen) {
+              await document.documentElement.requestFullscreen();
+              console.log('[Child Mode Selection] Successfully re-entered fullscreen');
+            }
+          } catch (err) {
+            console.error('[Child Mode Selection] Failed to re-enter fullscreen:', err);
+          }
         }
-      }
+      }, 500); // Check every 500ms
     };
 
     document.addEventListener('keydown', handleKeyDown, true);
@@ -96,16 +104,21 @@ export default function ChildModeSelectionPage() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
-    document.addEventListener('fullscreenchange', handleFullscreenChange, true);
+
+    // Start polling for fullscreen exit
+    startFullscreenPolling();
 
     return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+
       document.removeEventListener('keydown', handleKeyDown, true);
       document.removeEventListener('keyup', handleKeyUp, true);
       document.removeEventListener('contextmenu', handleContextMenu, true);
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange, true);
     };
   }, []);
 
