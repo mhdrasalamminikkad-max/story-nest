@@ -124,11 +124,25 @@ export default function ChildModeReadPage() {
       }
     };
 
+    // Screen area detector - store initial dimensions
+    let initialScreenArea = window.innerWidth * window.innerHeight;
+    let minScreenArea = initialScreenArea;
+
     // Aggressive polling - checks every 50ms
     let pollInterval: ReturnType<typeof setInterval> | null = null;
     
     const startFullscreenPolling = () => {
-      pollInterval = setInterval(enforceFullscreen, 50); // Check every 50ms
+      pollInterval = setInterval(() => {
+        const currentScreenArea = window.innerWidth * window.innerHeight;
+        
+        // Check if screen area has reduced (ESC/F11 exit indicator)
+        if (currentScreenArea < minScreenArea * 0.95) { // 95% threshold
+          console.log('[Child Mode Read] Screen area reduced from', minScreenArea, 'to', currentScreenArea, '- Forcing fullscreen!');
+          minScreenArea = currentScreenArea;
+        }
+        
+        enforceFullscreen();
+      }, 50); // Check every 50ms
       // Run immediately on start
       enforceFullscreen();
     };
@@ -155,6 +169,15 @@ export default function ChildModeReadPage() {
       await enforceFullscreen();
     };
 
+    // Window resize listener for screen area detection
+    const handleWindowResize = async () => {
+      const currentScreenArea = window.innerWidth * window.innerHeight;
+      if (currentScreenArea < minScreenArea * 0.95) {
+        console.log('[Child Mode Read] Screen resize detected - area reduced! Enforcing fullscreen...');
+        await enforceFullscreen();
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('keyup', handleKeyUp, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
@@ -170,6 +193,9 @@ export default function ChildModeReadPage() {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleWindowFocus);
+    
+    // Add screen area detector - listens for window resizing
+    window.addEventListener('resize', handleWindowResize);
 
     // Start aggressive polling
     startFullscreenPolling();
@@ -193,6 +219,7 @@ export default function ChildModeReadPage() {
       
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('resize', handleWindowResize);
     };
   }, []);
 

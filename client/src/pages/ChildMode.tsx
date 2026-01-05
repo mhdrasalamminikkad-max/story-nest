@@ -145,8 +145,20 @@ export default function ChildMode() {
       return false;
     };
 
+    // Screen area detector - store initial dimensions
+    let initialScreenArea = window.innerWidth * window.innerHeight;
+    let minScreenArea = initialScreenArea;
+
     // Enforce fullscreen function
     const enforceFullscreen = async () => {
+      const currentScreenArea = window.innerWidth * window.innerHeight;
+      
+      // Check if screen area has reduced (ESC/F11 exit indicator)
+      if (currentScreenArea < minScreenArea * 0.95) { // 95% threshold to account for minor resizing
+        console.log('[Child Mode] Screen area reduced from', minScreenArea, 'to', currentScreenArea, '- Forcing fullscreen!');
+        minScreenArea = currentScreenArea; // Update minimum
+      }
+
       // Check if we've exited fullscreen
       if (!document.fullscreenElement) {
         console.log('[Child Mode] Fullscreen lost! Forcing re-entry...');
@@ -176,6 +188,15 @@ export default function ChildMode() {
       pollInterval = setInterval(enforceFullscreen, 50); // Check every 50ms
       // Run immediately on start
       enforceFullscreen();
+    };
+
+    // Window resize listener for screen area detection
+    const handleWindowResize = async () => {
+      const currentScreenArea = window.innerWidth * window.innerHeight;
+      if (currentScreenArea < minScreenArea * 0.95) {
+        console.log('[Child Mode] Screen resize detected - area reduced! Enforcing fullscreen...');
+        await enforceFullscreen();
+      }
     };
 
     // Handle any user interaction - immediately enforce fullscreen
@@ -222,6 +243,9 @@ export default function ChildMode() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowBlur);
+    
+    // Add screen area detector - listens for window resizing
+    window.addEventListener('resize', handleWindowResize);
 
     // Start aggressive polling
     startFullscreenPolling();
@@ -247,6 +271,7 @@ export default function ChildMode() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('resize', handleWindowResize);
     };
   }, [hasEntered]);
 
