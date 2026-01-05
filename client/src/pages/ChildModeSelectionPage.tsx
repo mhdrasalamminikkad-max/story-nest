@@ -58,11 +58,30 @@ export default function ChildModeSelectionPage() {
     // Also handle browser back with history API
     const preventBack = () => {
       window.history.pushState(null, '', window.location.href);
+      console.log('[Child Mode Selection] Browser back prevented');
     };
     
     // Push current state to prevent going back
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', preventBack);
+
+    // Prevent page unload in web browser (blocks navigation/refresh)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+      console.log('[Child Mode Selection] Page unload blocked');
+      return '';
+    };
+
+    // Block navigation attempts
+    const handleUnload = (e: Event) => {
+      e.preventDefault();
+      console.log('[Child Mode Selection] Unload event blocked');
+      return false;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('unload', handleUnload);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Block ESC, F11, F12, F5
@@ -236,6 +255,8 @@ export default function ChildModeSelectionPage() {
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('resize', handleWindowResize);
       window.removeEventListener('popstate', preventBack);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('unload', handleUnload);
       
       // Cleanup Capacitor listeners
       if (backButtonSubscription) {
