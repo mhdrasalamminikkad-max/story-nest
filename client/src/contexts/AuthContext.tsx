@@ -1,94 +1,132 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { User, onAuthStateChanged, signInWithPopup, getRedirectResult, signOut as firebaseSignOut, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createContext, useContext, useState } from "react";
+
+export interface GoogleUser {
+  id: string;
+  email: string;
+  displayName: string;
+  photoUrl?: string;
+  idToken?: string;
+  accessToken?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: GoogleUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<User>;
+  error: string | null;
+  signInWithGoogle: () => Promise<GoogleUser>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Store user in localStorage for persistence
+const STORAGE_KEY = "google_auth_user";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check for redirect result first (for compatibility with any existing redirects)
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          console.log('✓ Sign in via redirect successful:', result.user.email);
-          setUser(result.user);
-        }
-      })
-      .catch((error) => {
-        // Ignore redirect errors since we're primarily using popup
-        if (error.code !== 'auth/no-auth-event') {
-          console.error('Redirect sign in error (expected if using popup):', error.code, error.message);
-        }
-      });
-
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const [user, setUser] = useState<GoogleUser | null>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const signInWithGoogle = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      const provider = new GoogleAuthProvider();
+      const { Capacitor } = await import("@capacitor/core");
       
-      // Try to use Capacitor Browser on mobile
-      try {
-        const { Capacitor } = await import("@capacitor/core");
-        const { Browser } = await import("@capacitor/browser");
+      if (Capacitor.isNativePlatform()) {
+        // Native: Call custom Google Sign-In plugin
+        const { GoogleSignInPlugin } = await import("@capacitor/core");
         
-        if (Capacitor.isNativePlatform()) {
-          // Mobile: Use system browser
-          const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_FIREBASE_API_KEY}&redirect_uri=https://${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com/__/auth/handler&response_type=code&scope=email%20profile&state=${Math.random().toString(36)}`;
-          
-          await Browser.open({ url: googleAuthUrl });
-          
-          // Wait for auth state to update
-          return new Promise<User>((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              reject(new Error("Auth timeout"));
-            }, 60000);
-            
-            const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-              if (firebaseUser) {
-                clearTimeout(timeout);
-                unsubscribe();
-                resolve(firebaseUser);
-              }
-            });
+        try {
+          const result = await GoogleSignInPlugin.signInWithGoogle({
+            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           });
+          
+          const googleUser: GoogleUser = {
+            id: result.id,
+            email: result.email,
+            displayName: result.displayName,
+            photoUrl: result.photoUrl,
+            idToken: result.idToken,
+            accessToken: result.accessToken,
+          };
+          
+          setUser(googleUser);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
+          setLoading(false);
+          return googleUser;
+        } catch (nativeError) {
+          console.log("Native sign-in error, trying web flow:", nativeError);
         }
-      } catch (e) {
-        console.log("Capacitor not available, using popup");
       }
+    } catch (e) {
+      console.log("Capacitor not available");
+    }
+    
+    // Web: OAuth popup
+    try {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const scope = "openid profile email";
+      const redirectUri = `${window.location.origin}/`;
       
-      // Web: Use popup as primary method (more reliable than redirect)
-      const result = await signInWithPopup(auth, provider);
-      return result.user;
-    } catch (error) {
-      console.error("Sign in error:", error);
-      throw error;
+      // Generate random state for security
+      const state = Math.random().toString(36).substring(7);
+      sessionStorage.setItem("oauth_state", state);
+      
+      const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      authUrl.searchParams.append("client_id", clientId);
+      authUrl.searchParams.append("redirect_uri", redirectUri);
+      authUrl.searchParams.append("response_type", "code");
+      authUrl.searchParams.append("scope", scope);
+      authUrl.searchParams.append("state", state);
+      authUrl.searchParams.append("access_type", "online");
+      
+      // Redirect to Google
+      window.location.href = authUrl.toString();
+      
+      // Keep loading true until redirect
+      setLoading(true);
+    } catch (webError) {
+      const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
+      setError(errorMessage);
+      setLoading(false);
+      throw new Error(errorMessage);
     }
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
-    setUser(null);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const { GoogleSignInPlugin } = await import("@capacitor/core");
+          await GoogleSignInPlugin.signOut();
+        } catch (e) {
+          console.error("Native sign-out error:", e);
+        }
+      }
+      
+      setUser(null);
+      localStorage.removeItem(STORAGE_KEY);
+      setLoading(false);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Sign-out failed";
+      setError(errorMessage);
+      setLoading(false);
+      throw new Error(errorMessage);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,9 +5,9 @@ const config: CapacitorConfig = {
   appName: 'Tell Mamma',
   webDir: 'dist/public',
   server: {
-    // For local development - comment out when building for production
-    // url: 'https://tellmamma.com',
-    androidScheme: 'https'
+    // Point to hosted production URL
+    url: 'https://tellmamma.com',
+    cleartext: false
   },
   plugins: {
     SplashScreen: {
