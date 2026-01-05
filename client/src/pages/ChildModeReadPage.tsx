@@ -49,6 +49,26 @@ export default function ChildModeReadPage() {
 
   // Block keyboard shortcuts in child mode read page
   useEffect(() => {
+    // Block Android back button
+    const handleBackButton = (e: any) => {
+      e.preventDefault();
+      console.log('[Child Mode Read] Android back button blocked!');
+      return false;
+    };
+
+    // Add Capacitor back button handler
+    const { App } = require('@capacitor/app');
+    const backButtonSubscription = App.addListener('backButton', handleBackButton);
+
+    // Also handle browser back with history API
+    const preventBack = () => {
+      window.history.pushState(null, '', window.location.href);
+    };
+    
+    // Push current state to prevent going back
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', preventBack);
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Block ESC, F11, F12, F5
       const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
@@ -220,6 +240,12 @@ export default function ChildModeReadPage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('resize', handleWindowResize);
+      window.removeEventListener('popstate', preventBack);
+      
+      // Cleanup Capacitor back button listener
+      if (backButtonSubscription) {
+        backButtonSubscription.remove?.();
+      }
     };
   }, []);
 
