@@ -20,12 +20,10 @@ public class MainActivity extends BridgeActivity {
     settings.setDomStorageEnabled(true);
     settings.setDatabaseEnabled(true);
     settings.setJavaScriptEnabled(true);
-    settings.setAppCacheEnabled(true);
     settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
     
     // Force localStorage AND IndexedDB to persist across redirects
     String appCachePath = this.getApplicationContext().getCacheDir().getAbsolutePath();
-    settings.setAppCachePath(appCachePath);
     settings.setDatabasePath(appCachePath);
     
     // Enable offline storage for IndexedDB

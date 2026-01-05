@@ -1,4 +1,5 @@
 import { registerPlugin } from "@capacitor/core";
+import { App } from "@capacitor/app";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 const ChildModePlugin = registerPlugin<any>("ChildMode");
 
 export default function ChildMode() {
+  console.log('[ChildMode] Component rendering');
   const [password, setPassword] = useState("");
   const [isExiting, setIsExiting] = useState(false);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
@@ -138,6 +140,9 @@ export default function ChildMode() {
   useEffect(() => {
     if (!hasEntered) return;
 
+    let backButtonSubscription: any = null;
+    let resumeSubscription: any = null;
+
     // Block Android back button
     const handleBackButton = (e: any) => {
       e.preventDefault();
@@ -146,8 +151,7 @@ export default function ChildMode() {
     };
 
     // Add Capacitor back button handler
-    const { App } = require('@capacitor/app');
-    const backButtonSubscription = App.addListener('backButton', handleBackButton);
+    backButtonSubscription = App.addListener('backButton', handleBackButton);
 
     // Handle app resume - re-enforce fullscreen and keyboard blocking
     const handleAppResume = async () => {
@@ -164,7 +168,7 @@ export default function ChildMode() {
       window.focus();
     };
 
-    const resumeSubscription = App.addListener('resume', handleAppResume);
+    resumeSubscription = App.addListener('resume', handleAppResume);
 
     // Also handle browser back with history API
     const preventBack = () => {
@@ -194,6 +198,43 @@ export default function ChildMode() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('unload', handleUnload);
 
+    // Show "blocked" message when ESC/F11 pressed
+    let lastBlockedTime = 0;
+    const showBlockedFeedback = () => {
+      const now = Date.now();
+      if (now - lastBlockedTime < 300) return; // Throttle to once per 300ms
+      lastBlockedTime = now;
+      
+      // Create temporary overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 0, 0, 0.2);
+        z-index: 999999;
+        pointer-events: none;
+        animation: fadeOut 0.3s ease-in-out;
+      `;
+      document.body.appendChild(overlay);
+      setTimeout(() => overlay.remove(), 300);
+    };
+
+    // Add CSS for animation
+    if (!document.getElementById('child-mode-style')) {
+      const style = document.createElement('style');
+      style.id = 'child-mode-style';
+      style.textContent = `
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
 
@@ -202,6 +243,7 @@ export default function ChildMode() {
         e.stopPropagation();
         e.returnValue = false;
         console.log(`[Child Mode] Blocked ${e.key}`);
+        showBlockedFeedback();
         return false;
       }
       
@@ -280,11 +322,11 @@ export default function ChildMode() {
       }
     };
 
-    // Aggressive polling - checks every 50ms
+    // Aggressive polling - checks every 10ms (ultra-fast)
     let pollInterval: ReturnType<typeof setInterval> | null = null;
     
     const startFullscreenPolling = () => {
-      pollInterval = setInterval(enforceFullscreen, 50); // Check every 50ms
+      pollInterval = setInterval(enforceFullscreen, 10); // Check every 10ms for instant re-entry
       // Run immediately on start
       enforceFullscreen();
     };
@@ -398,8 +440,10 @@ export default function ChildMode() {
     return defaultCategoryColors[slug] || "bg-purple-500/20 text-purple-700 border-purple-300/50";
   };
 
+  console.log('[ChildMode] Rendering with hasEntered:', hasEntered);
+
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 overflow-hidden z-[9999]">
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 overflow-hidden z-[9999] w-screen h-screen" style={{ background: '#f3e8ff' }}>
       <AnimatePresence mode="wait">
         {!hasEntered ? (
           <motion.div 
@@ -408,6 +452,7 @@ export default function ChildMode() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
+            style={{ width: '100vw', height: '100vh', top: 0, left: 0 }}
           >
             <div className="text-center space-y-8 max-w-lg w-full">
               <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity }} className="text-9xl mb-4">✨</motion.div>

@@ -1,25 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, AlertCircle } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import type { ParentSettings } from "@shared/schema";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { signInWithGoogle, user } = useAuth();
+  const { signInWithGoogle, user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const { data: parentSettings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
     enabled: !!user,
   });
+  
+  // Handle redirect result - check if user just signed in via redirect
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      if (user && !authLoading) {
+        try {
+          const token = await user.getIdToken(true);
+          
+          // Check if parent settings already exist
+          const response = await fetch("/api/parent-settings", {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            // Settings exist, go to dashboard
+            setLocation("/dashboard");
+          } else if (response.status === 404) {
+            // No settings, go to setup
+            setLocation("/setup");
+          } else {
+            // Some other error, go to setup
+            setLocation("/setup");
+          }
+        } catch (error) {
+          console.error('Error checking parent settings:', error);
+        }
+      }
+    };
+    
+    checkRedirectResult();
+  }, [user, authLoading, setLocation]);
   
   const welcomeText = parentSettings?.childName 
     ? `Welcome to ${parentSettings.childName}`
@@ -27,34 +62,30 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const user = await signInWithGoogle();
+      await signInWithGoogle();
+      // The popup will handle navigation after successful auth
+      // No need to redirect here - let the auth state change trigger it
+    } catch (error: any) {
+      // Sign in failed
+      console.error("Sign in error:", error);
       
-      // Ensure we have a valid token before proceeding
-      if (user) {
-        const token = await user.getIdToken(true);
-        
-        // Check if parent settings already exist
-        const response = await fetch("/api/parent-settings", {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          // Settings exist, go to dashboard
-          setLocation("/dashboard");
-        } else if (response.status === 404) {
-          // No settings, go to setup
-          setLocation("/setup");
-        } else {
-          // Some other error
-          setLocation("/setup");
-        }
+      let errorMessage = 'Failed to sign in. Please try again.';
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign in was cancelled. Please try again.';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up was blocked. Please allow pop-ups for this site.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized. Please contact support.';
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = 'Google Sign-In is not enabled. Please contact support.';
+      } else if (error.message.includes('initial state') || error.code === 'auth/missing-auth-event') {
+        errorMessage = 'Storage issue detected. Please ensure third-party cookies are enabled or try a different browser.';
       }
-    } catch (error) {
-      // Sign in failed - user likely closed the popup
-    } finally {
+      
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -98,6 +129,13 @@ export default function AuthPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                
                 <Button
                   onClick={handleGoogleSignIn}
                   size="lg"

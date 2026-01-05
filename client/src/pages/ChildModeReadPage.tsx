@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { App } from "@capacitor/app";
 import { Button } from "@/components/ui/button";
 import { PINDialog } from "@/components/PINDialog";
 import { RewardsDialog } from "@/components/RewardsDialog";
@@ -49,6 +50,9 @@ export default function ChildModeReadPage() {
 
   // Block keyboard shortcuts in child mode read page
   useEffect(() => {
+    let backButtonSubscription: any = null;
+    let resumeSubscription: any = null;
+
     // Block Android back button
     const handleBackButton = (e: any) => {
       e.preventDefault();
@@ -57,8 +61,7 @@ export default function ChildModeReadPage() {
     };
 
     // Add Capacitor back button handler
-    const { App } = require('@capacitor/app');
-    const backButtonSubscription = App.addListener('backButton', handleBackButton);
+    backButtonSubscription = App.addListener('backButton', handleBackButton);
 
     // Handle app resume - re-enforce fullscreen and keyboard blocking
     const handleAppResume = async () => {
@@ -75,7 +78,7 @@ export default function ChildModeReadPage() {
       window.focus();
     };
 
-    const resumeSubscription = App.addListener('resume', handleAppResume);
+    resumeSubscription = App.addListener('resume', handleAppResume);
 
     // Also handle browser back with history API
     const preventBack = () => {
@@ -184,7 +187,7 @@ export default function ChildModeReadPage() {
     let initialScreenArea = window.innerWidth * window.innerHeight;
     let minScreenArea = initialScreenArea;
 
-    // Aggressive polling - checks every 50ms
+    // Aggressive polling - checks every 10ms (ultra-fast for web-hosted)
     let pollInterval: ReturnType<typeof setInterval> | null = null;
     
     const startFullscreenPolling = () => {
@@ -198,7 +201,7 @@ export default function ChildModeReadPage() {
         }
         
         enforceFullscreen();
-      }, 50); // Check every 50ms
+      }, 10); // Check every 10ms for instant re-entry
       // Run immediately on start
       enforceFullscreen();
     };

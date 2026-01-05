@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
 import ChildLockSetupPage from "@/pages/ChildLockSetupPage";
@@ -90,6 +91,7 @@ function Router() {
 
   return (
     <>
+      <AuthRedirectHandler />
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
