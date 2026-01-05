@@ -43,22 +43,64 @@ export default function ChildMode() {
     }
     setHasEntered(true);
     
-    // Enter Child Mode on native platforms
+    // Enter Child Mode on Electron first
+    if (window.electron?.ipcRenderer) {
+      try {
+        await window.electron.ipcRenderer.invoke('enter-child-mode');
+        console.log('[ChildMode] Electron kiosk mode activated');
+        return;
+      } catch (e) {
+        console.warn("Electron kiosk failed:", e);
+      }
+    }
+
+    // Enter Child Mode on native platforms (Android)
     try {
       await ChildModePlugin.enterChildMode();
+      console.log('[ChildMode] Android Lock Task Mode activated');
     } catch (e) {
       console.warn("Native ChildMode failed or not available:", e);
       if (window.androidChildMode) {
         window.androidChildMode.enterChildMode();
+        console.log('[ChildMode] Android bridge activated');
       }
     }
   };
 
   const handleExit = async () => {
     try {
-      // First try native exit if available
+      // Try Electron exit first
+      if (window.electron?.ipcRenderer) {
+        try {
+          const success = await window.electron.ipcRenderer.invoke('exit-child-mode', password);
+          if (success) {
+            console.log('[ChildMode] Electron kiosk mode exited');
+            toast({
+              title: "Exiting Child Mode",
+              description: "Returning to normal operation.",
+            });
+            
+            if (document.exitFullscreen) {
+              document.exitFullscreen().catch(err => {
+                console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
+              });
+            }
+
+            setLocation("/dashboard");
+            return;
+          } else {
+            throw new Error("Invalid password");
+          }
+        } catch (electronErr) {
+          console.warn("Electron exit failed:", electronErr);
+          throw new Error("Invalid password");
+        }
+      }
+
+      // Try Capacitor/Android exit
       try {
         await ChildModePlugin.exitChildMode({ password });
+        console.log('[ChildMode] Android exit successful');
       } catch (nativeErr) {
         console.warn("Native exit failed, falling back to web validation:", nativeErr);
         const res = await apiRequest("POST", "/api/verify-pin", { pin: password });

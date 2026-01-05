@@ -47,50 +47,45 @@ function enableChildMode() {
   
   isChildModeActive = true;
   
-  // Enter kiosk mode (fullscreen, no window controls)
-  mainWindow.setKiosk(true);
-  mainWindow.setFullScreen(true);
-  
-  // Block Alt+F4 and window close
-  mainWindow.setClosable(false);
-  
-  // Register global shortcuts to block
-  globalShortcut.register('Alt+F4', () => {
-    console.log('[Electron] Alt+F4 blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('CommandOrControl+Q', () => {
-    console.log('[Electron] Ctrl+Q / Cmd+Q blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('CommandOrControl+W', () => {
-    console.log('[Electron] Ctrl+W / Cmd+W blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('Escape', () => {
-    console.log('[Electron] ESC blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('F11', () => {
-    console.log('[Electron] F11 blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('F12', () => {
-    console.log('[Electron] F12 blocked in Child Mode');
-    return false;
-  });
-  
-  globalShortcut.register('CommandOrControl+Shift+I', () => {
-    console.log('[Electron] DevTools blocked in Child Mode');
-    return false;
-  });
-  
-  console.log('[Electron] Child Mode enabled - kiosk mode active with keyboard blocking');
+  try {
+    // Enter kiosk mode (fullscreen, no window controls)
+    mainWindow.setKiosk(true);
+    console.log('[Electron] Kiosk mode enabled');
+    
+    mainWindow.setFullScreen(true);
+    console.log('[Electron] Fullscreen enabled');
+    
+    // Block Alt+F4 and window close
+    mainWindow.setClosable(false);
+    console.log('[Electron] Window close disabled');
+    
+    // Register global shortcuts to block
+    const shortcuts = [
+      'Alt+F4',
+      'CommandOrControl+Q',
+      'CommandOrControl+W',
+      'Escape',
+      'F11',
+      'F12',
+      'CommandOrControl+Shift+I'
+    ];
+    
+    shortcuts.forEach(shortcut => {
+      try {
+        globalShortcut.register(shortcut, () => {
+          console.log(`[Electron] ${shortcut} blocked in Child Mode`);
+          return false;
+        });
+      } catch (err) {
+        console.error(`[Electron] Failed to register ${shortcut}:`, err);
+      }
+    });
+    
+    console.log('[Electron] Child Mode enabled - kiosk mode active with keyboard blocking');
+  } catch (err) {
+    console.error('[Electron] Error enabling Child Mode:', err);
+    isChildModeActive = false;
+  }
 }
 
 /**
@@ -99,19 +94,29 @@ function enableChildMode() {
 function disableChildMode() {
   if (!mainWindow || !isChildModeActive) return;
   
-  isChildModeActive = false;
-  
-  // Exit kiosk mode
-  mainWindow.setKiosk(false);
-  mainWindow.setFullScreen(false);
-  
-  // Re-enable window close
-  mainWindow.setClosable(true);
-  
-  // Unregister blocked shortcuts
-  globalShortcut.unregisterAll();
-  
-  console.log('[Electron] Child Mode disabled - normal mode restored');
+  try {
+    isChildModeActive = false;
+    
+    // Exit kiosk mode
+    mainWindow.setKiosk(false);
+    console.log('[Electron] Kiosk mode disabled');
+    
+    mainWindow.setFullScreen(false);
+    console.log('[Electron] Fullscreen disabled');
+    
+    // Re-enable window close
+    mainWindow.setClosable(true);
+    console.log('[Electron] Window close re-enabled');
+    
+    // Unregister blocked shortcuts
+    globalShortcut.unregisterAll();
+    console.log('[Electron] Global shortcuts unregistered');
+    
+    console.log('[Electron] Child Mode disabled - normal mode restored');
+  } catch (err) {
+    console.error('[Electron] Error disabling Child Mode:', err);
+    isChildModeActive = true; // Reset flag on error
+  }
 }
 
 /**
