@@ -85,6 +85,8 @@ export default function StoryExplorer() {
         { value: "educational", label: "Educational", icon: GraduationCap },
         { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
       ];
+
+  const filteredStories = allStories.filter((story) => {
     if (selectedLanguage && story.language !== selectedLanguage) return false;
     if (selectedCategory && story.category !== selectedCategory) return false;
     if (selectedType && story.storyType !== selectedType) return false;
