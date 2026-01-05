@@ -342,7 +342,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/parent-settings", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
-      const settingsData = insertParentSettingsSchema.parse(req.body);
+      
+      // Validate input
+      let settingsData;
+      try {
+        settingsData = insertParentSettingsSchema.parse(req.body);
+      } catch (validationError: any) {
+        console.error("Validation error:", validationError);
+        return res.status(400).json({ 
+          error: "Validation error",
+          details: validationError.errors || validationError.message 
+        });
+      }
       
       const pinHash = hashPIN(settingsData.pin);
 
@@ -392,9 +403,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
 
       res.json(settings);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving settings:", error);
-      res.status(500).json({ error: "Failed to save settings" });
+      res.status(500).json({ 
+        error: "Failed to save settings",
+        message: error.message || "Unknown error"
+      });
     }
   });
 
