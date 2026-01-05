@@ -113,13 +113,11 @@ export default function SubscriptionPage() {
                         <div className="pt-4">
                           <div className="flex items-baseline justify-between">
                             <span className="text-4xl font-bold text-foreground" data-testid={`text-price-${index}`}>
-                              {plan.price === "0" ? "Free" : `₹${plan.price}`}
+                              ₹{plan.price}
                             </span>
-                            {plan.price !== "0" && (
-                              <span className="text-sm text-black dark:text-black font-medium">
-                                {getPeriodLabel(plan.billingPeriod)}
-                              </span>
-                            )}
+                            <span className="text-sm text-black dark:text-black font-medium">
+                              {getPeriodLabel(plan.billingPeriod)}
+                            </span>
                           </div>
                         </div>
                       </CardHeader>
@@ -148,15 +146,11 @@ export default function SubscriptionPage() {
                           className="w-full rounded-2xl bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90"
                           size="lg"
                           onClick={() => {
-                            if (plan.id === "plan-free") {
-                              setLocation("/dashboard");
-                            } else {
-                              setLocation(`/payment?planId=${plan.id}`);
-                            }
+                            setLocation(`/payment?planId=${plan.id}`);
                           }}
                           data-testid={`button-subscribe-${index}`}
                         >
-                          {plan.id === "plan-free" ? "Start Reading" : "Get Started"}
+                          Get Started
                         </Button>
                       </CardFooter>
                     </Card>

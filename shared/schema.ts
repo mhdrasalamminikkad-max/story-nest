@@ -102,7 +102,7 @@ export const parentSettingsSchema = z.object({
   coins: z.number().default(0),
   trialStartedAt: z.number().optional(),
   trialEndsAt: z.number().optional(),
-  subscriptionStatus: z.enum(["trial", "active", "expired", "canceled", "free"]).default("free"),
+  subscriptionStatus: z.enum(["trial", "active", "expired", "canceled"]).default("trial"),
 });
 
 export const insertParentSettingsSchema = z.object({
