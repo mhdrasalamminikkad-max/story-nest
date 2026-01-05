@@ -55,35 +55,64 @@ export default function ChildModeReadPage() {
       if (blockedKeys.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        console.log(`[Child Mode Read] Blocked ${e.key}`);
+        return false;
       }
 
       // Block system shortcuts
       if (e.altKey && (e.key === 'F4' || e.key === 'Tab')) {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        return false;
       }
 
       if ((e.ctrlKey || e.metaKey) && ['w', 'r', 'q', 'n', 't', 'p'].includes(e.key.toLowerCase())) {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        return false;
       }
 
       if (e.key === 'Tab') {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        return false;
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
+        return false;
       }
     };
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      e.returnValue = false;
+      return false;
     };
 
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keyup', handleKeyUp, true);
+    document.addEventListener('contextmenu', handleContextMenu, true);
     window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
 
     return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keyup', handleKeyUp, true);
+      document.removeEventListener('contextmenu', handleContextMenu, true);
       window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
     };
   }, []);

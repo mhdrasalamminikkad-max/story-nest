@@ -94,11 +94,16 @@ export default function ChildMode() {
   };
 
   useEffect(() => {
+    if (!hasEntered) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
       if (blockedKeys.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        console.log(`[Child Mode] Blocked ${e.key}`);
+        return false;
       }
       
       const isSystemShortcut = 
@@ -108,20 +113,60 @@ export default function ChildMode() {
       if (isSystemShortcut) {
         e.preventDefault();
         e.stopPropagation();
+        e.returnValue = false;
+        console.log(`[Child Mode] Blocked system shortcut`);
+        return false;
+      }
+
+      // Block Tab key navigation
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
+        return false;
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const blockedKeys = ['Escape', 'F5', 'F11', 'F12'];
+      if (blockedKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
+        return false;
       }
     };
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      e.returnValue = false;
+      console.log('[Child Mode] Context menu blocked');
+      return false;
     };
 
+    // Add event listeners with capture phase to intercept before other handlers
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keyup', handleKeyUp, true);
+    document.addEventListener('contextmenu', handleContextMenu, true);
     window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
+
+    // Also handle fullscreen change events
+    const handleFullscreenChange = () => {
+      console.log('[Child Mode] Fullscreen state changed, re-attaching handlers');
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     
     return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keyup', handleKeyUp, true);
+      document.removeEventListener('contextmenu', handleContextMenu, true);
       window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [hasEntered]);
 

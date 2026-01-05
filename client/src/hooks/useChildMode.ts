@@ -60,49 +60,93 @@ export function useChildMode() {
       // Block ESC key
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] ESC key blocked');
-        return;
+        return false;
       }
 
       // Block F11 (fullscreen toggle)
       if (e.key === 'F11') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] F11 key blocked');
-        return;
+        return false;
+      }
+
+      // Block F12, F5, etc.
+      if (['F5', 'F12'].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
+        console.log(`[Child Mode] ${e.key} blocked`);
+        return false;
       }
 
       // Block Alt+F4 (close window)
       if (e.altKey && e.key === 'F4') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] Alt+F4 blocked');
-        return;
+        return false;
       }
 
       // Block Ctrl+W (close tab)
       if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] Ctrl+W blocked');
-        return;
+        return false;
       }
 
       // Block Ctrl+Q / Cmd+Q (quit app)
       if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] Ctrl+Q blocked');
-        return;
+        return false;
       }
 
       // Block Tab key to prevent focus escape
       if (e.key === 'Tab') {
         e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
         console.log('[Child Mode] Tab key blocked');
-        return;
+        return false;
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (['Escape', 'F11', 'F5', 'F12'].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = false;
+        return false;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+
+    // Block fullscreen exit by preventing ESC
+    const handleFullscreenChange = () => {
+      console.log('[Child Mode] Fullscreen event detected');
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
     return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [isChildModeActive]);
 
