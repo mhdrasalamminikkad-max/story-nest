@@ -1,0 +1,20 @@
+{
+  "name": "story-nest-electron",
+  "version": "1.0.0",
+  "description": "Electron wrapper for StoryNest",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder"
+  },
+  "keywords": ["electron", "story-nest"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
+
+
