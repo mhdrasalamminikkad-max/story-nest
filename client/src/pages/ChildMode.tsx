@@ -145,6 +145,18 @@ export default function ChildMode() {
       return false;
     };
 
+    // Monitor fullscreen changes - if user exits fullscreen, re-enter
+    const handleFullscreenChange = async () => {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        console.log('[Child Mode] Fullscreen exited, re-entering...');
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (err) {
+          console.warn('[Child Mode] Could not re-enter fullscreen:', err);
+        }
+      }
+    };
+
     // Add event listeners with capture phase to intercept before other handlers
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('keyup', handleKeyUp, true);
@@ -152,12 +164,7 @@ export default function ChildMode() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
-
-    // Also handle fullscreen change events
-    const handleFullscreenChange = () => {
-      console.log('[Child Mode] Fullscreen state changed, re-attaching handlers');
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange, true);
     
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
@@ -166,7 +173,7 @@ export default function ChildMode() {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange, true);
     };
   }, [hasEntered]);
 

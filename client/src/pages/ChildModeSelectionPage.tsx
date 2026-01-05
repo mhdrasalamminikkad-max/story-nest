@@ -78,12 +78,25 @@ export default function ChildModeSelectionPage() {
       return false;
     };
 
+    // Monitor fullscreen changes - if user exits fullscreen, re-enter
+    const handleFullscreenChange = async () => {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        console.log('[Child Mode Selection] Fullscreen exited, re-entering...');
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (err) {
+          console.warn('[Child Mode Selection] Could not re-enter fullscreen:', err);
+        }
+      }
+    };
+
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('keyup', handleKeyUp, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
+    document.addEventListener('fullscreenchange', handleFullscreenChange, true);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
@@ -92,6 +105,7 @@ export default function ChildModeSelectionPage() {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange, true);
     };
   }, []);
 
