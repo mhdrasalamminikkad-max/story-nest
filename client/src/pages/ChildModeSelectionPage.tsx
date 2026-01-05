@@ -78,24 +78,36 @@ export default function ChildModeSelectionPage() {
       return false;
     };
 
-    // Polling mechanism to ensure fullscreen stays active
+    // Aggressive polling mechanism - checks every 100ms
     let pollInterval: ReturnType<typeof setInterval> | null = null;
     
-    const startFullscreenPolling = () => {
-      pollInterval = setInterval(async () => {
-        // Check if we've exited fullscreen
-        if (!document.fullscreenElement) {
-          console.log('[Child Mode Selection] Fullscreen lost detected, re-entering...');
-          try {
-            if (document.documentElement.requestFullscreen) {
-              await document.documentElement.requestFullscreen();
-              console.log('[Child Mode Selection] Successfully re-entered fullscreen');
-            }
-          } catch (err) {
-            console.error('[Child Mode Selection] Failed to re-enter fullscreen:', err);
+    const enforceFullscreen = async () => {
+      // Check if we've exited fullscreen
+      if (!document.fullscreenElement) {
+        console.log('[Child Mode Selection] Fullscreen lost! Forcing re-entry immediately...');
+        try {
+          if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+            console.log('[Child Mode Selection] Re-entered fullscreen successfully');
           }
+        } catch (err) {
+          console.error('[Child Mode Selection] Failed to re-enter fullscreen:', err);
         }
-      }, 500); // Check every 500ms
+      }
+      
+      // Keep window focused
+      if (document.hidden) {
+        console.log('[Child Mode Selection] Window lost focus, refocusing...');
+        window.focus();
+      }
+    };
+    
+    const startFullscreenPolling = () => {
+      // Check every 100ms (10 times per second) for ultra-responsive trap
+      pollInterval = setInterval(enforceFullscreen, 100);
+      
+      // Also run immediately on start
+      enforceFullscreen();
     };
 
     document.addEventListener('keydown', handleKeyDown, true);
@@ -105,7 +117,7 @@ export default function ChildModeSelectionPage() {
     window.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
 
-    // Start polling for fullscreen exit
+    // Start aggressive polling
     startFullscreenPolling();
 
     return () => {
