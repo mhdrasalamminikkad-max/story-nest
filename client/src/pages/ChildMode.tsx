@@ -60,7 +60,7 @@ export default function ChildMode() {
       console.log('[ChildMode] Android Lock Task Mode activated');
     } catch (e) {
       console.warn("Native ChildMode failed or not available:", e);
-      if (window.androidChildMode) {
+      if (window.androidChildMode?.enterChildMode) {
         window.androidChildMode.enterChildMode();
         console.log('[ChildMode] Android bridge activated');
       }
@@ -108,7 +108,7 @@ export default function ChildMode() {
         if (!response.valid && password !== "1234") {
            throw new Error("Invalid password");
         }
-        if (window.androidChildMode) {
+        if (window.androidChildMode?.exitChildMode) {
           window.androidChildMode.exitChildMode(password);
         }
       }

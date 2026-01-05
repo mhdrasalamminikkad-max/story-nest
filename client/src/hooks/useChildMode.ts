@@ -7,11 +7,13 @@ import { useEffect, useCallback, useState } from 'react';
 interface ChildModeBridge {
   enterChildMode?: () => void;
   exitChildMode?: (password: string) => Promise<boolean>;
+  _exitCallback?: (success: boolean) => void;
 }
 
 declare global {
   interface Window {
     childMode?: ChildModeBridge;
+    androidChildMode?: ChildModeBridge;
     electron?: {
       ipcRenderer: {
         invoke: (channel: string, ...args: any[]) => Promise<any>;
