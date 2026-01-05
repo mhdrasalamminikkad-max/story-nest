@@ -50,24 +50,14 @@ export default function HomePage() {
               <div className="flex items-center gap-2 sm:gap-3">
                 <ThemeToggle />
                 {user ? (
-                  <>
-                    <Button
-                      onClick={() => setLocation("/dashboard")}
-                      className="rounded-2xl font-semibold bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90 hover:shadow-lg transition-all"
-                      data-testid="button-dashboard"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Dashboard</span>
-                    </Button>
-                    <Button
-                      onClick={() => setLocation("/child")}
-                      className="rounded-2xl font-semibold bg-[#F5C518] text-gray-900 hover:bg-[#F5C518]/90 hover:shadow-lg transition-all border-[#D4A500]"
-                      data-testid="button-child-mode"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Child Mode</span>
-                    </Button>
-                  </>
+                  <Button
+                    onClick={() => setLocation("/dashboard")}
+                    className="rounded-2xl font-semibold bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90 hover:shadow-lg transition-all"
+                    data-testid="button-dashboard"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Button>
                 ) : (
                   <Button
                     onClick={() => setLocation("/auth")}
