@@ -927,7 +927,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(subscriptionPlans)
         .where(eq(subscriptionPlans.isActive, true))
         .orderBy(desc(subscriptionPlans.createdAt));
-      
+
+      // Add a virtual Free plan
+      const freePlan = {
+        id: "plan-free",
+        name: "Free",
+        description: "Explore magical stories with daily limits",
+        price: "0",
+        currency: "INR",
+        billingPeriod: "lifetime",
+        features: ["1 Story per day", "Standard Quality", "Community Access"],
+        isActive: true,
+        maxStories: 1,
+      };
+
       // Return only public-facing fields, exclude internal payment identifiers
       const publicPlans = activePlans.map(plan => ({
         id: plan.id,
@@ -939,7 +952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         features: plan.features ?? [],
         maxStories: plan.maxStories,
       }));
-      res.json(publicPlans);
+      res.json([freePlan, ...publicPlans]);
     } catch (error) {
       console.error("Error fetching subscription plans:", error);
       res.status(500).json({ error: "Failed to fetch subscription plans" });
