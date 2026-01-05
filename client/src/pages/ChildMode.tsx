@@ -26,6 +26,10 @@ export default function ChildMode() {
     queryKey: ["/api/stories"],
   });
 
+  const { data: apiCategories = [] } = useQuery<{id: string, name: string, slug: string}[]>({
+    queryKey: ["/api/admin/categories"],
+  });
+
   const { data: settings } = useQuery<ParentSettings>({
     queryKey: ["/api/parent-settings"],
   });
@@ -111,12 +115,17 @@ export default function ChildMode() {
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [hasEntered]);
 
-  const categoryColors: Record<string, string> = {
+  const defaultCategoryColors: Record<string, string> = {
     "fairy-tale": "bg-pink-500/20 text-pink-700 border-pink-300/50",
     "adventure": "bg-orange-500/20 text-orange-700 border-orange-300/50",
     "educational": "bg-blue-500/20 text-blue-700 border-blue-300/50",
     "moral": "bg-green-500/20 text-green-700 border-green-300/50",
     "islamic": "bg-teal-500/20 text-teal-700 border-teal-300/50",
+  };
+
+  const getCategoryColor = (category: string) => {
+    const slug = category.toLowerCase().replace(/\s+/g, '-');
+    return defaultCategoryColors[slug] || "bg-purple-500/20 text-purple-700 border-purple-300/50";
   };
 
   return (

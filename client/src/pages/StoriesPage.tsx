@@ -19,21 +19,15 @@ export default function StoriesPage() {
     queryKey: ["/api/stories"],
   });
 
-  const categories = ["All", "Fairy Tale", "Adventure", "Educational", "Moral", "History"];
+  const { data: apiCategories = [] } = useQuery<{id: string, name: string, slug: string}[]>({
+    queryKey: ["/api/admin/categories"],
+  });
 
-  const categoryMap: Record<string, string[]> = {
-    "All": [],
-    "Fairy Tale": ["fairy-tale"],
-    "Adventure": ["adventure"],
-    "Educational": ["educational"],
-    "Moral": ["moral"],
-    "History": ["history"],
-  };
+  const categories = ["All", ...apiCategories.map(c => c.name)];
 
   const filteredStories = stories.filter((story: Story) => {
-    const categoryValues = categoryMap[selectedCategory] || [];
     const matchesCategory = selectedCategory === "All" || 
-      categoryValues.some(cat => story.category.toLowerCase() === cat.toLowerCase());
+      story.category.toLowerCase() === selectedCategory.toLowerCase();
     
     const matchesSearch = !searchQuery || 
       story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

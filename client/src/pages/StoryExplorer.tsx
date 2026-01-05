@@ -71,7 +71,20 @@ export default function StoryExplorer() {
     queryKey: ["/api/stories/preview"],
   });
 
-  const filteredStories = allStories.filter((story) => {
+  const { data: apiCategories = [] } = useQuery<{id: string, name: string, slug: string}[]>({
+    queryKey: ["/api/admin/categories"],
+  });
+
+  const categories = apiCategories.length > 0 
+    ? apiCategories.map(c => ({ value: c.slug, label: c.name, icon: Star }))
+    : [
+        { value: "islamic", label: "Islamic", icon: Star },
+        { value: "history", label: "History", icon: History },
+        { value: "moral", label: "Moral Lessons", icon: Lightbulb },
+        { value: "adventure", label: "Adventure", icon: Map },
+        { value: "educational", label: "Educational", icon: GraduationCap },
+        { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
+      ];
     if (selectedLanguage && story.language !== selectedLanguage) return false;
     if (selectedCategory && story.category !== selectedCategory) return false;
     if (selectedType && story.storyType !== selectedType) return false;
@@ -261,8 +274,8 @@ export default function StoryExplorer() {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
               >
-                {categories.map((cat) => {
-                  const IconComponent = cat.icon;
+                {categories.map((cat: any) => {
+                  const IconComponent = cat.icon || Star;
                   return (
                     <Card
                       key={cat.value}
