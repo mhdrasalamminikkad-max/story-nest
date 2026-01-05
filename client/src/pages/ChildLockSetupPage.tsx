@@ -52,13 +52,12 @@ export default function ChildLockSetupPage() {
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Submitting child lock settings:", data);
-      try {
-        const res = await apiRequest("POST", "/api/parent-settings", data);
-        return await res.json();
-      } catch (error: any) {
-        console.error("API error details:", error.message);
-        throw error;
+      const res = await apiRequest("POST", "/api/parent-settings", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save settings");
       }
+      return await res.json();
     },
     onSuccess: () => {
       console.log("Settings saved successfully");
@@ -97,7 +96,7 @@ export default function ChildLockSetupPage() {
           <Button
             variant="ghost"
             onClick={() => setLocation("/")}
-            className="rounded-2xl text-white"
+            className="rounded-2xl text-purple-600 dark:text-purple-400"
             data-testid="button-back-home"
           >
             ← Back to Home
@@ -112,25 +111,25 @@ export default function ChildLockSetupPage() {
             transition={{ duration: 0.4 }}
             className="w-full max-w-2xl"
           >
-            <Card className="rounded-3xl border-2 text-card-foreground">
-              <CardHeader className="text-center">
+            <Card className="rounded-3xl border-2 text-card-foreground bg-white dark:bg-gray-900 border-white/20 shadow-2xl overflow-hidden">
+              <CardHeader className="text-center bg-gradient-to-r from-purple-500/20 to-pink-500/20 pb-8">
                 <div className="mx-auto mb-4 w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                  <Lock className="w-8 h-8 text-white" />
+                  <Lock className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <CardTitle className="font-heading text-3xl text-white">Child Lock Setup</CardTitle>
-                <CardDescription className="text-base text-white/80">
+                <CardTitle className="font-heading text-3xl text-purple-600 dark:text-purple-400">Child Lock Setup</CardTitle>
+                <CardDescription className="text-base text-gray-600 dark:text-gray-400">
                   Configure safety settings for your child's reading time
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-8">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-white">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-gray-900 dark:text-gray-100">
                     <FormField
                       control={form.control}
                       name="pin"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base flex items-center gap-2 text-white">
+                          <FormLabel className="text-base flex items-center gap-2 text-gray-700 dark:text-gray-300">
                             <Lock className="w-4 h-4" />
                             Parent PIN (4 digits)
                           </FormLabel>
@@ -140,19 +139,19 @@ export default function ChildLockSetupPage() {
                               inputMode="numeric"
                               maxLength={4}
                               placeholder="Enter 4-digit PIN"
-                              className="text-center text-2xl tracking-widest rounded-2xl text-foreground bg-background border-2 border-input"
+                              className="text-center text-2xl tracking-widest rounded-2xl text-foreground bg-background border-2 border-input focus:border-purple-500 transition-colors"
                               {...field}
                               onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, "");
+                                const value = e.target.value.replace(/\D/g, "").slice(0, 4);
                                 field.onChange(value);
                               }}
                               data-testid="input-setup-pin"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-500 dark:text-gray-400">
                             This PIN will be required to exit child mode
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -162,22 +161,22 @@ export default function ChildLockSetupPage() {
                       name="parentName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base text-white">
+                          <FormLabel className="text-base text-gray-700 dark:text-gray-300">
                             Your Name (Parent)
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="text"
                               placeholder="Enter your name"
-                              className="rounded-2xl text-foreground bg-background border-2 border-input"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input focus:border-purple-500 transition-colors"
                               {...field}
                               data-testid="input-parent-name"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-500 dark:text-gray-400">
                             This helps personalize the experience
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -187,22 +186,22 @@ export default function ChildLockSetupPage() {
                       name="childName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base text-white">
+                          <FormLabel className="text-base text-gray-700 dark:text-gray-300">
                             Child's Name
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="text"
                               placeholder="Enter your child's name"
-                              className="rounded-2xl text-foreground bg-background border-2 border-input"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input focus:border-purple-500 transition-colors"
                               {...field}
                               data-testid="input-child-name"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-500 dark:text-gray-400">
                             This name will appear in welcome messages
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -212,7 +211,7 @@ export default function ChildLockSetupPage() {
                       name="childAge"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base text-white">
+                          <FormLabel className="text-base text-gray-700 dark:text-gray-300">
                             Child's Age
                           </FormLabel>
                           <FormControl>
@@ -221,16 +220,16 @@ export default function ChildLockSetupPage() {
                               min="1"
                               max="18"
                               placeholder="Enter child's age (1-18)"
-                              className="rounded-2xl text-foreground bg-background border-2 border-input"
+                              className="rounded-2xl text-foreground bg-background border-2 border-input focus:border-purple-500 transition-colors"
                               {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                               data-testid="input-child-age"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-500 dark:text-gray-400">
                             Child's age for age-appropriate content selection
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -240,12 +239,12 @@ export default function ChildLockSetupPage() {
                       name="readingTimeLimit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base flex items-center gap-2 justify-between text-white">
+                          <FormLabel className="text-base flex items-center gap-2 justify-between text-gray-700 dark:text-gray-300">
                             <span className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               Reading Time Limit
                             </span>
-                            <span className="font-heading text-yellow-300">{field.value} minutes</span>
+                            <span className="font-heading text-purple-600 dark:text-purple-400 font-bold">{field.value} minutes</span>
                           </FormLabel>
                           <FormControl>
                             <Slider
@@ -261,10 +260,10 @@ export default function ChildLockSetupPage() {
                               data-testid="slider-reading-time"
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-500 dark:text-gray-400">
                             Maximum reading time per session (10-60 minutes)
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -273,13 +272,13 @@ export default function ChildLockSetupPage() {
                       control={form.control}
                       name="fullscreenLockEnabled"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-white/30 p-6 bg-white/10">
+                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border-2 border-purple-100 dark:border-purple-900 p-6 bg-purple-50/50 dark:bg-purple-900/20">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-base flex items-center gap-2 text-white">
+                            <FormLabel className="text-base flex items-center gap-2 text-gray-700 dark:text-gray-300">
                               <Maximize className="w-4 h-4" />
                               Enable Fullscreen Lock
                             </FormLabel>
-                            <FormDescription>
+                            <FormDescription className="text-gray-500 dark:text-gray-400">
                               Prevent accidental exits during story time
                             </FormDescription>
                           </div>
@@ -297,7 +296,7 @@ export default function ChildLockSetupPage() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full rounded-2xl text-lg py-6"
+                      className="w-full rounded-2xl text-lg py-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 transition-opacity"
                       disabled={saveMutation.isPending}
                       data-testid="button-save-settings"
                     >
