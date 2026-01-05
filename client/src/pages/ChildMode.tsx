@@ -107,6 +107,23 @@ export default function ChildMode() {
     const { App } = require('@capacitor/app');
     const backButtonSubscription = App.addListener('backButton', handleBackButton);
 
+    // Handle app resume - re-enforce fullscreen and keyboard blocking
+    const handleAppResume = async () => {
+      console.log('[Child Mode] App resumed - re-enforcing fullscreen trap...');
+      // Re-enter fullscreen when app comes back to foreground
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        try {
+          await document.documentElement.requestFullscreen();
+          console.log('[Child Mode] Fullscreen re-entered after resume');
+        } catch (err) {
+          console.error('[Child Mode] Failed to re-enter fullscreen on resume:', err);
+        }
+      }
+      window.focus();
+    };
+
+    const resumeSubscription = App.addListener('resume', handleAppResume);
+
     // Also handle browser back with history API
     const preventBack = () => {
       window.history.pushState(null, '', window.location.href);
@@ -295,9 +312,12 @@ export default function ChildMode() {
       window.removeEventListener('resize', handleWindowResize);
       window.removeEventListener('popstate', preventBack);
       
-      // Cleanup Capacitor back button listener
+      // Cleanup Capacitor listeners
       if (backButtonSubscription) {
         backButtonSubscription.remove?.();
+      }
+      if (resumeSubscription) {
+        resumeSubscription.remove?.();
       }
     };
   }, [hasEntered]);
