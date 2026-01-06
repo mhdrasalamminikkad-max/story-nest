@@ -1,10 +1,14 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut as firebaseSignOut, onAuthStateChanged, User } from "firebase/auth";
 import { FIREBASE_CONFIG } from "./google-oauth-config";
 
 // Initialize Firebase
 const app = initializeApp(FIREBASE_CONFIG);
 export const auth = getAuth(app);
+
+// Initialize Analytics
+const analytics = getAnalytics(app);
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
