@@ -836,10 +836,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin check endpoint
-  app.get("/api/admin/check", authenticateUser, async (req: AuthRequest, res) => {
+  // Admin check endpoint - public endpoint, returns false if no userId
+  app.get("/api/admin/check", async (req: AuthRequest, res) => {
     try {
-      const userId = req.userId!;
+      const userId = req.userId;
+      
+      // Return false if not authenticated
+      if (!userId) {
+        return res.json({ isAdmin: false });
+      }
+      
       const [settings] = await db
         .select()
         .from(parentSettings)
@@ -848,6 +854,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ isAdmin: settings?.isAdmin || false });
     } catch (error) {
       console.error("Error checking admin status:", error);
+      res.json({ isAdmin: false });
+    }
       res.status(500).json({ error: "Failed to check admin status" });
     }
   });
