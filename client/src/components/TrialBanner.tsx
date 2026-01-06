@@ -91,19 +91,19 @@ export function TrialBanner() {
                 <Clock className={`w-5 h-5 ${isLastDays ? "text-orange-500" : "text-blue-500"}`} />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">
+                <h3 className="font-semibold text-lg mb-1 text-white">
                   {isLastDays ? "⚠️ Trial Ending Soon!" : "🎉 Free Trial Active"}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-white">
                   {daysRemaining === 1 ? (
                     <>
-                      <span className="font-bold text-foreground">Last day</span> of your free trial!
+                      <span className="font-bold text-white">Last day</span> of your free trial!
                     </>
                   ) : daysRemaining === 0 ? (
-                    <>Your trial ends <span className="font-bold text-foreground">today</span></>
+                    <>Your trial ends <span className="font-bold text-white">today</span></>
                   ) : (
                     <>
-                      <span className="font-bold text-foreground">{daysRemaining} days</span> remaining in your
+                      <span className="font-bold text-white">{daysRemaining} days</span> remaining in your
                       free trial
                     </>
                   )}
