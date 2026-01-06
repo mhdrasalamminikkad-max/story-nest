@@ -361,7 +361,7 @@ export default function ParentDashboard() {
         
         // Upload to Firebase Storage and get download URL
         try {
-          const userId = user?.uid || `temp-${Date.now()}`;
+          const userId = user?.id || `temp-${Date.now()}`;
           const downloadURL = await uploadVoiceoverBlob(audioBlob, userId);
           setVoiceoverBase64(downloadURL);
           (form.setValue as any)('voiceoverUrl', downloadURL);
