@@ -37,14 +37,18 @@ export default function AuthPage() {
           
           // Check if parent settings already exist
           const response = await fetch("/api/parent-settings", {
-            headers: {
-              "Authorization": `Bearer ${token}`
-            }
+            credentials: "include", // Send HTTP-only cookie
           });
           
           if (response.ok) {
-            // Settings exist, go to dashboard
-            setLocation("/dashboard");
+            const settings = await response.json();
+            // If they have a PIN and child name, they completed setup
+            if (settings.pinHash && settings.childName) {
+              setLocation("/dashboard");
+            } else {
+              // Not fully set up yet, go to setup
+              setLocation("/setup");
+            }
           } else if (response.status === 404) {
             // No settings, go to setup
             setLocation("/setup");

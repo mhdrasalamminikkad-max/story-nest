@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
       
-      // If user doesn't exist, create them with default settings
+      // If user doesn't exist, create them with default settings (they'll complete setup after)
       if (!existingUser) {
         await db.insert(parentSettings).values({
           userId: userId,
@@ -104,8 +104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - users stay logged in until they logout
       });
 
-      // Redirect to frontend - token is now in HTTP-only cookie
-      const redirectUrl = new URL(`${frontendRedirect}/dashboard`);
+      // Redirect to setup page for first-time users to configure child settings
+      const redirectUrl = new URL(`${frontendRedirect}/setup`);
       
       return res.redirect(redirectUrl.toString());
     } catch (error: any) {
