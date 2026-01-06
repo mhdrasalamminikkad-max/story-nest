@@ -97,9 +97,10 @@ export default function ChildLockSetupPage() {
     },
     onError: (error: Error) => {
       console.error("❌ Failed to save settings:", error.message);
+      const errorMessage = error.message;
       toast({
         title: "Error",
-        description: error.message || "Failed to save settings. Please try again.",
+        description: errorMessage,
         variant: "destructive",
         duration: 5000,
       });

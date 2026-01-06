@@ -195,6 +195,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // Debug endpoint for token verification
+  app.post("/api/auth/test-token", async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ error: "No token provided" });
+      }
+      
+      console.log("🧪 Testing token verification...");
+      console.log("Token length:", token.length);
+      console.log("Token preview:", token.substring(0, 50) + "...");
+      
+      const decodedToken = await auth.verifyIdToken(token);
+      console.log("✅ Token verified:", decodedToken.uid);
+      
+      res.json({
+        success: true,
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        message: "Token is valid"
+      });
+    } catch (error: any) {
+      console.error("❌ Token verification failed:", error.message);
+      res.status(401).json({
+        error: "Token verification failed",
+        details: error.message,
+        code: error.code
+      });
+    }
+  });
+
   // Alternative POST endpoint for token exchange (if needed for SPAs)
   app.post("/api/auth/callback", async (req, res) => {
     try {
