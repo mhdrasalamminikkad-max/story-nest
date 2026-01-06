@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import android.view.WindowManager;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -27,20 +28,44 @@ public class ChildModePlugin extends Plugin {
         }
 
         try {
-            // Get ActivityManager
-            ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
-            
-            if (activityManager != null) {
-                // Start lock task mode (app pinning)
-                activityManager.startLockTask();
-                
-                JSObject result = new JSObject();
-                result.put("success", true);
-                result.put("message", "Child mode enabled with app pinning");
-                call.resolve(result);
-            } else {
-                call.reject("ActivityManager not available");
+            // Method 1: Try startLockTask (Android 5.0+)
+            // This requires the activity to be explicitly pinned
+            try {
+                ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+                if (activityManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    // This will fail with permission denied for non-system apps
+                    // But we try anyway in case device allows it
+                    activityManager.startLockTask();
+                    
+                    JSObject result = new JSObject();
+                    result.put("success", true);
+                    result.put("message", "Child mode enabled with app pinning");
+                    call.resolve(result);
+                    return;
+                }
+            } catch (Exception e) {
+                // startLockTask failed, fall through to kiosk mode
+                android.util.Log.w("ChildMode", "startLockTask failed: " + e.getMessage());
             }
+
+            // Method 2: Enable fullscreen kiosk mode
+            // Disable status bar and navigation bar
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                int uiOptions = activity.getWindow().getDecorView().getSystemUiVisibility();
+                uiOptions |= android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                uiOptions |= android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                uiOptions |= android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+                activity.getWindow().getDecorView().setSystemUiVisibility(uiOptions);
+            }
+            
+            // Keep screen on
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            
+            JSObject result = new JSObject();
+            result.put("success", true);
+            result.put("message", "Child mode enabled with fullscreen kiosk");
+            call.resolve(result);
+            
         } catch (Exception e) {
             call.reject("Failed to enable child mode: " + e.getMessage());
         }
@@ -48,7 +73,6 @@ public class ChildModePlugin extends Plugin {
 
     /**
      * Disable screen pinning (app pinning) on Android
-     * User must provide correct password to exit
      */
     @PluginMethod
     public void exitChildMode(PluginCall call) {
@@ -59,20 +83,32 @@ public class ChildModePlugin extends Plugin {
         }
 
         try {
-            // Get ActivityManager
-            ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
-            
-            if (activityManager != null) {
-                // Stop lock task mode (app pinning)
-                activityManager.stopLockTask();
-                
-                JSObject result = new JSObject();
-                result.put("success", true);
-                result.put("message", "Child mode disabled");
-                call.resolve(result);
-            } else {
-                call.reject("ActivityManager not available");
+            // Try to exit lock task mode
+            try {
+                ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+                if (activityManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    activityManager.stopLockTask();
+                }
+            } catch (Exception e) {
+                android.util.Log.w("ChildMode", "stopLockTask failed: " + e.getMessage());
             }
+
+            // Exit fullscreen kiosk mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                int uiOptions = activity.getWindow().getDecorView().getSystemUiVisibility();
+                uiOptions &= ~android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                uiOptions &= ~android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                uiOptions &= ~android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+                activity.getWindow().getDecorView().setSystemUiVisibility(uiOptions);
+            }
+            
+            // Allow screen to sleep
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            
+            JSObject result = new JSObject();
+            result.put("success", true);
+            result.put("message", "Child mode disabled");
+            call.resolve(result);
         } catch (Exception e) {
             call.reject("Failed to disable child mode: " + e.getMessage());
         }
@@ -83,22 +119,10 @@ public class ChildModePlugin extends Plugin {
      */
     @PluginMethod
     public void isSupported(PluginCall call) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            call.reject("Activity not available");
-            return;
-        }
-
-        try {
-            // App pinning is supported on Android 5.0+ (API 21+)
-            boolean supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-            
-            JSObject result = new JSObject();
-            result.put("supported", supported);
-            result.put("apiLevel", Build.VERSION.SDK_INT);
-            call.resolve(result);
-        } catch (Exception e) {
-            call.reject("Failed to check support: " + e.getMessage());
-        }
+        JSObject result = new JSObject();
+        result.put("supported", true); // Fullscreen kiosk is always supported
+        result.put("apiLevel", Build.VERSION.SDK_INT);
+        result.put("lockTaskSupported", Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+        call.resolve(result);
     }
 }
