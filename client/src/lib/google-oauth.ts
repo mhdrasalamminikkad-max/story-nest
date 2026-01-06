@@ -9,7 +9,7 @@ export const GOOGLE_OAUTH_CONFIG = {
 export function getRedirectUri(): string {
   const origin = window.location.origin;
   if (origin.includes("localhost")) {
-    return "http://localhost:3000/api/auth/callback";
+    return "https://tellmamma.com/api/auth/callback";
   }
   return "https://tellmamma.com/api/auth/callback";
 }

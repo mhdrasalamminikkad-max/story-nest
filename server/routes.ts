@@ -28,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code, state, error } = req.query;
 
-      const frontendRedirect = getFrontendRedirectUri();
+      const frontendRedirect = process.env.ORIGIN || "https://tellmamma.com";
 
       if (error) {
         // Redirect to frontend with error
@@ -84,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.redirect(redirectUrl.toString());
     } catch (error: any) {
       console.error("OAuth callback error:", error);
-      const frontendRedirect = getFrontendRedirectUri();
+      const frontendRedirect = process.env.ORIGIN || "https://tellmamma.com";
       return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error.message || "Authentication failed")}`);
     }
   });

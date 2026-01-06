@@ -6,17 +6,14 @@ export const GOOGLE_OAUTH_CONFIG = {
   authUri: "https://accounts.google.com/o/oauth2/auth",
   tokenUri: "https://oauth2.googleapis.com/token",
   authProviderX509CertUrl: "https://www.googleapis.com/oauth2/v1/certs",
-  redirectUris: ["https://tellmamma.com/api/auth/callback", "http://localhost:5000/api/auth/callback"],
-  javascriptOrigins: ["https://tellmamma.com", "http://localhost:3000", "http://localhost:5000"],
+  redirectUris: ["https://tellmamma.com/api/auth/callback"],
+  javascriptOrigins: ["https://tellmamma.com"],
 };
 
 // Determine the redirect URI based on environment
 export function getRedirectUri(): string {
-  const origin = process.env.ORIGIN || "http://localhost:5000";
-  if (origin.includes("localhost")) {
-    return "http://localhost:5000/api/auth/callback";
-  }
-  return "https://tellmamma.com/api/auth/callback";
+  const origin = process.env.ORIGIN || "https://tellmamma.com";
+  return origin;
 }
 
 // Determine the frontend redirect URI after OAuth

@@ -5,9 +5,6 @@ export const GOOGLE_OAUTH_CONFIG = {
   projectId: "tellmamma-483419",
   authUri: "https://accounts.google.com/o/oauth2/auth",
   tokenUri: "https://oauth2.googleapis.com/token",
-  redirectUri: process.env.NODE_ENV === 'production'
-    ? "https://tellmamma.com/api/auth/callback"
-    : "http://localhost:3000/api/auth/callback",
+  redirectUri: "https://tellmamma.com/api/auth/callback",
   scope: "openid profile email",
 };
-

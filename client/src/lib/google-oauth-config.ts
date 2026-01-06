@@ -5,12 +5,7 @@ export const GOOGLE_OAUTH_CONFIG = {
   projectId: "tellmamma-483419",
   authUri: "https://accounts.google.com/o/oauth2/auth",
   tokenUri: "https://oauth2.googleapis.com/token",
-  redirectUri: typeof window !== 'undefined' 
-    ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? "http://localhost:3000/api/auth/callback"
-        : "https://tellmamma.com/api/auth/callback")
-    : "http://localhost:3000/api/auth/callback",
-  javascriptOrigins: ["https://tellmamma.com", "http://localhost:3000"],
+  redirectUri: "https://tellmamma.com/api/auth/callback",
+  javascriptOrigins: ["https://tellmamma.com"],
   scope: "openid profile email",
 };
-
