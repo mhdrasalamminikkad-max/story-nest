@@ -815,6 +815,7 @@ export default function ParentDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
 
             <div className="hidden md:flex gap-3 flex-wrap">
               <motion.div className="flex-1 sm:flex-initial">
