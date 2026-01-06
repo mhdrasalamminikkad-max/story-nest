@@ -63,7 +63,7 @@ export default function ChildLockSetupPage() {
         description: "Child lock settings saved successfully",
         duration: 3000,
       });
-      setLocation("/dashboard");
+      setLocation("/");
     },
     onError: (error: Error) => {
       console.error("❌ Failed to save settings:", error.message);
