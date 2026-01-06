@@ -79,10 +79,10 @@ export default function ChildLockSetupPage() {
         
         if (res.status === 401) {
           console.error("❌ 401 Unauthorized - Token rejected by server");
-          console.error("Details:", errorData);
-          throw new Error("Session expired - please sign in again");
+          console.error("Server error details:", JSON.stringify(errorData, null, 2));
+          throw new Error(`Authentication failed: ${errorData.details || errorData.error || "Invalid token"}`);
         }
-        throw new Error(errorData.message || errorData.details || "Failed to save settings");
+        throw new Error(errorData.message || errorData.details || errorData.error || "Failed to save settings");
       }
       return await res.json();
     },

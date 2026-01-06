@@ -13,6 +13,13 @@ export async function authenticateUser(
   res: Response,
   next: NextFunction
 ) {
+  // Check if Firebase Auth is initialized
+  if (!auth) {
+    console.error("❌ Firebase Admin Auth is not initialized!");
+    res.status(500).json({ error: "Server configuration error - Firebase Auth not available" });
+    return;
+  }
+  
   // Get token from Authorization header (Firebase tokens)
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
