@@ -86,17 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Store token in a session or pass it via URL fragment (more secure)
-      // For now, we'll redirect with the token in the URL fragment (it won't be sent to server)
-      // In production, consider using secure HTTP-only cookies instead
-      const userData = {
-        sub: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      };
-
-      // Set HTTP-only cookie with ID token - persistent until logout
+      // Set HTTP-only cookie with ID token for web - persistent until logout
       res.cookie("auth_token", tokens.id_token, {
         httpOnly: true,
         secure: true, // Only send over HTTPS
@@ -104,8 +94,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - users stay logged in until they logout
       });
 
-      // Redirect to setup page for first-time users to configure child settings
+      // For native apps, also pass token in URL fragment (won't be sent to server, secure)
+      // Native apps will extract and store in secure Capacitor Storage
       const redirectUrl = new URL(`${frontendRedirect}/setup`);
+      redirectUrl.hash = `token=${encodeURIComponent(tokens.id_token)}&user=${encodeURIComponent(JSON.stringify({
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      }))}`;
       
       return res.redirect(redirectUrl.toString());
     } catch (error: any) {

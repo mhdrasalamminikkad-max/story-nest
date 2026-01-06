@@ -7,6 +7,21 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    
+    if (Capacitor.isNativePlatform()) {
+      const { Storage } = await import("@capacitor/storage");
+      const { value } = await Storage.get({ key: "auth_token" });
+      return value;
+    }
+  } catch (e) {
+    // Not a native app or storage not available
+  }
+  return null;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -18,11 +33,17 @@ export async function apiRequest(
     headers["Content-Type"] = "application/json";
   }
 
+  // Get token from native storage if available
+  const token = await getAuthToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include", // Automatically sends HTTP-only cookies
+    credentials: "include", // Automatically sends HTTP-only cookies for web
   });
 
   await throwIfResNotOk(res);
@@ -35,8 +56,16 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // Get token from native storage if available
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include", // Automatically sends HTTP-only cookies
+      headers,
+      credentials: "include", // Automatically sends HTTP-only cookies for web
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

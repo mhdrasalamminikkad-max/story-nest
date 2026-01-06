@@ -22,8 +22,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Store user in sessionStorage (cleared when browser closes)
-const STORAGE_KEY = "google_auth_user";
+// Storage keys for secure token storage
+const AUTH_TOKEN_KEY = "auth_token";
+const AUTH_USER_KEY = "auth_user";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GoogleUser | null>(null);
@@ -34,47 +35,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // Also listen for deep link from OAuth redirect
-        const { App } = await import("@capacitor/app");
-        
-        App.addListener("appUrlOpen", async (event: any) => {
-          const url = event.url;
+        // First try to restore from Capacitor Storage (native app)
+        try {
+          const { Storage } = await import("@capacitor/storage");
+          const { value: storedToken } = await Storage.get({ key: AUTH_TOKEN_KEY });
+          const { value: storedUser } = await Storage.get({ key: AUTH_USER_KEY });
           
-          // Handle OAuth callback redirect
-          if (url.includes("api/auth/callback")) {
-            // User is being redirected back from OAuth
-            // Session will be established via the /api/auth/me endpoint below
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Re-check session
-            try {
-              const response = await fetch("/api/auth/me", {
-                credentials: "include", // Send HTTP-only cookies
-              });
-              if (response.ok) {
-                const data = await response.json();
-                const googleUser: GoogleUser = {
-                  id: data.id,
-                  email: data.email,
-                  displayName: data.name || "",
-                  photoUrl: data.picture || "",
-                  idToken: "",
-                  authentication: { idToken: "" },
-                };
-                setUser(googleUser);
-              }
-            } catch (err) {
-              console.error("Error checking session after OAuth:", err);
-            }
+          if (storedToken && storedUser) {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            setLoading(false);
+            return;
           }
-        });
-      } catch (e) {
-        // App plugin not available (probably web)
-      }
-      
-      try {
+        } catch (e) {
+          console.log("Capacitor Storage not available (probably web)");
+        }
+        
+        // For web apps, use fetch with HTTP-only cookies
         const response = await fetch("/api/auth/me", {
-          credentials: "include", // Send HTTP-only cookies for persistent login
+          credentials: "include", // Send HTTP-only cookies
         });
         
         if (response.ok) {
@@ -84,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: data.email,
             displayName: data.name || "",
             photoUrl: data.picture || "",
-            idToken: "", // Token is in HTTP-only cookie
+            idToken: "", // Token is in HTTP-only cookie for web
             authentication: { idToken: "" },
           };
           setUser(googleUser);
@@ -94,44 +73,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } finally {
         setLoading(false);
       }
+      
+      // Listen for OAuth callback from deep link (native app)
+      try {
+        const { App } = await import("@capacitor/app");
+        
+        App.addListener("appUrlOpen", async (event: any) => {
+          const url = event.url;
+          
+          // Handle OAuth callback with token in URL fragment
+          if (url.includes("/setup") || url.includes("/dashboard")) {
+            const hashPart = url.split("#")[1];
+            if (hashPart) {
+              const params = new URLSearchParams(hashPart);
+              const token = params.get("token");
+              const userJson = params.get("user");
+              
+              if (token && userJson) {
+                try {
+                  const userData = JSON.parse(decodeURIComponent(userJson));
+                  
+                  // Store token securely in Capacitor Storage
+                  const { Storage } = await import("@capacitor/storage");
+                  await Storage.set({
+                    key: AUTH_TOKEN_KEY,
+                    value: token,
+                  });
+                  await Storage.set({
+                    key: AUTH_USER_KEY,
+                    value: JSON.stringify(userData),
+                  });
+                  
+                  const googleUser: GoogleUser = {
+                    id: userData.id,
+                    email: userData.email,
+                    displayName: userData.name || "",
+                    photoUrl: userData.picture || "",
+                    idToken: token,
+                    authentication: { idToken: token },
+                  };
+                  
+                  setUser(googleUser);
+                } catch (e) {
+                  console.error("Error processing OAuth callback:", e);
+                }
+              }
+            }
+          }
+        });
+      } catch (e) {
+        console.log("App plugin not available (probably web)");
+      }
     };
     
     checkSession();
   }, []);
-
-  // Handle OAuth callback from server redirect
-  useEffect(() => {
-    const handleOAuthCallback = async () => {
-      // Check if we just returned from OAuth (redirected to dashboard)
-      if (window.location.pathname === "/dashboard" && !user) {
-        // Give the session check time to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Retry session check
-        try {
-          const response = await fetch("/api/auth/me", {
-            credentials: "include", // Send HTTP-only cookies
-          });
-          if (response.ok) {
-            const data = await response.json();
-            const googleUser: GoogleUser = {
-              id: data.id,
-              email: data.email,
-              displayName: data.name || "",
-              photoUrl: data.picture || "",
-              idToken: "",
-              authentication: { idToken: "" },
-            };
-            setUser(googleUser);
-          }
-        } catch (err) {
-          console.error("OAuth callback session check error:", err);
-        }
-      }
-    };
-    
-    handleOAuthCallback();
-  }, [user]);
 
   const signInWithGoogle = async (): Promise<GoogleUser> => {
     setLoading(true);
@@ -218,6 +214,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (Capacitor.isNativePlatform()) {
         try {
+          // Clear secure token storage for native apps
+          const { Storage } = await import("@capacitor/storage");
+          await Storage.remove({ key: AUTH_TOKEN_KEY });
+          await Storage.remove({ key: AUTH_USER_KEY });
+        } catch (e) {
+          console.error("Error clearing native storage:", e);
+        }
+        
+        try {
           // Call native sign-out
           await (window as any).GoogleSignInPlugin?.signOut();
         } catch (e) {
@@ -225,7 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Call server logout to clear HTTP-only cookie
+      // Call server logout to clear HTTP-only cookie (for web)
       try {
         await fetch("/api/auth/logout", { method: "POST" });
       } catch (err) {
