@@ -48,7 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // Re-check session
             try {
-              const response = await fetch("/api/auth/me");
+              const response = await fetch("/api/auth/me", {
+                credentials: "include", // Send HTTP-only cookies
+              });
               if (response.ok) {
                 const data = await response.json();
                 const googleUser: GoogleUser = {
@@ -71,7 +73,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       try {
-        const response = await fetch("/api/auth/me");
+        const response = await fetch("/api/auth/me", {
+          credentials: "include", // Send HTTP-only cookies for persistent login
+        });
         
         if (response.ok) {
           const data = await response.json();
@@ -105,7 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Retry session check
         try {
-          const response = await fetch("/api/auth/me");
+          const response = await fetch("/api/auth/me", {
+            credentials: "include", // Send HTTP-only cookies
+          });
           if (response.ok) {
             const data = await response.json();
             const googleUser: GoogleUser = {
