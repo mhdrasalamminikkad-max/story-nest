@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from "express";
+import { OAuth2Client } from "google-auth-library";
 import { auth } from "../firebase-admin";
 import { db } from "../db";
 import { parentSettings } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { GOOGLE_OAUTH_CONFIG, getRedirectUri } from "../lib/google-oauth";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -13,8 +15,14 @@ export async function authenticateUser(
   res: Response,
   next: NextFunction
 ) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  // First check for HTTP-only cookie
+  let token = (req.cookies as any)?.auth_token;
+  
+  // Fallback to Authorization header
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  }
   
   if (!token) {
     res.status(401).json({ error: "Unauthorized" });
@@ -23,27 +31,41 @@ export async function authenticateUser(
   
   try {
     // Verify Google ID Token
-    // In a real production app, you should use google-auth-library to verify the token
-    // For this migration, we'll extract the UID from the token if it's a valid-looking JWT
-    // or fallback to a simplified verification since the user requested "Google Native Auth"
-    // without full Firebase backend integration for now.
-    
     let userId: string | undefined;
     
     try {
-      if (auth) {
-        const decodedToken = await auth.verifyIdToken(token);
-        userId = decodedToken.uid;
-      } else {
-        // Fallback for when Firebase Admin is not fully configured with the right service account
-        // but we still want to allow the native auth flow to progress
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        userId = payload.sub || payload.user_id;
+      // Try to verify with Google OAuth library
+      const oauth2Client = new OAuth2Client(
+        GOOGLE_OAUTH_CONFIG.clientId,
+        GOOGLE_OAUTH_CONFIG.clientSecret,
+        getRedirectUri()
+      );
+      
+      const ticket = await oauth2Client.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_OAUTH_CONFIG.clientId,
+      });
+      
+      const payload = ticket.getPayload();
+      if (payload) {
+        userId = payload.sub;
       }
     } catch (e) {
-      // Manual JWT decode fallback if verifyIdToken fails (e.g. invalid signature due to config)
-      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-      userId = payload.sub || payload.user_id;
+      // If Google verification fails, try Firebase
+      try {
+        if (auth) {
+          const decodedToken = await auth.verifyIdToken(token);
+          userId = decodedToken.uid;
+        }
+      } catch (firebaseErr) {
+        // Final fallback: manual JWT decode
+        try {
+          const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+          userId = payload.sub || payload.user_id;
+        } catch (decodeErr) {
+          throw new Error("Could not verify or decode token");
+        }
+      }
     }
 
     if (!userId) {

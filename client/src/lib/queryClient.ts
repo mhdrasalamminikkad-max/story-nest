@@ -7,28 +7,12 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-async function getGoogleIdToken(): Promise<string | null> {
-  try {
-    // Get token from localStorage (set by AuthContext after OAuth)
-    const token = localStorage.getItem("google_id_token");
-    return token;
-  } catch (error) {
-    console.error("Error getting Google ID token:", error);
-    return null;
-  }
-}
-
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
   const headers: Record<string, string> = {};
-  
-  const token = await getGoogleIdToken();
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
   
   if (data) {
     headers["Content-Type"] = "application/json";
@@ -38,7 +22,7 @@ export async function apiRequest(
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: "include", // Automatically sends HTTP-only cookies
   });
 
   await throwIfResNotOk(res);
@@ -51,16 +35,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const headers: Record<string, string> = {};
-    
-    const token = await getGoogleIdToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
     const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include",
-      headers,
+      credentials: "include", // Automatically sends HTTP-only cookies
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
