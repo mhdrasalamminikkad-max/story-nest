@@ -31,7 +31,7 @@ export const useGoogleSignIn = () => {
         id: result.user?.uid || '',
         email: result.user?.email || '',
         displayName: result.user?.displayName || '',
-        photoUrl: result.user?.photoUrl || undefined,
+        photoUrl: result.user?.photoURL || undefined,
       };
 
       setState(prev => ({
@@ -80,7 +80,7 @@ export const useGoogleSignIn = () => {
           id: result.user.uid,
           email: result.user.email || '',
           displayName: result.user.displayName || '',
-          photoUrl: result.user.photoUrl || undefined,
+          photoUrl: result.user.photoURL || undefined,
         };
         setState(prev => ({ ...prev, user }));
         return user;

@@ -162,12 +162,12 @@ export default function AdminPanel() {
   });
 
   const { data: categories = [], refetch: refetchCategories } = useQuery<StoryCategory[]>({
-    queryKey: ["/api/admin/categories"],
+    queryKey: ["/api/categories"],
     enabled: adminCheck?.isAdmin || false,
   });
 
   const { data: storyTypes = [], refetch: refetchStoryTypes } = useQuery<StoryType[]>({
-    queryKey: ["/api/admin/story-types"],
+    queryKey: ["/api/story-types"],
     enabled: adminCheck?.isAdmin || false,
   });
 

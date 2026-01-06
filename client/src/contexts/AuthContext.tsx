@@ -1,12 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User as FirebaseUser
-} from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createContext, useContext, useState } from "react";
 
 export interface GoogleUser {
   id: string;
@@ -14,9 +6,6 @@ export interface GoogleUser {
   displayName: string;
   photoUrl?: string;
   idToken?: string;
-  authentication?: {
-    idToken: string;
-  };
 }
 
 interface AuthContextType {
@@ -25,78 +14,83 @@ interface AuthContextType {
   error: string | null;
   signInWithGoogle: () => Promise<GoogleUser>;
   signOut: () => Promise<void>;
-  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const googleProvider = new GoogleAuthProvider();
+// Store user in localStorage for persistence
+const STORAGE_KEY = "google_auth_user";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<GoogleUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<GoogleUser | null>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Firebase auth state listener - handles automatic session restoration
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        const idToken = await firebaseUser.getIdToken();
-        const googleUser: GoogleUser = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email || "",
-          displayName: firebaseUser.displayName || "",
-          photoUrl: firebaseUser.photoURL || "",
-          idToken: idToken,
-          authentication: { idToken: idToken },
-        };
-        setUser(googleUser);
-        
-        // Store token in Capacitor Preferences for native app
-        try {
-          const { Preferences } = await import("@capacitor/preferences");
-          await Preferences.set({
-            key: "auth_token",
-            value: idToken,
-          });
-          await Preferences.set({
-            key: "auth_user",
-            value: JSON.stringify(googleUser),
-          });
-        } catch (e) {
-          console.log("Capacitor Preferences not available (probably web)");
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const signInWithGoogle = async (): Promise<GoogleUser> => {
+  const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
+      const { Capacitor } = await import("@capacitor/core");
       
-      const googleUser: GoogleUser = {
-        id: user.uid,
-        email: user.email || "",
-        displayName: user.displayName || "",
-        photoUrl: user.photoURL || "",
-        idToken: idToken,
-        authentication: { idToken: idToken },
-      };
+      if (Capacitor.isNativePlatform()) {
+        // Native Android: Use custom Google Sign-In plugin
+        try {
+          // Call the native plugin
+          const result = await (window as any).GoogleSignInPlugin?.signInWithGoogle({
+            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          });
+          
+          if (result) {
+            const googleUser: GoogleUser = {
+              id: result.id,
+              email: result.email,
+              displayName: result.displayName,
+              photoUrl: result.photoUrl,
+              idToken: result.idToken,
+            };
+            
+            setUser(googleUser);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
+            setLoading(false);
+            return googleUser;
+          }
+        } catch (nativeError) {
+          console.log("Native sign-in error:", nativeError);
+        }
+      }
+    } catch (e) {
+      console.log("Capacitor not available");
+    }
+    
+    // Web: Google OAuth popup
+    try {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const scope = "openid profile email";
+      const redirectUri = `${window.location.origin}/`;
       
-      setLoading(false);
-      return googleUser;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Sign-in failed";
+      // Generate random state for security
+      const state = Math.random().toString(36).substring(7);
+      sessionStorage.setItem("oauth_state", state);
+      
+      const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      authUrl.searchParams.append("client_id", clientId);
+      authUrl.searchParams.append("redirect_uri", redirectUri);
+      authUrl.searchParams.append("response_type", "code");
+      authUrl.searchParams.append("scope", scope);
+      authUrl.searchParams.append("state", state);
+      authUrl.searchParams.append("access_type", "online");
+      
+      // Redirect to Google
+      window.location.href = authUrl.toString();
+      
+      // Keep loading true until redirect
+      setLoading(true);
+    } catch (webError) {
+      const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
       setError(errorMessage);
       setLoading(false);
       throw new Error(errorMessage);
@@ -108,17 +102,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     
     try {
-      // Clear Capacitor Preferences for native app
-      try {
-        const { Preferences } = await import("@capacitor/preferences");
-        await Preferences.remove({ key: "auth_token" });
-        await Preferences.remove({ key: "auth_user" });
-      } catch (e) {
-        console.log("Capacitor Preferences not available (probably web)");
+      const { Capacitor } = await import("@capacitor/core");
+      
+      if (Capacitor.isNativePlatform()) {
+        try {
+          // Call native sign-out
+          await (window as any).GoogleSignInPlugin?.signOut();
+        } catch (e) {
+          console.error("Native sign-out error:", e);
+        }
       }
       
-      // Sign out from Firebase
-      await firebaseSignOut(auth);
+      setUser(null);
+      localStorage.removeItem(STORAGE_KEY);
       setLoading(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Sign-out failed";
@@ -128,24 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getIdToken = async (): Promise<string | null> => {
-    try {
-      if (auth.currentUser) {
-        console.log("🔑 Retrieving ID token for user:", auth.currentUser.email);
-        const token = await auth.currentUser.getIdToken(true); // Force refresh
-        console.log("✅ ID token retrieved successfully");
-        return token;
-      }
-      console.warn("⚠️ No authenticated user found");
-      return null;
-    } catch (error) {
-      console.error("❌ Error getting ID token:", error);
-      return null;
-    }
-  };
-
   return (
-    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut, getIdToken }}>
+    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
