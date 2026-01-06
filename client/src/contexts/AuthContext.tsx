@@ -84,6 +84,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Clean up URL
           window.history.replaceState({}, document.title, window.location.pathname);
           sessionStorage.removeItem("oauth_state");
+
+          // Force check for settings and redirect
+          const settingsResponse = await fetch("/api/parent-settings", {
+            headers: {
+              "Authorization": `Bearer ${idToken}`
+            }
+          });
+
+          if (settingsResponse.ok) {
+            window.location.href = "/dashboard";
+          } else {
+            window.location.href = "/setup";
+          }
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Authentication failed";
           setError(errorMessage);
@@ -127,6 +140,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           window.history.replaceState({}, document.title, window.location.pathname);
           sessionStorage.removeItem("oauth_state");
+
+          // Force check for settings and redirect
+          const settingsResponse = await fetch("/api/parent-settings", {
+            headers: {
+              "Authorization": `Bearer ${data.idToken}`
+            }
+          });
+
+          if (settingsResponse.ok) {
+            window.location.href = "/dashboard";
+          } else {
+            window.location.href = "/setup";
+          }
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Authentication failed";
           setError(errorMessage);
