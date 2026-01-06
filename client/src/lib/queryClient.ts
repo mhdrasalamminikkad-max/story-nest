@@ -12,8 +12,8 @@ async function getAuthToken(): Promise<string | null> {
     const { Capacitor } = await import("@capacitor/core");
     
     if (Capacitor.isNativePlatform()) {
-      const { Storage } = await import("@capacitor/storage");
-      const { value } = await Storage.get({ key: "auth_token" });
+      const { Preferences } = await import("@capacitor/preferences");
+      const { value } = await Preferences.get({ key: "auth_token" });
       return value;
     }
   } catch (e) {
