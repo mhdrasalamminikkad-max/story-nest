@@ -96,12 +96,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         picture: payload.picture,
       };
 
-      // Redirect to frontend with tokens in URL params (temporary solution)
-      // Note: In production, use HTTP-only cookies or postMessage for better security
-      const redirectUrl = new URL(`${frontendRedirect}/auth`);
-      redirectUrl.searchParams.set("code", code as string);
-      redirectUrl.searchParams.set("state", state as string);
-      redirectUrl.searchParams.set("id_token", tokens.id_token);
+      // Set HTTP-only cookie with ID token
+      res.cookie("auth_token", tokens.id_token, {
+        httpOnly: true,
+        secure: true, // Only send over HTTPS
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      });
+
+      // Redirect to frontend - token is now in HTTP-only cookie
+      const redirectUrl = new URL(`${frontendRedirect}/dashboard`);
       
       return res.redirect(redirectUrl.toString());
     } catch (error: any) {
@@ -109,6 +113,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const frontendRedirect = process.env.ORIGIN || "https://tellmamma.com";
       return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error.message || "Authentication failed")}`);
     }
+  });
+
+  // Check if user has active session
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const token = req.cookies.auth_token;
+      
+      if (!token) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
+      // Verify the ID token
+      const oauth2Client = new OAuth2Client(
+        GOOGLE_OAUTH_CONFIG.clientId,
+        GOOGLE_OAUTH_CONFIG.clientSecret,
+        getRedirectUri()
+      );
+      
+      const ticket = await oauth2Client.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_OAUTH_CONFIG.clientId,
+      });
+      
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return res.status(401).json({ error: "Invalid token" });
+      }
+      
+      // Return user info
+      res.json({
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      });
+    } catch (error: any) {
+      console.error("Auth check error:", error);
+      res.status(401).json({ error: "Not authenticated" });
+    }
+  });
+
+  // Sign out endpoint
+  app.post("/api/auth/logout", async (req, res) => {
+    res.clearCookie("auth_token");
+    res.json({ success: true });
   });
 
   // Alternative POST endpoint for token exchange (if needed for SPAs)
@@ -188,48 +237,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify and get user info from ID token
-  app.post("/api/verify-token", async (req, res) => {
-    try {
-      const authHeader = req.headers.authorization;
-      const idToken = authHeader?.replace("Bearer ", "");
-      
-      if (!idToken) {
-        return res.status(400).json({ error: "No token provided" });
-      }
-      
-      // Verify the ID token
-      const oauth2Client = new OAuth2Client(
-        GOOGLE_OAUTH_CONFIG.clientId,
-        GOOGLE_OAUTH_CONFIG.clientSecret,
-        getRedirectUri()
-      );
-      
-      const ticket = await oauth2Client.verifyIdToken({
-        idToken: idToken,
-        audience: GOOGLE_OAUTH_CONFIG.clientId,
-      });
-      
-      const payload = ticket.getPayload();
-      if (!payload) {
-        return res.status(400).json({ error: "Invalid token" });
-      }
-      
-      // Return user info
-      res.json({
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      });
-    } catch (error: any) {
-      console.error("Token verification error:", error);
-      res.status(401).json({ 
-        error: "Token verification failed", 
-        message: error.message || "Unknown error" 
-      });
-    }
-  });
-
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
     try {

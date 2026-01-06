@@ -22,36 +22,53 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Store user in localStorage for persistence
+// Store user in sessionStorage (cleared when browser closes)
 const STORAGE_KEY = "google_auth_user";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<GoogleUser | null>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<GoogleUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if user has active session on app load
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        
+        if (response.ok) {
+          const data = await response.json();
+          const googleUser: GoogleUser = {
+            id: data.id,
+            email: data.email,
+            displayName: data.name || "",
+            photoUrl: data.picture || "",
+            idToken: "", // Token is in HTTP-only cookie
+            authentication: { idToken: "" },
+          };
+          setUser(googleUser);
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkSession();
+  }, []);
 
   // Handle OAuth callback from server redirect
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const idToken = params.get("id_token");
-      const code = params.get("code");
-      
-      if (idToken && code) {
+      // Check if we just returned from OAuth (redirected to dashboard)
+      if (window.location.pathname === "/dashboard" && !user) {
+        // Give the session check time to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Retry session check
         try {
-          // Verify token with server to get user info
-          const response = await fetch("/api/verify-token", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${idToken}`,
-            },
-            body: JSON.stringify({ idToken, code }),
-          });
-          
+          const response = await fetch("/api/auth/me");
           if (response.ok) {
             const data = await response.json();
             const googleUser: GoogleUser = {
@@ -59,24 +76,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: data.email,
               displayName: data.name || "",
               photoUrl: data.picture || "",
-              idToken: idToken,
-              authentication: { idToken },
+              idToken: "",
+              authentication: { idToken: "" },
             };
-            
             setUser(googleUser);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
-            
-            // Clean up URL
-            window.history.replaceState({}, document.title, window.location.pathname);
           }
         } catch (err) {
-          console.error("OAuth callback error:", err);
+          console.error("OAuth callback session check error:", err);
         }
       }
     };
     
     handleOAuthCallback();
-  }, []);
+  }, [user]);
 
   const signInWithGoogle = async (): Promise<GoogleUser> => {
     setLoading(true);
@@ -101,7 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             
             setUser(googleUser);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
             setLoading(false);
             return googleUser;
           }
@@ -161,8 +172,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
+      // Call server logout to clear HTTP-only cookie
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+      
       setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
       setLoading(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Sign-out failed";
