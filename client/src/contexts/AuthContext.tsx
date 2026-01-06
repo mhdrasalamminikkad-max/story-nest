@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { GOOGLE_OAUTH_CONFIG } from "@/lib/google-oauth";
 
 export interface GoogleUser {
@@ -37,18 +37,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // First try to restore from Capacitor Storage (native app)
         try {
-          const { Storage } = await import("@capacitor/storage");
-          const { value: storedToken } = await Storage.get({ key: AUTH_TOKEN_KEY });
-          const { value: storedUser } = await Storage.get({ key: AUTH_USER_KEY });
+          const { Preferences } = await import("@capacitor/preferences");
+          const { value: storedToken } = await Preferences.get({ key: AUTH_TOKEN_KEY });
+          const { value: storedUser } = await Preferences.get({ key: AUTH_USER_KEY });
           
           if (storedToken && storedUser) {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-            setLoading(false);
-            return;
+            // Validate token with server before restoring session
+            const response = await fetch("/api/auth/me", {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${storedToken}`
+              }
+            });
+            
+            if (response.ok) {
+              const userData = JSON.parse(storedUser);
+              setUser(userData);
+              setLoading(false);
+              return;
+            } else {
+              // Token is invalid, clear storage
+              const { Preferences } = await import("@capacitor/preferences");
+              await Preferences.remove({ key: AUTH_TOKEN_KEY });
+              await Preferences.remove({ key: AUTH_USER_KEY });
+            }
           }
         } catch (e) {
-          console.log("Capacitor Storage not available (probably web)");
+          console.log("Capacitor Preferences not available (probably web)");
         }
         
         // For web apps, use fetch with HTTP-only cookies
@@ -73,12 +88,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } finally {
         setLoading(false);
       }
-      
-      // Listen for OAuth callback from deep link (native app)
+    };
+    
+    // Listen for OAuth callback from deep link (native app)
+    const setupOAuthListener = async () => {
       try {
         const { App } = await import("@capacitor/app");
         
-        App.addListener("appUrlOpen", async (event: any) => {
+        App.addListener("appUrlOpen", async (event: { url: string }) => {
           const url = event.url;
           
           // Handle OAuth callback with token in URL fragment
@@ -93,13 +110,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 try {
                   const userData = JSON.parse(decodeURIComponent(userJson));
                   
-                  // Store token securely in Capacitor Storage
-                  const { Storage } = await import("@capacitor/storage");
-                  await Storage.set({
+                  // Store token securely in Capacitor Preferences
+                  const { Preferences } = await import("@capacitor/preferences");
+                  await Preferences.set({
                     key: AUTH_TOKEN_KEY,
                     value: token,
                   });
-                  await Storage.set({
+                  await Preferences.set({
                     key: AUTH_USER_KEY,
                     value: JSON.stringify(userData),
                   });
@@ -127,6 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     checkSession();
+    setupOAuthListener();
   }, []);
 
   const signInWithGoogle = async (): Promise<GoogleUser> => {
@@ -139,16 +157,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (Capacitor.isNativePlatform()) {
         try {
           const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
-          const result = await GoogleAuth.signIn();
+          const result = await GoogleAuth.signIn() as any;
           
-          if (result) {
+          if (result && result.id) {
             const googleUser: GoogleUser = {
               id: result.id,
-              email: result.email,
+              email: result.email || "",
               displayName: result.displayName || "",
               photoUrl: result.imageUrl || "",
               idToken: result.authentication?.idToken || "",
-              authentication: result.authentication as { idToken: string } | undefined,
+              authentication: result.authentication ? { idToken: result.authentication.idToken } : undefined,
             };
             
             setUser(googleUser);
@@ -163,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (e) {
-      console.log("Capacitor not available");
+      console.log("Capacitor not available, falling back to web OAuth");
     }
 
     // Web/Capacitor: Google OAuth with proper browser handling
@@ -215,9 +233,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (Capacitor.isNativePlatform()) {
         try {
           // Clear secure token storage for native apps
-          const { Storage } = await import("@capacitor/storage");
-          await Storage.remove({ key: AUTH_TOKEN_KEY });
-          await Storage.remove({ key: AUTH_USER_KEY });
+          const { Preferences } = await import("@capacitor/preferences");
+          await Preferences.remove({ key: AUTH_TOKEN_KEY });
+          await Preferences.remove({ key: AUTH_USER_KEY });
         } catch (e) {
           console.error("Error clearing native storage:", e);
         }

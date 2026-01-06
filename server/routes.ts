@@ -115,25 +115,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check if user has active session
   app.get("/api/auth/me", async (req, res) => {
     try {
-      const token = req.cookies.auth_token;
+      // First check for HTTP-only cookie (web apps)
+      let token = req.cookies?.auth_token;
+      
+      // Fallback to Authorization header (mobile apps)
+      if (!token) {
+        const authHeader = req.headers.authorization;
+        token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+      }
       
       if (!token) {
         return res.status(401).json({ error: "Not authenticated" });
       }
       
       // Verify the ID token
-      const oauth2Client = new OAuth2Client(
-        GOOGLE_OAUTH_CONFIG.clientId,
-        GOOGLE_OAUTH_CONFIG.clientSecret,
-        getRedirectUri()
-      );
+      let payload: any;
       
-      const ticket = await oauth2Client.verifyIdToken({
-        idToken: token,
-        audience: GOOGLE_OAUTH_CONFIG.clientId,
-      });
+      try {
+        const oauth2Client = new OAuth2Client(
+          GOOGLE_OAUTH_CONFIG.clientId,
+          GOOGLE_OAUTH_CONFIG.clientSecret,
+          getRedirectUri()
+        );
+        
+        const ticket = await oauth2Client.verifyIdToken({
+          idToken: token,
+          audience: GOOGLE_OAUTH_CONFIG.clientId,
+        });
+        
+        payload = ticket.getPayload();
+      } catch (e) {
+        // Try Firebase verification
+        try {
+          if (auth) {
+            const decodedToken = await auth.verifyIdToken(token);
+            payload = decodedToken;
+          }
+        } catch (firebaseErr) {
+          // Final fallback: manual JWT decode
+          try {
+            payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+            
+            // Check if token is expired
+            if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+              throw new Error("Token expired");
+            }
+          } catch (decodeErr) {
+            return res.status(401).json({ error: "Invalid token" });
+          }
+        }
+      }
       
-      const payload = ticket.getPayload();
       if (!payload) {
         return res.status(401).json({ error: "Invalid token" });
       }
@@ -200,8 +232,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
       
-      // If user doesn't exist, create them with default settings
+      // If user doesn't exist, create them with default settings and 7-day trial
       if (!existingUser) {
+        // Auto-activate 7-day trial for new users
+        const now = new Date();
+        const trialEnd = new Date(now);
+        trialEnd.setDate(trialEnd.getDate() + 7);
+
         await db.insert(parentSettings).values({
           userId: userId,
           pinHash: "", // Empty PIN initially
@@ -210,6 +247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           theme: "system", // Default theme
           coins: 0, // Start with 0 coins
           subscriptionStatus: "trial", // Default to trial
+          trialStartedAt: now,
+          trialEndsAt: trialEnd,
         });
       }
 

@@ -791,33 +791,14 @@ export default function ParentDashboard() {
                     onClick={() => setLocation("/checkpoints")}
                     className="rounded-xl"
                     data-testid="button-checkpoints"
-                  >
-                    <Target className="w-4 h-4 mr-2" />
-                    Checkpoints
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setLocation("/pricing")}
-                    className="rounded-xl"
-                    data-testid="button-view-plans"
-                  >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Plans
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={enterChildMode}
-                    className="rounded-xl col-span-2"
-                    data-testid="button-child-mode"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Child Mode
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
-            <div className="hidden md:flex gap-3 flex-wrap w-full">
+const formatDate = (timestamp: number) => {
+return new Date(timestamp).toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+};
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={() => {
@@ -847,22 +828,22 @@ export default function ParentDashboard() {
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-primary/40 font-semibold"
+                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-yellow-500/30 hover:bg-yellow-500/10"
                   data-testid="button-checkpoints-desktop"
+                  title="Checkpoints"
                 >
-                  <Target className="w-5 h-5 mr-2" />
-                  Checkpoints & Rewards
+                  <Target className="w-5 h-5 mr-2 text-yellow-500" />
+                  Checkpoints
                 </Button>
-              </motion.div>
-              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-secondary/40 font-semibold"
+                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-yellow-500/30 hover:bg-yellow-500/10"
                   data-testid="button-view-plans-desktop"
+                  title="View Plans"
                 >
                   <CreditCard className="w-5 h-5 mr-2" />
-                  View Plans
+                  Plans
                 </Button>
               </motion.div>
               <motion.div className="flex-1 sm:flex-initial">

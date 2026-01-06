@@ -143,10 +143,22 @@ export default function ChildMode() {
     let backButtonSubscription: any = null;
     let resumeSubscription: any = null;
 
-    // Block Android back button
+    // Handle Android back button - return to child mode entry
     const handleBackButton = (e: any) => {
       e.preventDefault();
-      console.log('[Child Mode] Android back button blocked!');
+      console.log('[Child Mode] Android back button - returning to entry');
+      // Reset state to return to password entry
+      setHasEntered(false);
+      setSelectedStory(null);
+      setPassword("");
+      
+      // Exit fullscreen if active
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(err => {
+          console.warn(`Error exiting fullscreen: ${err.message}`);
+        });
+      }
+      
       return false;
     };
 

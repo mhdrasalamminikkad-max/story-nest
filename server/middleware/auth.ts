@@ -15,10 +15,10 @@ export async function authenticateUser(
   res: Response,
   next: NextFunction
 ) {
-  // First check for HTTP-only cookie
+  // First check for HTTP-only cookie (web apps)
   let token = (req.cookies as any)?.auth_token;
   
-  // Fallback to Authorization header
+  // Fallback to Authorization header (mobile apps)
   if (!token) {
     const authHeader = req.headers.authorization;
     token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
@@ -58,10 +58,15 @@ export async function authenticateUser(
           userId = decodedToken.uid;
         }
       } catch (firebaseErr) {
-        // Final fallback: manual JWT decode
+        // Final fallback: manual JWT decode (for development/testing)
         try {
           const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
           userId = payload.sub || payload.user_id;
+          
+          // Check if token is expired
+          if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+            throw new Error("Token expired");
+          }
         } catch (decodeErr) {
           throw new Error("Could not verify or decode token");
         }
