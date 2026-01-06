@@ -23,6 +23,7 @@ export function AuthRedirectHandler() {
         }
 
         try {
+          console.log("Checking parent settings for redirection...");
           const response = await fetch("/api/parent-settings", {
             headers: {
               "Authorization": `Bearer ${token}`
@@ -30,12 +31,16 @@ export function AuthRedirectHandler() {
           });
 
           if (response.ok) {
+            const settings = await response.json();
+            console.log("Settings found:", settings);
             // Settings exist, go to dashboard
             setLocation("/dashboard");
           } else if (response.status === 404) {
+            console.log("No settings found (404), going to setup");
             // No settings, go to setup
             setLocation("/setup");
           } else {
+            console.log(`Error ${response.status} checking settings, going to setup`);
             // Some other error, go to setup
             setLocation("/setup");
           }

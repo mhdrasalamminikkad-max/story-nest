@@ -99,7 +99,11 @@ export default function ParentDashboard() {
 
   // Redirect to setup if user hasn't completed setup
   useEffect(() => {
-    if (!settingsLoading && !parentSettings) {
+    // If we're already checking settings or they exist, don't redirect
+    if (settingsLoading) return;
+    
+    if (!parentSettings) {
+      console.log("No parent settings found, redirecting to setup...");
       setLocation("/setup");
     }
   }, [settingsLoading, parentSettings, setLocation]);
