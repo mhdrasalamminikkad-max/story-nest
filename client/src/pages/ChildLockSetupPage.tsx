@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -15,26 +15,12 @@ import { useLocation } from "wouter";
 import { insertParentSettingsSchema } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ChildLockSetupPage() {
   const [, setLocation] = useLocation();
-  const { user, loading: authLoading, getIdToken } = useAuth();
   const [readingTime, setReadingTime] = useState(30);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      toast({
-        title: "Please sign in first",
-        description: "You need to sign in before setting up child lock",
-        variant: "destructive",
-        duration: 3000,
-      });
-      setLocation("/auth");
-    }
-  }, [authLoading, user, setLocation, toast]);
 
   const form = useForm({
     resolver: zodResolver(insertParentSettingsSchema),
@@ -53,20 +39,10 @@ export default function ChildLockSetupPage() {
     mutationFn: async (data: any) => {
       console.log("📝 Submitting child lock settings:", data);
       
-      const token = await getIdToken();
-      if (!token) {
-        console.error("❌ No authentication token available");
-        throw new Error("Authentication required - no token available");
-      }
-      
-      console.log("✅ Token retrieved successfully (length: " + token.length + ")");
-      console.log("🔑 Token preview:", token.substring(0, 50) + "..." + token.substring(token.length - 20));
-      
       const res = await fetch("/api/parent-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
@@ -76,12 +52,6 @@ export default function ChildLockSetupPage() {
       if (!res.ok) {
         const errorData = await res.json();
         console.error("❌ API Error response:", errorData);
-        
-        if (res.status === 401) {
-          console.error("❌ 401 Unauthorized - Token rejected by server");
-          console.error("Server error details:", JSON.stringify(errorData, null, 2));
-          throw new Error(`Authentication failed: ${errorData.details || errorData.error || "Invalid token"}`);
-        }
         throw new Error(errorData.message || errorData.details || errorData.error || "Failed to save settings");
       }
       return await res.json();
