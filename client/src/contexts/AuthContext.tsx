@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Firebase auth state listener
+  // Firebase auth state listener - handles automatic session restoration
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
@@ -73,111 +73,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => unsubscribe();
   }, []);
-            idToken: "", // Token is in HTTP-only cookie for web
-            authentication: { idToken: "" },
-          };
-          setUser(googleUser);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Listen for OAuth callback from deep link (native app)
-    const setupOAuthListener = async () => {
-      try {
-        const { App } = await import("@capacitor/app");
-        
-        App.addListener("appUrlOpen", async (event: { url: string }) => {
-          const url = event.url;
-          
-          // Handle OAuth callback with token in URL fragment
-          if (url.includes("/setup") || url.includes("/dashboard")) {
-            const hashPart = url.split("#")[1];
-            if (hashPart) {
-              const params = new URLSearchParams(hashPart);
-              const token = params.get("token");
-              const userJson = params.get("user");
-              
-              if (token && userJson) {
-                try {
-                  const userData = JSON.parse(decodeURIComponent(userJson));
-                  
-                  // Store token securely in Capacitor Preferences
-                  const { Preferences } = await import("@capacitor/preferences");
-                  await Preferences.set({
-                    key: AUTH_TOKEN_KEY,
-                    value: token,
-                  });
-                  await Preferences.set({
-                    key: AUTH_USER_KEY,
-                    value: JSON.stringify(userData),
-                  });
-                  
-                  const googleUser: GoogleUser = {
-                    id: userData.id,
-                    email: userData.email,
-                    displayName: userData.name || "",
-                    photoUrl: userData.picture || "",
-                    idToken: token,
-                    authentication: { idToken: token },
-                  };
-                  
-                  setUser(googleUser);
-                } catch (e) {
-                  console.error("Error processing OAuth callback:", e);
-                }
-              }
-            }
-          }
-        });
-      } catch (e) {
-        console.log("App plugin not available (probably web)");
-      }
-    };
-    
-    checkSession();
-    setupOAuthListener();
-  }, []);
 
   const signInWithGoogle = async (): Promise<GoogleUser> => {
     setLoading(true);
     setError(null);
     
-    try {
-      const { Capacitor } = await import("@capacitor/core");
-      
-      if (Capacitor.isNativePlatform()) {
-        // For native, use Firebase popup (works with Capacitor WebView)
-        try {
-          const result = await signInWithPopup(auth, googleProvider);
-          const user = result.user;
-          const idToken = await user.getIdToken();
-          
-          const googleUser: GoogleUser = {
-            id: user.uid,
-            email: user.email || "",
-            displayName: user.displayName || "",
-            photoUrl: user.photoURL || "",
-            idToken: idToken,
-            authentication: { idToken: idToken },
-          };
-          
-          setLoading(false);
-          return googleUser;
-        } catch (nativeError) {
-          console.error("Native sign-in error:", nativeError);
-          setLoading(false);
-          throw nativeError;
-        }
-      }
-    } catch (e) {
-      console.log("Capacitor not available, using web auth");
-    }
-
-    // Web: Use Firebase popup
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -194,8 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setLoading(false);
       return googleUser;
-    } catch (webError) {
-      const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Sign-in failed";
       setError(errorMessage);
       setLoading(false);
       throw new Error(errorMessage);
@@ -213,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await Preferences.remove({ key: "auth_token" });
         await Preferences.remove({ key: "auth_user" });
       } catch (e) {
-        console.error("Error clearing preferences:", e);
+        console.log("Capacitor Preferences not available (probably web)");
       }
       
       // Sign out from Firebase
