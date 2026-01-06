@@ -289,13 +289,11 @@ export default function ParentDashboard() {
   });
 
   const enterChildMode = () => {
-    // Request fullscreen if possible
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.warn(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-    }
-    setLocation("/child-mode");
+    toast({
+      title: "Coming Soon! 🎉",
+      description: "Child Mode is under construction. Stay tuned!",
+      duration: 3000,
+    });
   };
 
   const handleSignOut = () => {
