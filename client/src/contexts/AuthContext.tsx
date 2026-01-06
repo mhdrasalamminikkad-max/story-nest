@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { GOOGLE_OAUTH_CONFIG } from "@/lib/google-oauth";
 
 export interface GoogleUser {
   id: string;
@@ -72,14 +73,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Web: Google OAuth popup fallback
     try {
-      const clientId = "112395408252-ela7l26ctmspe0bo5cc6plhbdfb7nnoe.apps.googleusercontent.com";
-      const scope = "openid profile email";
-      const redirectUri = `${window.location.origin}/`;
+      const clientId = GOOGLE_OAUTH_CONFIG.clientId;
+      const scope = GOOGLE_OAUTH_CONFIG.scope;
+      const redirectUri = GOOGLE_OAUTH_CONFIG.redirectUri;
       
       const state = Math.random().toString(36).substring(7);
       sessionStorage.setItem("oauth_state", state);
       
-      const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      const authUrl = new URL(GOOGLE_OAUTH_CONFIG.authUri);
       authUrl.searchParams.append("client_id", clientId);
       authUrl.searchParams.append("redirect_uri", redirectUri);
       authUrl.searchParams.append("response_type", "code");
