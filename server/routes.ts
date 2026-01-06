@@ -96,12 +96,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         picture: payload.picture,
       };
 
-      // Set HTTP-only cookie with ID token
+      // Set HTTP-only cookie with ID token - persistent until logout
       res.cookie("auth_token", tokens.id_token, {
         httpOnly: true,
         secure: true, // Only send over HTTPS
         sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - users stay logged in until they logout
       });
 
       // Redirect to frontend - token is now in HTTP-only cookie
