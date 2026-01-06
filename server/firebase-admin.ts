@@ -7,20 +7,15 @@ let auth: Auth | null = null;
 
 try {
   if (!admin.apps.length) {
+    // ⚠️ WARNING: CREDENTIALS HARDCODED - REPLACE WITH ENV VARIABLES BEFORE PRODUCTION
     const projectId = process.env.FIREBASE_PROJECT_ID || "tellmamma";
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || "firebase-adminsdk-fbsvc@tellmamma.iam.gserviceaccount.com";
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY || "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC3Qw6iXoY3x2BJ\nRD/im9AXAK+BDWyJRM1o+5lgXk+yTy7Ewa7ZszafYMXjrmdbCgiyOBfi6GOQdsV3\nPtlduDKg0miPxhQeJrUVIVXEsUESekEYmpkLQ2sxzoMtsmhiTGTINuAt5k2WREL3\nop7DEaZNVY2GwH/jGlL/uAR6YFEqAQ1GVyaD4Futaqt3fjEunMIWJcMqCbFMUUZB\nzS3Wv2y4MNcWYx7RFvzOI/Q3SksYeQop9NYy5JxrRHO1BMVMOLXSY8odjxEOwoLw\ndBcJZO8+8sSpiw5V20scaz/G0nH8kfNeq1D3JUYTP9pUxpYO2dHEmJj3H5xGfP9i\nQG//0y4tAgMBAAECggEAOtX4Dk/7lk/XzV3whr/QbHonXm7hYCarLd/M66ALxSrf\n0IKAMNt1F3EZx1G4VAWiKhmRLaO/R2OiXPjcD1cyReiXckU9MzrpGyoTH61qv1Rp\nrsz/gpq4AQsUmWi0U47EMnVPvty4Hxy2RUu73dO+SQjFAbSuuko6yGebZHCkzi9w\ncizPj2/trFiFh85KfaELECvDXTzD9xRg3KfjRxkSo7s5kPB9Tggf0d+/zRZhvR4X\nQd8YSSYS+MvWQPumWofZGPHKagTUCcBZvgJJiKKAkE0h483kGxFH5vv6TN8IxMoD\nXZ2WdgnC5DBZGVGIGiGTiHTPL7lo8U3O2fWWUgkJfwKBgQD9r/NzN3ocvu+X/bWC\ndTi/cyMbMJEae5SFIpRUq4ov0JEWEZ7ai8atCmlwbxGPWJ4XSqTxDGg/6GOV2TDI\nAns0wjd+JbkfI0+jvgFglMGVJfFxJ/omIX4rcKYqVyYjffn0ejCnNSAQyZnJsfN0\n67SjZvlIil0rTst8BU+qCnqLCwKBgQC47r/O0TPUmcipGHZQd6I2OOdrfHcxi46+\n28VtQO8ZKRWOtL5ZvTuOdIIhdmVv5nm2JCFovVvCJmMYe0cm86f8OF4863ooCBKt\n9we3Kxgaqte5kFPJg4YSeP4HKPqJ7riy3xb4xmdiduOJCeuZKCM7fldhjKwkqNeQ\nRmuNosOupwKBgQDGN5/KC7PfGBVPNg6H0522gXkRup32Ck9ew0kQ60O63oUusC/l\n5UckV7lQ/4fB8GT+H/XG3oHqRWLiZ+SkssOf0ozXhRQjT0zfzQt4cmLbbd08JBdh\nidPyjz9WX+fN3ZXbP0oaq/jVBSCjpuZqGe13q3LmCi6IMzXtPp0jaLKdRwKBgQCM\nElH3rV8rrZtd8KhUxHh5x1oJgMmrHkBtcXq1CNTQ4txwLZhr0jfU64xRGiM0wYX4\nnp8rfRmOEZNHTMCU0UKweGVwkQ8CWTMEzzHp29sy/6nL5HSCEnuvbDNEaxZw+P6u\nhOkaXvSZkOFAv+HSLKObAVPgEDOmxLgZkC0Qp3K9ywKBgQCkpvCA9v0PATNQtJgY\n4Rd4fX8S7bapvDeGncz7qUw67476xKVgHyJskE+7jpgR97znwOM264dhR3oZSZxU\nXtOAsovTe0nL4BgmqpdchK1WemVc7VAe/IgTbmB6mScc3Fcq1+drJzI0qK9NHnvh\noRPHgu6uJaYbDSvVvqLqrGzBTw==\n-----END PRIVATE KEY-----";
     
     console.log("🔧 Firebase Admin SDK Setup:");
     console.log("  - Project ID from env:", !!process.env.FIREBASE_PROJECT_ID);
     console.log("  - Client Email from env:", !!process.env.FIREBASE_CLIENT_EMAIL);
     console.log("  - Private Key from env:", !!process.env.FIREBASE_PRIVATE_KEY);
-    
-    if (!privateKey) {
-      console.error("❌ FIREBASE_PRIVATE_KEY environment variable is not set!");
-      console.error("Please add the Firebase service account private key to .env");
-      throw new Error("Firebase admin SDK not properly configured - missing FIREBASE_PRIVATE_KEY");
-    }
     
     console.log("📝 Firebase Admin SDK Configuration:");
     console.log("  - Project ID:", projectId);
