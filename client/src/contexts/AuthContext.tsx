@@ -35,31 +35,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // First try to restore from Capacitor Storage (native app)
+        // First try to restore from Capacitor Preferences (native app)
         try {
           const { Preferences } = await import("@capacitor/preferences");
           const { value: storedToken } = await Preferences.get({ key: AUTH_TOKEN_KEY });
           const { value: storedUser } = await Preferences.get({ key: AUTH_USER_KEY });
           
           if (storedToken && storedUser) {
-            // Validate token with server before restoring session
-            const response = await fetch("/api/auth/me", {
-              method: "GET",
-              headers: {
-                "Authorization": `Bearer ${storedToken}`
-              }
-            });
-            
-            if (response.ok) {
+            try {
               const userData = JSON.parse(storedUser);
               setUser(userData);
               setLoading(false);
               return;
-            } else {
-              // Token is invalid, clear storage
-              const { Preferences } = await import("@capacitor/preferences");
-              await Preferences.remove({ key: AUTH_TOKEN_KEY });
-              await Preferences.remove({ key: AUTH_USER_KEY });
+            } catch (parseError) {
+              console.error("Error parsing stored user:", parseError);
             }
           }
         } catch (e) {
@@ -78,6 +67,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: data.email,
             displayName: data.name || "",
             photoUrl: data.picture || "",
+            idToken: "", // Token is in HTTP-only cookie for web
+            authentication: { idToken: "" },
+          };
+          setUser(googleUser);
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        setLoading(false);
+      }
+      
+      // Listen for OAuth callback from deep link (native app)
+      try {
+        const { App } = await import("@capacitor/app");
+        
+        App.addListener("appUrlOpen", async (event: any) => {
+          const url = event.url;
+          
+          // Handle OAuth callback with token in URL fragment
+          if (url.includes("/setup") || url.includes("/dashboard")) {
+            const hashPart = url.split("#")[1];
+            if (hashPart) {
+              const params = new URLSearchParams(hashPart);
+              const token = params.get("token");
+              const userJson = params.get("user");
+              
+              if (token && userJson) {
+                try {
+                  const userData = JSON.parse(decodeURIComponent(userJson));
+                  
+                  // Store token securely in Capacitor Preferences
+                  const { Preferences } = await import("@capacitor/preferences");
+                  await Preferences.set({
+                    key: AUTH_TOKEN_KEY,
+                    value: token,
+                  });
+                  await Preferences.set({
+                    key: AUTH_USER_KEY,
+                    value: JSON.stringify(userData),
+                  });
+                  
+                  const googleUser: GoogleUser = {
+                    id: userData.id,
+                    email: userData.email,
+                    displayName: userData.name || "",
+                    photoUrl: userData.picture || "",
+                    idToken: token,
+                    authentication: { idToken: token },
+                  };
+                  
+                  setUser(googleUser);
+                } catch (e) {
+                  console.error("Error processing OAuth callback:", e);
+                }
+              }
+            }
+          }
+        });
+      } catch (e) {
+        console.log("App plugin not available (probably web)");
+      }
+    };
+    
+    checkSession();
+  }, []);
             idToken: "", // Token is in HTTP-only cookie for web
             authentication: { idToken: "" },
           };
