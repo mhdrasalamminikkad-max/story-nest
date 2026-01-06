@@ -168,3 +168,19 @@ export const gameSessions = pgTable("game_sessions", {
   playedAt: timestamp("played_at").notNull().default(sql`now()`),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
+
+export const storyCategories = pgTable("story_categories", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
+export const storyTypes = pgTable("story_types", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
