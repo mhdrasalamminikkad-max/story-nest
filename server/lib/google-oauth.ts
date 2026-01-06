@@ -6,7 +6,7 @@ export const GOOGLE_OAUTH_CONFIG = {
   authUri: "https://accounts.google.com/o/oauth2/auth",
   tokenUri: "https://oauth2.googleapis.com/token",
   authProviderX509CertUrl: "https://www.googleapis.com/oauth2/v1/certs",
-  redirectUris: ["https://tellmamma.com/api/auth/callback"],
+  redirectUris: ["https://tellmamma.com/api/auth/callback/google"],
   javascriptOrigins: ["https://tellmamma.com", "http://localhost:3000"],
 };
 
