@@ -9,15 +9,27 @@ async function throwIfResNotOk(res: Response) {
 
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { Capacitor } = await import("@capacitor/core");
+    // Try to get token from Firebase (web and native)
+    const { auth } = await import("@/lib/firebase");
+    const currentUser = auth.currentUser;
     
-    if (Capacitor.isNativePlatform()) {
-      const { Preferences } = await import("@capacitor/preferences");
-      const { value } = await Preferences.get({ key: "auth_token" });
-      return value;
+    if (currentUser) {
+      return await currentUser.getIdToken();
+    }
+    
+    // Fallback to Preferences for native app offline state
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.isNativePlatform()) {
+        const { Preferences } = await import("@capacitor/preferences");
+        const { value } = await Preferences.get({ key: "auth_token" });
+        return value;
+      }
+    } catch (e) {
+      // Not a native app
     }
   } catch (e) {
-    // Not a native app or storage not available
+    console.error("Error getting auth token:", e);
   }
   return null;
 }
@@ -33,7 +45,7 @@ export async function apiRequest(
     headers["Content-Type"] = "application/json";
   }
 
-  // Get token from native storage if available
+  // Get Firebase token
   const token = await getAuthToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -43,7 +55,7 @@ export async function apiRequest(
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include", // Automatically sends HTTP-only cookies for web
+    credentials: "include", // Include cookies if set
   });
 
   await throwIfResNotOk(res);
@@ -56,7 +68,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Get token from native storage if available
+    // Get Firebase token
     const token = await getAuthToken();
     const headers: Record<string, string> = {};
     if (token) {
@@ -65,7 +77,7 @@ export const getQueryFn: <T>(options: {
 
     const res = await fetch(queryKey.join("/") as string, {
       headers,
-      credentials: "include", // Automatically sends HTTP-only cookies for web
+      credentials: "include", // Include cookies if set
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
