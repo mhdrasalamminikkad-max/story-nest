@@ -13,7 +13,7 @@ export const GOOGLE_OAUTH_CONFIG = {
 // Determine the redirect URI based on environment
 export function getRedirectUri(): string {
   const origin = process.env.ORIGIN || "https://tellmamma.com";
-  return origin;
+  return `${origin}/api/auth/callback`;
 }
 
 // Determine the frontend redirect URI after OAuth
