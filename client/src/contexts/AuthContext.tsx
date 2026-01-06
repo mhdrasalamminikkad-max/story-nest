@@ -34,6 +34,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Also listen for deep link from OAuth redirect
+        const { App } = await import("@capacitor/app");
+        
+        App.addListener("appUrlOpen", async (event: any) => {
+          const url = event.url;
+          
+          // Handle OAuth callback redirect
+          if (url.includes("api/auth/callback")) {
+            // User is being redirected back from OAuth
+            // Session will be established via the /api/auth/me endpoint below
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Re-check session
+            try {
+              const response = await fetch("/api/auth/me");
+              if (response.ok) {
+                const data = await response.json();
+                const googleUser: GoogleUser = {
+                  id: data.id,
+                  email: data.email,
+                  displayName: data.name || "",
+                  photoUrl: data.picture || "",
+                  idToken: "",
+                  authentication: { idToken: "" },
+                };
+                setUser(googleUser);
+              }
+            } catch (err) {
+              console.error("Error checking session after OAuth:", err);
+            }
+          }
+        });
+      } catch (e) {
+        // App plugin not available (probably web)
+      }
+      
+      try {
         const response = await fetch("/api/auth/me");
         
         if (response.ok) {
@@ -127,8 +164,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Capacitor not available");
     }
 
-    // Web: Google OAuth popup fallback
+    // Web/Capacitor: Google OAuth with proper browser handling
     try {
+      const { Capacitor } = await import("@capacitor/core");
+      const { Browser } = await import("@capacitor/browser");
+      
       const clientId = GOOGLE_OAUTH_CONFIG.clientId;
       const scope = GOOGLE_OAUTH_CONFIG.scope;
       const redirectUri = GOOGLE_OAUTH_CONFIG.redirectUri;
@@ -144,7 +184,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authUrl.searchParams.append("state", state);
       authUrl.searchParams.append("access_type", "online");
       
-      window.location.href = authUrl.toString();
+      // Use Capacitor Browser for native and web
+      if (Capacitor.isNativePlatform()) {
+        // For native apps, open in Capacitor Browser (stays in app)
+        await Browser.open({ url: authUrl.toString() });
+      } else {
+        // For web, use window.location
+        window.location.href = authUrl.toString();
+      }
       
       // Return a promise that never resolves as we are redirecting
       return new Promise<GoogleUser>(() => {});

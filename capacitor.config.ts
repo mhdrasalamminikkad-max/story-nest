@@ -13,6 +13,10 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 0,
     },
+    App: {
+      // Handle deep links for OAuth redirects
+      androidExportDynamicBroadcastReceiver: true,
+    },
   },
 };
 
