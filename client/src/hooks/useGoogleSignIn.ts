@@ -1,5 +1,5 @@
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { useCallback, useState } from 'react';
+import { signInWithGoogle, signOutUser, getCurrentUser, type AuthUser } from '../lib/firebase-auth';
 
 export interface GoogleUser {
   id: string;
@@ -22,16 +22,16 @@ export const useGoogleSignIn = () => {
     error: null,
   });
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogleHandler = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const result = await FirebaseAuthentication.signInWithGoogle();
+      const authUser: AuthUser = await signInWithGoogle();
       
       const user: GoogleUser = {
-        id: result.user?.uid || '',
-        email: result.user?.email || '',
-        displayName: result.user?.displayName || '',
-        photoUrl: result.user?.photoURL || undefined,
+        id: authUser.id,
+        email: authUser.email,
+        displayName: authUser.displayName,
+        photoUrl: authUser.photoUrl,
       };
 
       setState(prev => ({
@@ -55,7 +55,7 @@ export const useGoogleSignIn = () => {
   const signOut = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      await FirebaseAuthentication.signOut();
+      await signOutUser();
       setState(prev => ({
         ...prev,
         user: null,
@@ -72,15 +72,15 @@ export const useGoogleSignIn = () => {
     }
   }, []);
 
-  const getCurrentUser = useCallback(async () => {
+  const getCurrentUserHandler = useCallback(async () => {
     try {
-      const result = await FirebaseAuthentication.getCurrentUser();
-      if (result.user) {
+      const authUser = await getCurrentUser();
+      if (authUser) {
         const user: GoogleUser = {
-          id: result.user.uid,
-          email: result.user.email || '',
-          displayName: result.user.displayName || '',
-          photoUrl: result.user.photoURL || undefined,
+          id: authUser.id,
+          email: authUser.email,
+          displayName: authUser.displayName,
+          photoUrl: authUser.photoUrl,
         };
         setState(prev => ({ ...prev, user }));
         return user;
@@ -94,8 +94,8 @@ export const useGoogleSignIn = () => {
 
   return {
     ...state,
-    signInWithGoogle,
+    signInWithGoogle: signInWithGoogleHandler,
     signOut,
-    getCurrentUser,
+    getCurrentUser: getCurrentUserHandler,
   };
 };

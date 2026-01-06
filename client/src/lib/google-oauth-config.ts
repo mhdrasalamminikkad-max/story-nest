@@ -1,11 +1,9 @@
-// Google OAuth Configuration - Hardcoded credentials (client-side safe - NO SECRET)
-export const GOOGLE_OAUTH_CONFIG = {
-  clientId: "112395408252-ela7l26ctmspe0bo5cc6plhbdfb7nnoe.apps.googleusercontent.com",
-  // Client secret should NEVER be in client-side code
-  projectId: "tellmamma-483419",
-  authUri: "https://accounts.google.com/o/oauth2/auth",
-  tokenUri: "https://oauth2.googleapis.com/token",
-  redirectUri: "https://tellmamma.com/api/auth/callback",
-  javascriptOrigins: ["https://tellmamma.com"],
-  scope: "openid profile email",
+// Firebase Configuration
+export const FIREBASE_CONFIG = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };

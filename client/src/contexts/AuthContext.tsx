@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { signInWithGoogle, signOutUser, onAuthStateChange, type AuthUser } from "../lib/firebase-auth";
 
 export interface GoogleUser {
   id: string;
@@ -18,103 +19,66 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Store user in localStorage for persistence
-const STORAGE_KEY = "google_auth_user";
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<GoogleUser | null>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<GoogleUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const signInWithGoogle = async () => {
+  // Listen to Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange((authUser) => {
+      if (authUser) {
+        const googleUser: GoogleUser = {
+          id: authUser.id,
+          email: authUser.email,
+          displayName: authUser.displayName,
+          photoUrl: authUser.photoUrl,
+        };
+        setUser(googleUser);
+        localStorage.setItem("firebase_auth_user", JSON.stringify(googleUser));
+      } else {
+        setUser(null);
+        localStorage.removeItem("firebase_auth_user");
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignInWithGoogle = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const { Capacitor } = await import("@capacitor/core");
+      const authUser = await signInWithGoogle();
+      const googleUser: GoogleUser = {
+        id: authUser.id,
+        email: authUser.email,
+        displayName: authUser.displayName,
+        photoUrl: authUser.photoUrl,
+      };
       
-      if (Capacitor.isNativePlatform()) {
-        // Native Android: Use custom Google Sign-In plugin
-        try {
-          // Call the native plugin
-          const result = await (window as any).GoogleSignInPlugin?.signInWithGoogle({
-            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          });
-          
-          if (result) {
-            const googleUser: GoogleUser = {
-              id: result.id,
-              email: result.email,
-              displayName: result.displayName,
-              photoUrl: result.photoUrl,
-              idToken: result.idToken,
-            };
-            
-            setUser(googleUser);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
-            setLoading(false);
-            return googleUser;
-          }
-        } catch (nativeError) {
-          console.log("Native sign-in error:", nativeError);
-        }
-      }
-    } catch (e) {
-      console.log("Capacitor not available");
-    }
-    
-    // Web: Google OAuth popup
-    try {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const scope = "openid profile email";
-      const redirectUri = `${window.location.origin}/`;
-      
-      // Generate random state for security
-      const state = Math.random().toString(36).substring(7);
-      sessionStorage.setItem("oauth_state", state);
-      
-      const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-      authUrl.searchParams.append("client_id", clientId);
-      authUrl.searchParams.append("redirect_uri", redirectUri);
-      authUrl.searchParams.append("response_type", "code");
-      authUrl.searchParams.append("scope", scope);
-      authUrl.searchParams.append("state", state);
-      authUrl.searchParams.append("access_type", "online");
-      
-      // Redirect to Google
-      window.location.href = authUrl.toString();
-      
-      // Keep loading true until redirect
-      setLoading(true);
-    } catch (webError) {
-      const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
+      setUser(googleUser);
+      localStorage.setItem("firebase_auth_user", JSON.stringify(googleUser));
+      setLoading(false);
+      return googleUser;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Sign-in failed";
       setError(errorMessage);
       setLoading(false);
       throw new Error(errorMessage);
     }
   };
 
-  const signOut = async () => {
+  const handleSignOut = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const { Capacitor } = await import("@capacitor/core");
-      
-      if (Capacitor.isNativePlatform()) {
-        try {
-          // Call native sign-out
-          await (window as any).GoogleSignInPlugin?.signOut();
-        } catch (e) {
-          console.error("Native sign-out error:", e);
-        }
-      }
-      
+      await signOutUser();
       setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("firebase_auth_user");
       setLoading(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Sign-out failed";
@@ -125,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle: handleSignInWithGoogle, signOut: handleSignOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -138,3 +102,4 @@ export function useAuth() {
   }
   return context;
 }
+

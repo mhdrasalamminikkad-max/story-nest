@@ -1,10 +1,9 @@
-// Google OAuth Configuration - Hardcoded credentials for server
-export const GOOGLE_OAUTH_CONFIG = {
-  clientId: "112395408252-ela7l26ctmspe0bo5cc6plhbdfb7nnoe.apps.googleusercontent.com",
-  clientSecret: "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",
-  projectId: "tellmamma-483419",
-  authUri: "https://accounts.google.com/o/oauth2/auth",
-  tokenUri: "https://oauth2.googleapis.com/token",
-  redirectUri: "https://tellmamma.com/api/auth/callback",
-  scope: "openid profile email",
+// Firebase Admin Configuration is handled in ../firebase-admin.ts
+// This file is kept for reference, actual config is in environment variables
+
+export const FIREBASE_CONFIG = {
+  // These are set via environment variables:
+  // - FIREBASE_PROJECT_ID
+  // - FIREBASE_PRIVATE_KEY
+  // - FIREBASE_CLIENT_EMAIL
 };

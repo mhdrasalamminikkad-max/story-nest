@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../firebase-admin";
+import { verifyIdToken } from "../lib/firebase-admin-auth";
 import { db } from "../db";
 import { parentSettings } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -13,13 +13,6 @@ export async function authenticateUser(
   res: Response,
   next: NextFunction
 ) {
-  // Check if Firebase Auth is initialized
-  if (!auth) {
-    console.error("❌ Firebase Admin Auth is not initialized!");
-    res.status(500).json({ error: "Server configuration error - Firebase Auth not available" });
-    return;
-  }
-  
   // Get token from Authorization header (Firebase tokens)
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
@@ -36,7 +29,7 @@ export async function authenticateUser(
     
     // Verify Firebase ID Token
     console.log("🔐 Attempting to verify Firebase ID token...");
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await verifyIdToken(token);
     const userId = decodedToken.uid;
     console.log("✅ Token verified successfully for user:", userId);
     

@@ -12,8 +12,7 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { initializeWebSocket, wsManager } from "./websocket";
-import { GOOGLE_OAUTH_CONFIG, getRedirectUri, getFrontendRedirectUri } from "./lib/google-oauth";
-import { OAuth2Client } from "google-auth-library";
+import { verifyIdToken, setUserClaims } from "./lib/firebase-admin-auth";
 
 // Helper function to filter out blob URLs and only allow Firebase storage URLs
 function filterBlobUrl(url: string | undefined | null): string | undefined {
@@ -23,49 +22,18 @@ function filterBlobUrl(url: string | undefined | null): string | undefined {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // OAuth callback endpoint - handles GET redirect from Google
-  app.get("/api/auth/callback", async (req, res) => {
+  // Verify Firebase ID Token endpoint
+  app.post("/api/auth/verify", async (req, res) => {
     try {
-      const { code, state, error } = req.query;
-
-      const frontendRedirect = process.env.ORIGIN || "https://tellmamma.com";
-
-      if (error) {
-        // Redirect to frontend with error
-        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error as string)}`);
-      }
-
-      if (!code || !state) {
-        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("Missing code or state parameter")}`);
-      }
-
-      // Initialize OAuth2Client
-      const oauth2Client = new OAuth2Client(
-        GOOGLE_OAUTH_CONFIG.clientId,
-        GOOGLE_OAUTH_CONFIG.clientSecret,
-        getRedirectUri()
-      );
-
-      // Exchange authorization code for tokens
-      const { tokens } = await oauth2Client.getToken(code as string);
+      const { token } = req.body;
       
-      if (!tokens.id_token) {
-        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("No ID token received from Google")}`);
+      if (!token) {
+        return res.status(400).json({ error: "No token provided" });
       }
-
-      // Verify the ID token
-      const ticket = await oauth2Client.verifyIdToken({
-        idToken: tokens.id_token,
-        audience: GOOGLE_OAUTH_CONFIG.clientId,
-      });
-
-      const payload = ticket.getPayload();
-      if (!payload) {
-        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("Invalid token payload")}`);
-      }
-
-      // Create or update user in parentSettings if they don't exist
-      const userId = payload.sub;
+      
+      // Verify the Firebase ID token
+      const decodedToken = await verifyIdToken(token);
+      const userId = decodedToken.uid;
       
       // Check if user exists in parentSettings
       const [existingUser] = await db
@@ -73,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
       
-      // If user doesn't exist, create them with default settings (they'll complete setup after)
+      // If user doesn't exist, create them with default settings
       if (!existingUser) {
         const now = new Date();
         const trialEndsAt = new Date(now);
@@ -92,29 +60,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Set HTTP-only cookie with ID token for web - persistent until logout
-      res.cookie("auth_token", tokens.id_token, {
+      // Set HTTP-only cookie with ID token for web
+      res.cookie("auth_token", token, {
         httpOnly: true,
         secure: true, // Only send over HTTPS
         sameSite: "lax",
-        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year - users stay logged in until they logout
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
       });
 
-      // For native apps, also pass token in URL fragment (won't be sent to server, secure)
-      // Native apps will extract and store in secure Capacitor Storage
-      const redirectUrl = new URL(`${frontendRedirect}/setup`);
-      redirectUrl.hash = `token=${encodeURIComponent(tokens.id_token)}&user=${encodeURIComponent(JSON.stringify({
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      }))}`;
-      
-      return res.redirect(redirectUrl.toString());
+      // Return user info
+      res.json({
+        success: true,
+        user: {
+          id: decodedToken.uid,
+          email: decodedToken.email,
+          name: decodedToken.name,
+          picture: decodedToken.picture,
+        },
+      });
     } catch (error: any) {
-      console.error("OAuth callback error:", error);
-      const frontendRedirect = process.env.ORIGIN || "https://tellmamma.com";
-      return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error.message || "Authentication failed")}`);
+      console.error("Token verification error:", error);
+      res.status(401).json({ error: "Token verification failed" });
     }
   });
 
@@ -134,54 +100,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Not authenticated" });
       }
       
-      // Verify the ID token
-      let payload: any;
-      
-      try {
-        const oauth2Client = new OAuth2Client(
-          GOOGLE_OAUTH_CONFIG.clientId,
-          GOOGLE_OAUTH_CONFIG.clientSecret,
-          getRedirectUri()
-        );
-        
-        const ticket = await oauth2Client.verifyIdToken({
-          idToken: token,
-          audience: GOOGLE_OAUTH_CONFIG.clientId,
-        });
-        
-        payload = ticket.getPayload();
-      } catch (e) {
-        // Try Firebase verification
-        try {
-          if (auth) {
-            const decodedToken = await auth.verifyIdToken(token);
-            payload = decodedToken;
-          }
-        } catch (firebaseErr) {
-          // Final fallback: manual JWT decode
-          try {
-            payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-            
-            // Check if token is expired
-            if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-              throw new Error("Token expired");
-            }
-          } catch (decodeErr) {
-            return res.status(401).json({ error: "Invalid token" });
-          }
-        }
-      }
-      
-      if (!payload) {
-        return res.status(401).json({ error: "Invalid token" });
-      }
+      // Verify Firebase ID token
+      const decodedToken = await verifyIdToken(token);
       
       // Return user info
       res.json({
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
+        id: decodedToken.uid,
+        email: decodedToken.email,
+        name: decodedToken.name,
+        picture: decodedToken.picture,
       });
     } catch (error: any) {
       console.error("Auth check error:", error);
@@ -208,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Token length:", token.length);
       console.log("Token preview:", token.substring(0, 50) + "...");
       
-      const decodedToken = await auth.verifyIdToken(token);
+      const decodedToken = await verifyIdToken(token);
       console.log("✅ Token verified:", decodedToken.uid);
       
       res.json({
@@ -226,8 +153,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
-  // Alternative POST endpoint for token exchange (if needed for SPAs)
   app.post("/api/auth/callback", async (req, res) => {
     try {
       const { code, state } = req.body;
@@ -301,16 +226,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         idToken: tokens.id_token,
         accessToken: tokens.access_token,
       });
-    } catch (error: any) {
-      console.error("OAuth callback error:", error);
-      res.status(500).json({ 
-        error: "Authentication failed", 
-        message: error.message || "Unknown error" 
-      });
     }
   });
 
-  // Verify and get user info from ID token
   // Stories endpoints - Public feed (published stories only) - requires valid subscription
   // Get published stories - public endpoint
   app.get("/api/stories", async (req, res) => {
