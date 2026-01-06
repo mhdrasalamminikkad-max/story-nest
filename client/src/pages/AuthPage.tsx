@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { signInWithGoogle, user, loading: authLoading } = useAuth();
+  const { signInWithGoogle, user, loading: authLoading, getIdToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -28,7 +28,11 @@ export default function AuthPage() {
     const checkRedirectResult = async () => {
       if (user && !authLoading) {
         try {
-          const token = await user.getIdToken(true);
+          const token = await getIdToken();
+          
+          if (!token) {
+            return;
+          }
           
           // Check if parent settings already exist
           const response = await fetch("/api/parent-settings", {
@@ -54,7 +58,7 @@ export default function AuthPage() {
     };
     
     checkRedirectResult();
-  }, [user, authLoading, setLocation]);
+  }, [user, authLoading, setLocation, getIdToken]);
   
   const welcomeText = parentSettings?.childName 
     ? `Welcome to ${parentSettings.childName}`

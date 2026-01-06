@@ -12,6 +12,8 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { initializeWebSocket, wsManager } from "./websocket";
+import { GOOGLE_OAUTH_CONFIG, getRedirectUri, getFrontendRedirectUri } from "./lib/google-oauth";
+import { OAuth2Client } from "google-auth-library";
 
 // Helper function to filter out blob URLs and only allow Firebase storage URLs
 function filterBlobUrl(url: string | undefined | null): string | undefined {
@@ -21,6 +23,126 @@ function filterBlobUrl(url: string | undefined | null): string | undefined {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // OAuth callback endpoint - handles GET redirect from Google
+  app.get("/api/auth/callback", async (req, res) => {
+    try {
+      const { code, state, error } = req.query;
+
+      const frontendRedirect = getFrontendRedirectUri();
+
+      if (error) {
+        // Redirect to frontend with error
+        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error as string)}`);
+      }
+
+      if (!code || !state) {
+        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("Missing code or state parameter")}`);
+      }
+
+      // Initialize OAuth2Client
+      const oauth2Client = new OAuth2Client(
+        GOOGLE_OAUTH_CONFIG.clientId,
+        GOOGLE_OAUTH_CONFIG.clientSecret,
+        getRedirectUri()
+      );
+
+      // Exchange authorization code for tokens
+      const { tokens } = await oauth2Client.getToken(code as string);
+      
+      if (!tokens.id_token) {
+        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("No ID token received from Google")}`);
+      }
+
+      // Verify the ID token
+      const ticket = await oauth2Client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: GOOGLE_OAUTH_CONFIG.clientId,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("Invalid token payload")}`);
+      }
+
+      // Store token in a session or pass it via URL fragment (more secure)
+      // For now, we'll redirect with the token in the URL fragment (it won't be sent to server)
+      // In production, consider using secure HTTP-only cookies instead
+      const userData = {
+        sub: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      };
+
+      // Redirect to frontend with tokens in URL params (temporary solution)
+      // Note: In production, use HTTP-only cookies or postMessage for better security
+      const redirectUrl = new URL(`${frontendRedirect}/auth`);
+      redirectUrl.searchParams.set("code", code as string);
+      redirectUrl.searchParams.set("state", state as string);
+      redirectUrl.searchParams.set("id_token", tokens.id_token);
+      
+      return res.redirect(redirectUrl.toString());
+    } catch (error: any) {
+      console.error("OAuth callback error:", error);
+      const frontendRedirect = getFrontendRedirectUri();
+      return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent(error.message || "Authentication failed")}`);
+    }
+  });
+
+  // Alternative POST endpoint for token exchange (if needed for SPAs)
+  app.post("/api/auth/callback", async (req, res) => {
+    try {
+      const { code, state } = req.body;
+
+      if (!code || !state) {
+        return res.status(400).json({ error: "Missing code or state parameter" });
+      }
+
+      // Initialize OAuth2Client
+      const oauth2Client = new OAuth2Client(
+        GOOGLE_OAUTH_CONFIG.clientId,
+        GOOGLE_OAUTH_CONFIG.clientSecret,
+        getRedirectUri()
+      );
+
+      // Exchange authorization code for tokens
+      const { tokens } = await oauth2Client.getToken(code);
+      
+      if (!tokens.id_token) {
+        return res.status(400).json({ error: "No ID token received from Google" });
+      }
+
+      // Verify the ID token
+      const ticket = await oauth2Client.verifyIdToken({
+        idToken: tokens.id_token,
+        audience: GOOGLE_OAUTH_CONFIG.clientId,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return res.status(400).json({ error: "Invalid token payload" });
+      }
+
+      // Return user info and ID token
+      res.json({
+        user: {
+          sub: payload.sub,
+          email: payload.email,
+          name: payload.name,
+          picture: payload.picture,
+        },
+        idToken: tokens.id_token,
+        accessToken: tokens.access_token,
+      });
+    } catch (error: any) {
+      console.error("OAuth callback error:", error);
+      res.status(500).json({ 
+        error: "Authentication failed", 
+        message: error.message || "Unknown error" 
+      });
+    }
+  });
+
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
     try {

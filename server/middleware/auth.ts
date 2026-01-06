@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../firebase-admin";
 import { db } from "../db";
 import { parentSettings } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { OAuth2Client } from "google-auth-library";
+import { GOOGLE_OAUTH_CONFIG } from "../lib/google-oauth";
 
 export interface AuthRequest extends Request {
   userId?: string;
 }
+
+// Initialize OAuth2Client for token verification
+const oauth2Client = new OAuth2Client(GOOGLE_OAUTH_CONFIG.clientId);
 
 export async function authenticateUser(
   req: AuthRequest,
@@ -22,14 +26,20 @@ export async function authenticateUser(
   }
   
   try {
-    if (!auth) {
-      console.error("Firebase Admin not initialized");
-      res.status(500).json({ error: "Authentication service unavailable" });
+    // Verify Google ID token
+    const ticket = await oauth2Client.verifyIdToken({
+      idToken: token,
+      audience: GOOGLE_OAUTH_CONFIG.clientId,
+    });
+    
+    const payload = ticket.getPayload();
+    if (!payload || !payload.sub) {
+      res.status(401).json({ error: "Invalid token payload" });
       return;
     }
     
-    const decodedToken = await auth.verifyIdToken(token);
-    req.userId = decodedToken.uid;
+    // Use Google user ID (sub claim) as userId
+    req.userId = payload.sub;
     next();
   } catch (error) {
     console.error("Error verifying token:", error);
