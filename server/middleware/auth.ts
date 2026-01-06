@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { OAuth2Client } from "google-auth-library";
 import { auth } from "../firebase-admin";
 import { db } from "../db";
 import { parentSettings } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { GOOGLE_OAUTH_CONFIG, getRedirectUri } from "../lib/google-oauth";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -15,14 +13,9 @@ export async function authenticateUser(
   res: Response,
   next: NextFunction
 ) {
-  // First check for HTTP-only cookie (web apps)
-  let token = (req.cookies as any)?.auth_token;
-  
-  // Fallback to Authorization header (mobile apps)
-  if (!token) {
-    const authHeader = req.headers.authorization;
-    token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
-  }
+  // Get token from Authorization header (Firebase tokens)
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
   
   if (!token) {
     res.status(401).json({ error: "Unauthorized" });
@@ -30,57 +23,40 @@ export async function authenticateUser(
   }
   
   try {
-    // Verify Google ID Token
-    let userId: string | undefined;
+    // Verify Firebase ID Token
+    const decodedToken = await auth.verifyIdToken(token);
+    const userId = decodedToken.uid;
     
-    try {
-      // Try to verify with Google OAuth library
-      const oauth2Client = new OAuth2Client(
-        GOOGLE_OAUTH_CONFIG.clientId,
-        GOOGLE_OAUTH_CONFIG.clientSecret,
-        getRedirectUri()
-      );
-      
-      const ticket = await oauth2Client.verifyIdToken({
-        idToken: token,
-        audience: GOOGLE_OAUTH_CONFIG.clientId,
-      });
-      
-      const payload = ticket.getPayload();
-      if (payload) {
-        userId = payload.sub;
-      }
-    } catch (e) {
-      // If Google verification fails, try Firebase
-      try {
-        if (auth) {
-          const decodedToken = await auth.verifyIdToken(token);
-          userId = decodedToken.uid;
-        }
-      } catch (firebaseErr) {
-        // Final fallback: manual JWT decode (for development/testing)
-        try {
-          const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-          userId = payload.sub || payload.user_id;
-          
-          // Check if token is expired
-          if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-            throw new Error("Token expired");
-          }
-        } catch (decodeErr) {
-          throw new Error("Could not verify or decode token");
-        }
-      }
-    }
-
-    if (!userId) {
-      throw new Error("Could not extract user ID from token");
-    }
-
+    // Store userId in request for use in route handlers
     req.userId = userId;
+    
+    // Check if user exists in database, if not create them
+    const [existingUser] = await db
+      .select()
+      .from(parentSettings)
+      .where(eq(parentSettings.userId, userId));
+    
+    if (!existingUser) {
+      const now = Date.now();
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+      const trialEndsAt = now + sevenDaysMs;
+      
+      await db.insert(parentSettings).values({
+        userId: userId,
+        pinHash: "",
+        readingTimeLimit: 30,
+        fullscreenLockEnabled: false,
+        theme: "system",
+        coins: 0,
+        subscriptionStatus: "trial",
+        trialStartedAt: now,
+        trialEndsAt: trialEndsAt,
+      });
+    }
+    
     next();
-  } catch (error) {
-    console.error("Error verifying token:", error);
+  } catch (error: any) {
+    console.error("Token verification error:", error.message);
     res.status(401).json({ error: "Invalid token" });
   }
 }
