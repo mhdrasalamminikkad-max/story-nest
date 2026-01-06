@@ -195,6 +195,36 @@ export async function runMigrations() {
     } catch (e) {
       // Column might already exist, ignore error
     }
+
+    // Create story_categories table if it doesn't exist
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS story_categories (
+          id VARCHAR PRIMARY KEY,
+          name TEXT NOT NULL UNIQUE,
+          slug VARCHAR(50) NOT NULL UNIQUE,
+          is_active BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        );
+      `);
+    } catch (e) {
+      console.log("story_categories table creation note:", e);
+    }
+
+    // Create story_types table if it doesn't exist
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS story_types (
+          id VARCHAR PRIMARY KEY,
+          name TEXT NOT NULL UNIQUE,
+          slug VARCHAR(50) NOT NULL UNIQUE,
+          is_active BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        );
+      `);
+    } catch (e) {
+      console.log("story_types table creation note:", e);
+    }
     
     console.log('✅ Database tables created successfully!');
   } catch (error) {
