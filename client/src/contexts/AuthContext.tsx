@@ -25,6 +25,7 @@ interface AuthContextType {
   error: string | null;
   signInWithGoogle: () => Promise<GoogleUser>;
   signOut: () => Promise<void>;
+  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -127,8 +128,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getIdToken = async (): Promise<string | null> => {
+    try {
+      if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken(true); // Force refresh
+        return token;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting ID token:", error);
+      return null;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle, signOut, getIdToken }}>
       {children}
     </AuthContext.Provider>
   );

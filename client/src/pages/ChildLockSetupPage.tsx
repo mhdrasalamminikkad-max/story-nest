@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ChildLockSetupPage() {
   const [, setLocation] = useLocation();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, getIdToken } = useAuth();
   const [readingTime, setReadingTime] = useState(30);
   const { toast } = useToast();
 
@@ -53,13 +53,11 @@ export default function ChildLockSetupPage() {
     mutationFn: async (data: any) => {
       console.log("Submitting child lock settings:", data);
       
-      // Get fresh token before making request
-      const { auth } = await import("@/lib/firebase");
-      if (!auth.currentUser) {
-        throw new Error("Authentication required");
+      const token = await getIdToken();
+      if (!token) {
+        throw new Error("Authentication required - no token available");
       }
       
-      const token = await auth.currentUser.getIdToken(true); // Force refresh
       console.log("Using token for request:", token?.substring(0, 20) + "...");
       
       const res = await fetch("/api/parent-settings", {
