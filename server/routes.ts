@@ -75,6 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If user doesn't exist, create them with default settings (they'll complete setup after)
       if (!existingUser) {
+        const now = Date.now();
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const trialEndsAt = now + sevenDaysMs;
+        
         await db.insert(parentSettings).values({
           userId: userId,
           pinHash: "", // Empty PIN initially
@@ -83,6 +87,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           theme: "system", // Default theme
           coins: 0, // Start with 0 coins
           subscriptionStatus: "trial", // Default to trial
+          trialStartedAt: now,
+          trialEndsAt: trialEndsAt, // 7 days free trial
         });
       }
 
