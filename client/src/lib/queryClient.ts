@@ -1,5 +1,4 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { auth } from "@/lib/firebase";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -8,15 +7,13 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-async function getFirebaseToken(forceRefresh = false): Promise<string | null> {
-  if (!auth.currentUser) {
-    return null;
-  }
+async function getGoogleIdToken(): Promise<string | null> {
   try {
-    const token = await auth.currentUser.getIdToken(forceRefresh);
+    // Get token from localStorage (set by AuthContext after OAuth)
+    const token = localStorage.getItem("google_id_token");
     return token;
   } catch (error) {
-    console.error("Error getting Firebase token:", error);
+    console.error("Error getting Google ID token:", error);
     return null;
   }
 }
@@ -28,7 +25,7 @@ export async function apiRequest(
 ): Promise<Response> {
   const headers: Record<string, string> = {};
   
-  const token = await getFirebaseToken();
+  const token = await getGoogleIdToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -56,7 +53,7 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const headers: Record<string, string> = {};
     
-    const token = await getFirebaseToken();
+    const token = await getGoogleIdToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }

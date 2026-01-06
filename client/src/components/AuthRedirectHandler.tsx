@@ -3,12 +3,12 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
- * Handles redirect logic after Firebase authentication (signInWithRedirect)
+ * Handles redirect logic after Google OAuth authentication
  * Redirects to appropriate page based on whether parent settings exist
  */
 export function AuthRedirectHandler() {
   const [location, setLocation] = useLocation();
-  const { user, loading } = useAuth();
+  const { user, loading, getIdToken } = useAuth();
 
   useEffect(() => {
     if (loading) return; // Wait for auth to load
@@ -16,7 +16,12 @@ export function AuthRedirectHandler() {
     // User is authenticated and we're on the auth page
     if (user && location === "/auth") {
       // Check if parent settings exist
-      user.getIdToken(true).then(async (token) => {
+      getIdToken().then(async (token) => {
+        if (!token) {
+          setLocation("/setup");
+          return;
+        }
+
         try {
           const response = await fetch("/api/parent-settings", {
             headers: {
@@ -41,7 +46,7 @@ export function AuthRedirectHandler() {
         }
       });
     }
-  }, [user, loading, location, setLocation]);
+  }, [user, loading, location, setLocation, getIdToken]);
 
   return null; // This component doesn't render anything
 }
