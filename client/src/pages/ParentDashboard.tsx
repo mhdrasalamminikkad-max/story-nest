@@ -787,28 +787,26 @@ export default function ParentDashboard() {
                 </Button>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    variant="outline"
                     onClick={() => setLocation("/checkpoints")}
-                    className="rounded-xl border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                    className="rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                     data-testid="button-checkpoints"
                     title="Checkpoints"
                   >
-                    <Target className="w-4 h-4 mr-2 text-yellow-500" />
+                    <Target className="w-4 h-4 mr-2" />
                     Checkpoints
                   </Button>
                   <Button
-                    variant="outline"
                     onClick={() => setLocation("/pricing")}
-                    className="rounded-xl border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                    className="rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                     data-testid="button-view-plans"
                     title="View Plans"
                   >
-                    <CreditCard className="w-4 h-4 mr-2 text-yellow-500" />
+                    <CreditCard className="w-4 h-4 mr-2" />
                     Plans
                   </Button>
                   <Button
                     onClick={enterChildMode}
-                    className="rounded-xl col-span-2 bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
+                    className="rounded-xl col-span-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                     data-testid="button-child-mode"
                   >
                     <Play className="w-4 h-4 mr-2" />
@@ -846,32 +844,30 @@ export default function ParentDashboard() {
               </motion.div>
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
-                  variant="outline"
                   onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                   data-testid="button-checkpoints-desktop"
                   title="Checkpoints"
                 >
-                  <Target className="w-5 h-5 mr-2 text-yellow-500" />
+                  <Target className="w-5 h-5 mr-2" />
                   Checkpoints
                 </Button>
               </motion.div>
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
-                  variant="outline"
                   onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                   data-testid="button-view-plans-desktop"
                   title="View Plans"
                 >
-                  <CreditCard className="w-5 h-5 mr-2 text-yellow-500" />
+                  <CreditCard className="w-5 h-5 mr-2" />
                   Plans
                 </Button>
               </motion.div>
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={enterChildMode}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
+                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
                   data-testid="button-child-mode-desktop"
                 >
                   <Play className="w-5 h-5 mr-2" />
