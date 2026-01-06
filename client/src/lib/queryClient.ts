@@ -14,7 +14,11 @@ async function getAuthToken(): Promise<string | null> {
     const currentUser = auth.currentUser;
     
     if (currentUser) {
-      return await currentUser.getIdToken();
+      try {
+        return await currentUser.getIdToken();
+      } catch (tokenError) {
+        console.error("Error getting ID token from current user:", tokenError);
+      }
     }
     
     // Fallback to Preferences for native app offline state
@@ -23,7 +27,9 @@ async function getAuthToken(): Promise<string | null> {
       if (Capacitor.isNativePlatform()) {
         const { Preferences } = await import("@capacitor/preferences");
         const { value } = await Preferences.get({ key: "auth_token" });
-        return value;
+        if (value) {
+          return value;
+        }
       }
     } catch (e) {
       // Not a native app

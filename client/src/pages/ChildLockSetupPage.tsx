@@ -52,7 +52,25 @@ export default function ChildLockSetupPage() {
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Submitting child lock settings:", data);
-      const res = await apiRequest("POST", "/api/parent-settings", data);
+      
+      // Get fresh token before making request
+      const { auth } = await import("@/lib/firebase");
+      if (!auth.currentUser) {
+        throw new Error("Authentication required");
+      }
+      
+      const token = await auth.currentUser.getIdToken(true); // Force refresh
+      console.log("Using token for request:", token?.substring(0, 20) + "...");
+      
+      const res = await fetch("/api/parent-settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      
       if (!res.ok) {
         if (res.status === 401) {
           throw new Error("401 Invalid Token");
