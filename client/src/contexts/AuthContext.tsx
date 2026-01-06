@@ -6,6 +6,9 @@ export interface GoogleUser {
   displayName: string;
   photoUrl?: string;
   idToken?: string;
+  authentication?: {
+    idToken: string;
+  };
 }
 
 interface AuthContextType {
@@ -55,14 +58,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setLoading(false);
             return googleUser;
           }
+          throw new Error("Sign-in failed - no result");
         } catch (nativeError) {
           console.error("Native sign-in error:", nativeError);
+          setLoading(false);
+          throw nativeError;
         }
       }
     } catch (e) {
       console.log("Capacitor not available");
     }
-    
+
     // Web: Google OAuth popup fallback
     try {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -82,8 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       window.location.href = authUrl.toString();
       
-      // We need to return a promise that won't resolve because we're redirecting
-      return new Promise(() => {});
+      // Return a promise that never resolves as we are redirecting
+      return new Promise<GoogleUser>(() => {});
     } catch (webError) {
       const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
       setError(errorMessage);
