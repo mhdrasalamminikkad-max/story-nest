@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { GOOGLE_OAUTH_CONFIG } from "@/lib/google-oauth";
 
 export interface GoogleUser {
@@ -32,6 +32,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle OAuth callback from server redirect
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const idToken = params.get("id_token");
+      const code = params.get("code");
+      
+      if (idToken && code) {
+        try {
+          // Verify token with server to get user info
+          const response = await fetch("/api/verify-token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ idToken, code }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const googleUser: GoogleUser = {
+              id: data.id,
+              email: data.email,
+              displayName: data.name || "",
+              photoUrl: data.picture || "",
+              idToken: idToken,
+              authentication: { idToken },
+            };
+            
+            setUser(googleUser);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(googleUser));
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch (err) {
+          console.error("OAuth callback error:", err);
+        }
+      }
+    };
+    
+    handleOAuthCallback();
+  }, []);
 
   const signInWithGoogle = async (): Promise<GoogleUser> => {
     setLoading(true);

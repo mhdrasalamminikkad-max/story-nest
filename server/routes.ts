@@ -187,6 +187,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verify and get user info from ID token
+  app.post("/api/verify-token", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      const idToken = authHeader?.replace("Bearer ", "");
+      
+      if (!idToken) {
+        return res.status(400).json({ error: "No token provided" });
+      }
+      
+      // Verify the ID token
+      const oauth2Client = new OAuth2Client(
+        GOOGLE_OAUTH_CONFIG.clientId,
+        GOOGLE_OAUTH_CONFIG.clientSecret,
+        getRedirectUri()
+      );
+      
+      const ticket = await oauth2Client.verifyIdToken({
+        idToken: idToken,
+        audience: GOOGLE_OAUTH_CONFIG.clientId,
+      });
+      
+      const payload = ticket.getPayload();
+      if (!payload) {
+        return res.status(400).json({ error: "Invalid token" });
+      }
+      
+      // Return user info
+      res.json({
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      });
+    } catch (error: any) {
+      console.error("Token verification error:", error);
+      res.status(401).json({ 
+        error: "Token verification failed", 
+        message: error.message || "Unknown error" 
+      });
+    }
+  });
+
   // Stories endpoints - Public feed (published stories only)
   app.get("/api/stories", async (req, res) => {
     try {
