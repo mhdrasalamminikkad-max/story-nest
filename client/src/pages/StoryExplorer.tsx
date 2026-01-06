@@ -76,8 +76,23 @@ export default function StoryExplorer() {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
+  const { data: apiStoryTypes = [] } = useQuery<{id: string, name: string, slug: string}[]>({
+    queryKey: ["/api/story-types"],
+    staleTime: 5 * 60 * 1000,
+  });
+
   const categories = apiCategories.length > 0 
-    ? apiCategories.map(c => ({ value: c.slug, label: c.name, icon: Star }))
+    ? apiCategories.map(c => {
+        const fallback = [
+          { value: "islamic", icon: Star },
+          { value: "history", icon: History },
+          { value: "moral", icon: Lightbulb },
+          { value: "adventure", icon: Map },
+          { value: "educational", icon: GraduationCap },
+          { value: "fairy-tale", icon: Wand2 },
+        ].find(f => f.value === c.slug);
+        return { value: c.slug, label: c.name, icon: fallback?.icon || Star };
+      })
     : [
         { value: "islamic", label: "Islamic", icon: Star },
         { value: "history", label: "History", icon: History },
@@ -85,6 +100,33 @@ export default function StoryExplorer() {
         { value: "adventure", label: "Adventure", icon: Map },
         { value: "educational", label: "Educational", icon: GraduationCap },
         { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
+      ];
+
+  const storyTypes = apiStoryTypes.length > 0
+    ? apiStoryTypes.map(t => {
+        const fallback = [
+          { value: "islamic", icon: Star },
+          { value: "lesson", icon: BookText },
+          { value: "history", icon: Castle },
+          { value: "fairy-tale", icon: Sparkles },
+          { value: "adventure", icon: Compass },
+          { value: "educational", icon: GraduationCap },
+          { value: "moral", icon: Heart },
+          { value: "mythology", icon: Zap },
+          { value: "science", icon: Microscope },
+        ].find(f => f.value === t.slug);
+        return { value: t.slug, label: t.name, icon: fallback?.icon || Star };
+      })
+    : [
+        { value: "islamic", label: "Islamic", icon: Star },
+        { value: "lesson", label: "Lesson", icon: BookText },
+        { value: "history", label: "History", icon: Castle },
+        { value: "fairy-tale", label: "Fairy Tale", icon: Sparkles },
+        { value: "adventure", label: "Adventure", icon: Compass },
+        { value: "educational", label: "Educational", icon: GraduationCap },
+        { value: "moral", label: "Moral", icon: Heart },
+        { value: "mythology", label: "Mythology", icon: Zap },
+        { value: "science", label: "Science", icon: Microscope },
       ];
 
   const filteredStories = allStories.filter((story) => {
