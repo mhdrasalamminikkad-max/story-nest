@@ -856,8 +856,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error checking admin status:", error);
       res.json({ isAdmin: false });
     }
-      res.status(500).json({ error: "Failed to check admin status" });
-    }
   });
 
   // Grant admin access with secret code
