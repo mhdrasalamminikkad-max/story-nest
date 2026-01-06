@@ -287,7 +287,7 @@ export default function StoryExplorer() {
                       <Crown className="w-8 h-8 text-primary" />
                     </div>
                     <h3 className="text-2xl font-bold">Main Stories</h3>
-                    <p className="text-sm text-[#f4eef6]">
+                    <p className="text-sm text-[#ffffff]">
                       Curated collection of official stories
                     </p>
                   </div>
@@ -303,7 +303,7 @@ export default function StoryExplorer() {
                       <Users className="w-8 h-8 text-primary" />
                     </div>
                     <h3 className="text-2xl font-bold">Parent Added Stories</h3>
-                    <p className="text-sm text-[#f4eef6]">
+                    <p className="text-sm text-[#ffffff]">
                       Stories created by parents in the community
                     </p>
                   </div>
