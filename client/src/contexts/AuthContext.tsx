@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<GoogleUser> => {
     setLoading(true);
     setError(null);
     
@@ -37,20 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { Capacitor } = await import("@capacitor/core");
       
       if (Capacitor.isNativePlatform()) {
-        // Native Android: Use custom Google Sign-In plugin
         try {
-          // Call the native plugin
-          const result = await (window as any).GoogleSignInPlugin?.signInWithGoogle({
-            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          });
+          const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+          const result = await GoogleAuth.signIn();
           
           if (result) {
             const googleUser: GoogleUser = {
               id: result.id,
               email: result.email,
-              displayName: result.displayName,
-              photoUrl: result.photoUrl,
-              idToken: result.idToken,
+              displayName: result.displayName || "",
+              photoUrl: result.imageUrl || "",
+              idToken: result.authentication?.idToken || "",
             };
             
             setUser(googleUser);
@@ -59,20 +56,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return googleUser;
           }
         } catch (nativeError) {
-          console.log("Native sign-in error:", nativeError);
+          console.error("Native sign-in error:", nativeError);
         }
       }
     } catch (e) {
       console.log("Capacitor not available");
     }
     
-    // Web: Google OAuth popup
+    // Web: Google OAuth popup fallback
     try {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const scope = "openid profile email";
       const redirectUri = `${window.location.origin}/`;
       
-      // Generate random state for security
       const state = Math.random().toString(36).substring(7);
       sessionStorage.setItem("oauth_state", state);
       
@@ -84,11 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authUrl.searchParams.append("state", state);
       authUrl.searchParams.append("access_type", "online");
       
-      // Redirect to Google
       window.location.href = authUrl.toString();
       
-      // Keep loading true until redirect
-      setLoading(true);
+      // We need to return a promise that won't resolve because we're redirecting
+      return new Promise(() => {});
     } catch (webError) {
       const errorMessage = webError instanceof Error ? webError.message : "Sign-in failed";
       setError(errorMessage);

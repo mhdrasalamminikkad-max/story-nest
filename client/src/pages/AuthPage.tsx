@@ -28,7 +28,12 @@ export default function AuthPage() {
     const checkRedirectResult = async () => {
       if (user && !authLoading) {
         try {
-          const token = await user.getIdToken(true);
+          const token = user.idToken;
+          
+          if (!token) {
+            console.error("No ID token available");
+            return;
+          }
           
           // Check if parent settings already exist
           const response = await fetch("/api/parent-settings", {
