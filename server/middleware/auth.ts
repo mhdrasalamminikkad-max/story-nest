@@ -50,9 +50,9 @@ export async function authenticateUser(
       .where(eq(parentSettings.userId, userId));
     
     if (!existingUser) {
-      const now = Date.now();
-      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-      const trialEndsAt = now + sevenDaysMs;
+      const now = new Date();
+      const trialEndsAt = new Date(now);
+      trialEndsAt.setDate(now.getDate() + 7);
       
       await db.insert(parentSettings).values({
         userId: userId,

@@ -75,9 +75,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If user doesn't exist, create them with default settings (they'll complete setup after)
       if (!existingUser) {
-        const now = Date.now();
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const trialEndsAt = now + sevenDaysMs;
+        const now = new Date();
+        const trialEndsAt = new Date(now);
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7);
         
         await db.insert(parentSettings).values({
           userId: userId,
@@ -354,8 +354,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const storiesWithTimestamp = publishedStories.map(s => ({
         ...s,
-        createdAt: s.createdAt.getTime(),
-        reviewedAt: s.reviewedAt?.getTime() || null,
+        createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
+        reviewedAt: s.reviewedAt instanceof Date ? s.reviewedAt.getTime() : null,
       }));
       res.json(storiesWithTimestamp);
     } catch (error) {
@@ -392,8 +392,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const storiesWithTimestamp = userStories.map(s => ({
         ...s,
-        createdAt: s.createdAt.getTime(),
-        reviewedAt: s.reviewedAt?.getTime() || null,
+        createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
+        reviewedAt: s.reviewedAt instanceof Date ? s.reviewedAt.getTime() : null,
       }));
       res.json(storiesWithTimestamp);
     } catch (error) {
@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           return {
             ...s,
-            createdAt: s.createdAt.getTime(),
+            createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
             isCreatorAdmin: creator?.isAdmin || false,
           };
         })
@@ -466,8 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const storyWithTimestamp = {
         ...story,
-        createdAt: story.createdAt.getTime(),
-        reviewedAt: story.reviewedAt?.getTime() || null,
+        createdAt: story.createdAt instanceof Date ? story.createdAt.getTime() : story.createdAt,
+        reviewedAt: story.reviewedAt instanceof Date ? story.reviewedAt.getTime() : null,
       };
       
       res.json(storyWithTimestamp);
@@ -505,8 +505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const storyWithTimestamp = {
         ...story,
-        createdAt: story.createdAt.getTime(),
-        reviewedAt: story.reviewedAt?.getTime() || null,
+        createdAt: story.createdAt instanceof Date ? story.createdAt.getTime() : story.createdAt,
+        reviewedAt: story.reviewedAt instanceof Date ? story.reviewedAt.getTime() : null,
       };
       res.json(storyWithTimestamp);
     } catch (error) {
