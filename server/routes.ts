@@ -64,6 +64,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect(`${frontendRedirect}/auth?error=${encodeURIComponent("Invalid token payload")}`);
       }
 
+      // Create or update user in parentSettings if they don't exist
+      const userId = payload.sub;
+      
+      // Check if user exists in parentSettings
+      const [existingUser] = await db
+        .select()
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+      
+      // If user doesn't exist, create them with default settings
+      if (!existingUser) {
+        await db.insert(parentSettings).values({
+          userId: userId,
+          pinHash: "", // Empty PIN initially
+          readingTimeLimit: 30, // Default 30 minutes
+          fullscreenLockEnabled: false,
+          theme: "system", // Default theme
+          coins: 0, // Start with 0 coins
+          subscriptionStatus: "trial", // Default to trial
+        });
+      }
+
       // Store token in a session or pass it via URL fragment (more secure)
       // For now, we'll redirect with the token in the URL fragment (it won't be sent to server)
       // In production, consider using secure HTTP-only cookies instead
@@ -121,6 +143,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payload = ticket.getPayload();
       if (!payload) {
         return res.status(400).json({ error: "Invalid token payload" });
+      }
+
+      // Create or update user in parentSettings if they don't exist
+      const userId = payload.sub;
+      
+      // Check if user exists in parentSettings
+      const [existingUser] = await db
+        .select()
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+      
+      // If user doesn't exist, create them with default settings
+      if (!existingUser) {
+        await db.insert(parentSettings).values({
+          userId: userId,
+          pinHash: "", // Empty PIN initially
+          readingTimeLimit: 30, // Default 30 minutes
+          fullscreenLockEnabled: false,
+          theme: "system", // Default theme
+          coins: 0, // Start with 0 coins
+          subscriptionStatus: "trial", // Default to trial
+        });
       }
 
       // Return user info and ID token
