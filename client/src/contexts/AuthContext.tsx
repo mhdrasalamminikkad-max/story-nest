@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               displayName: result.displayName || "",
               photoUrl: result.imageUrl || "",
               idToken: result.authentication?.idToken || "",
+              authentication: result.authentication as { idToken: string } | undefined,
             };
             
             setUser(googleUser);
