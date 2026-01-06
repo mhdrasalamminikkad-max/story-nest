@@ -54,6 +54,9 @@ export default function ChildLockSetupPage() {
       console.log("Submitting child lock settings:", data);
       const res = await apiRequest("POST", "/api/parent-settings", data);
       if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error("401 Invalid Token");
+        }
         const errorData = await res.json();
         throw new Error(errorData.message || "Failed to save settings");
       }
