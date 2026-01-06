@@ -78,10 +78,6 @@ export default function ChildLockSetupPage() {
   });
 
   const onSubmit = (data: any) => {
-    if (!user) {
-      setLocation("/auth");
-      return;
-    }
     saveMutation.mutate(data);
   };
 
