@@ -140,8 +140,8 @@ export function TrialBanner() {
                 <Clock className="w-5 h-5 text-destructive" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Trial Expired</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold text-lg mb-1 text-black">Trial Expired</h3>
+                <p className="text-sm text-black">
                   Your free trial has ended. Purchase a subscription to continue enjoying TELL MAMMA.
                 </p>
               </div>
