@@ -89,10 +89,12 @@ export default function ParentDashboard() {
 
   const { data: categories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const { data: storyTypes = [] } = useQuery<any[]>({
     queryKey: ["/api/story-types"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Redirect to setup if user hasn't completed setup

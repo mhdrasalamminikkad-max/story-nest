@@ -3,11 +3,11 @@ import { createServer, type Server } from "http";
 import { authenticateUser, checkNotBlocked, type AuthRequest } from "./middleware/auth";
 import { requireAdmin } from "./middleware/adminAuth";
 import { getSubscriptionInfo, checkSubscriptionStatus, type SubscriptionRequest } from "./middleware/subscription";
-import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema } from "@shared/schema";
+import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema, insertStoryCategorySchema, insertStoryTypeSchema } from "@shared/schema";
 import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
 import { db } from "./db";
-import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions } from "./db/schema";
+import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions, storyCategories, storyTypes } from "./db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -2552,6 +2552,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching story badges:", error);
       res.status(500).json({ error: "Failed to fetch story badges" });
+    }
+  });
+
+  // Story Categories endpoints
+  app.get("/api/admin/categories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const categories = await db
+        .select()
+        .from(storyCategories)
+        .orderBy(storyCategories.name);
+      
+      const categoriesWithTimestamp = categories.map(cat => ({
+        ...cat,
+        createdAt: cat.createdAt.getTime(),
+      }));
+      res.json(categoriesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  app.post("/api/admin/categories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { name, slug, isActive } = insertStoryCategorySchema.parse(req.body);
+      
+      const [category] = await db
+        .insert(storyCategories)
+        .values({
+          id: `cat-${Date.now()}`,
+          name,
+          slug,
+          isActive: isActive ?? true,
+        })
+        .returning();
+      
+      const categoryWithTimestamp = {
+        ...category,
+        createdAt: category.createdAt.getTime(),
+      };
+      res.json(categoryWithTimestamp);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).json({ error: "Failed to create category" });
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      await db
+        .delete(storyCategories)
+        .where(eq(storyCategories.id, id));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ error: "Failed to delete category" });
+    }
+  });
+
+  // Story Types endpoints
+  app.get("/api/admin/story-types", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const types = await db
+        .select()
+        .from(storyTypes)
+        .orderBy(storyTypes.name);
+      
+      const typesWithTimestamp = types.map(type => ({
+        ...type,
+        createdAt: type.createdAt.getTime(),
+      }));
+      res.json(typesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching story types:", error);
+      res.status(500).json({ error: "Failed to fetch story types" });
+    }
+  });
+
+  app.post("/api/admin/story-types", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { name, slug, isActive } = insertStoryTypeSchema.parse(req.body);
+      
+      const [type] = await db
+        .insert(storyTypes)
+        .values({
+          id: `type-${Date.now()}`,
+          name,
+          slug,
+          isActive: isActive ?? true,
+        })
+        .returning();
+      
+      const typeWithTimestamp = {
+        ...type,
+        createdAt: type.createdAt.getTime(),
+      };
+      res.json(typeWithTimestamp);
+    } catch (error) {
+      console.error("Error creating story type:", error);
+      res.status(500).json({ error: "Failed to create story type" });
+    }
+  });
+
+  app.delete("/api/admin/story-types/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      await db
+        .delete(storyTypes)
+        .where(eq(storyTypes.id, id));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting story type:", error);
+      res.status(500).json({ error: "Failed to delete story type" });
+    }
+  });
+
+  // Public endpoints to fetch categories and types
+  app.get("/api/categories", async (req, res) => {
+    try {
+      const categories = await db
+        .select()
+        .from(storyCategories)
+        .where(eq(storyCategories.isActive, true))
+        .orderBy(storyCategories.name);
+      
+      const categoriesWithTimestamp = categories.map(cat => ({
+        ...cat,
+        createdAt: cat.createdAt.getTime(),
+      }));
+      res.json(categoriesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  app.get("/api/story-types", async (req, res) => {
+    try {
+      const types = await db
+        .select()
+        .from(storyTypes)
+        .where(eq(storyTypes.isActive, true))
+        .orderBy(storyTypes.name);
+      
+      const typesWithTimestamp = types.map(type => ({
+        ...type,
+        createdAt: type.createdAt.getTime(),
+      }));
+      res.json(typesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching story types:", error);
+      res.status(500).json({ error: "Failed to fetch story types" });
     }
   });
 

@@ -72,7 +72,8 @@ export default function StoryExplorer() {
   });
 
   const { data: apiCategories = [] } = useQuery<{id: string, name: string, slug: string}[]>({
-    queryKey: ["/api/admin/categories"],
+    queryKey: ["/api/categories"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const categories = apiCategories.length > 0 
