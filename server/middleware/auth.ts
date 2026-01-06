@@ -23,9 +23,15 @@ export async function authenticateUser(
   }
   
   try {
+    // Log token for debugging
+    console.log("🔑 Token header received, length:", token.length);
+    console.log("🔑 Token preview:", token.substring(0, 50) + "...");
+    
     // Verify Firebase ID Token
+    console.log("🔐 Attempting to verify Firebase ID token...");
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
+    console.log("✅ Token verified successfully for user:", userId);
     
     // Store userId in request for use in route handlers
     req.userId = userId;
@@ -56,8 +62,15 @@ export async function authenticateUser(
     
     next();
   } catch (error: any) {
-    console.error("Token verification error:", error.message);
-    res.status(401).json({ error: "Invalid token" });
+    console.error("❌ Token verification error:");
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Full error:", error);
+    res.status(401).json({ 
+      error: "Invalid token",
+      details: error.message,
+      code: error.code
+    });
   }
 }
 

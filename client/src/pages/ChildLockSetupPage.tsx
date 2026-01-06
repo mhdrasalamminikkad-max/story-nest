@@ -51,14 +51,16 @@ export default function ChildLockSetupPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("Submitting child lock settings:", data);
+      console.log("📝 Submitting child lock settings:", data);
       
       const token = await getIdToken();
       if (!token) {
+        console.error("❌ No authentication token available");
         throw new Error("Authentication required - no token available");
       }
       
-      console.log("Using token for request:", token?.substring(0, 20) + "...");
+      console.log("✅ Token retrieved successfully (length: " + token.length + ")");
+      console.log("🔑 Token preview:", token.substring(0, 50) + "..." + token.substring(token.length - 20));
       
       const res = await fetch("/api/parent-settings", {
         method: "POST",
@@ -69,12 +71,18 @@ export default function ChildLockSetupPage() {
         body: JSON.stringify(data),
       });
       
+      console.log("📡 Response status:", res.status);
+      
       if (!res.ok) {
-        if (res.status === 401) {
-          throw new Error("401 Invalid Token");
-        }
         const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to save settings");
+        console.error("❌ API Error response:", errorData);
+        
+        if (res.status === 401) {
+          console.error("❌ 401 Unauthorized - Token rejected by server");
+          console.error("Details:", errorData);
+          throw new Error("Session expired - please sign in again");
+        }
+        throw new Error(errorData.message || errorData.details || "Failed to save settings");
       }
       return await res.json();
     },
@@ -88,12 +96,12 @@ export default function ChildLockSetupPage() {
       setLocation("/dashboard");
     },
     onError: (error: Error) => {
-      console.error("Failed to save settings:", error);
+      console.error("❌ Failed to save settings:", error.message);
       toast({
         title: "Error",
         description: error.message || "Failed to save settings. Please try again.",
         variant: "destructive",
-        duration: 4000,
+        duration: 5000,
       });
     },
   });

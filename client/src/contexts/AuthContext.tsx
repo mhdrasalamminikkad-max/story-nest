@@ -131,12 +131,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getIdToken = async (): Promise<string | null> => {
     try {
       if (auth.currentUser) {
+        console.log("🔑 Retrieving ID token for user:", auth.currentUser.email);
         const token = await auth.currentUser.getIdToken(true); // Force refresh
+        console.log("✅ ID token retrieved successfully");
         return token;
       }
+      console.warn("⚠️ No authenticated user found");
       return null;
     } catch (error) {
-      console.error("Error getting ID token:", error);
+      console.error("❌ Error getting ID token:", error);
       return null;
     }
   };
