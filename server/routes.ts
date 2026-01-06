@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { authenticateUser, checkNotBlocked, type AuthRequest } from "./middleware/auth";
 import { requireAdmin } from "./middleware/adminAuth";
-import { getSubscriptionInfo, type SubscriptionRequest } from "./middleware/subscription";
+import { getSubscriptionInfo, checkSubscriptionStatus, type SubscriptionRequest } from "./middleware/subscription";
 import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema } from "@shared/schema";
 import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
@@ -237,8 +237,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify and get user info from ID token
-  // Stories endpoints - Public feed (published stories only)
-  app.get("/api/stories", async (req, res) => {
+  // Stories endpoints - Public feed (published stories only) - requires valid subscription
+  app.get("/api/stories", authenticateUser, checkSubscriptionStatus, async (req: SubscriptionRequest, res) => {
     try {
       const { storyType, category, language } = req.query;
       
@@ -375,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single story by ID with ALL fields (for story reader pages)
-  app.get("/api/stories/:id", async (req, res) => {
+  app.get("/api/stories/:id", authenticateUser, checkSubscriptionStatus, async (req: SubscriptionRequest, res) => {
     try {
       const { id } = req.params;
       
