@@ -793,9 +793,32 @@ export default function ParentDashboard() {
                     data-testid="button-checkpoints"
                     title="Checkpoints"
                   >
-                  <Target className="w-4 h-4 mr-2 text-yellow-500" />
-                  Checkpoints
-                </Button>
+                    <Target className="w-4 h-4 mr-2 text-yellow-500" />
+                    Checkpoints
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setLocation("/pricing")}
+                    className="rounded-xl border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                    data-testid="button-view-plans"
+                    title="View Plans"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2 text-yellow-500" />
+                    Plans
+                  </Button>
+                  <Button
+                    onClick={enterChildMode}
+                    className="rounded-xl col-span-2 bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
+                    data-testid="button-child-mode"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Enter Child Mode
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="hidden md:flex gap-3 flex-wrap">
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={() => {
@@ -814,7 +837,7 @@ export default function ParentDashboard() {
                       voiceoverUrl: undefined,
                     });
                   }}
-                  className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-primary to-secondary hover:shadow-xl transition-all font-bold"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-primary to-secondary hover:shadow-xl transition-all font-bold"
                   data-testid="button-add-story-desktop"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -825,17 +848,19 @@ export default function ParentDashboard() {
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                  className="rounded-2xl text-sm sm:text-base border-2 border-yellow-500/30 hover:bg-yellow-500/10"
                   data-testid="button-checkpoints-desktop"
                   title="Checkpoints"
                 >
                   <Target className="w-5 h-5 mr-2 text-yellow-500" />
                   Checkpoints
                 </Button>
+              </motion.div>
+              <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base w-full border-2 border-yellow-500/30 hover:bg-yellow-500/10"
+                  className="rounded-2xl text-sm sm:text-base border-2 border-yellow-500/30 hover:bg-yellow-500/10"
                   data-testid="button-view-plans-desktop"
                   title="View Plans"
                 >
@@ -846,7 +871,7 @@ export default function ParentDashboard() {
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={enterChildMode}
-                  className="rounded-2xl text-sm sm:text-base w-full bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-secondary to-accent hover:shadow-xl transition-all font-bold"
                   data-testid="button-child-mode-desktop"
                 >
                   <Play className="w-5 h-5 mr-2" />
@@ -854,7 +879,6 @@ export default function ParentDashboard() {
                 </Button>
               </motion.div>
             </div>
-          </motion.div>
 
           <TrialBanner />
 
