@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Web: Google OAuth popup fallback
     try {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const clientId = "112395408252-ela7l26ctmspe0bo5cc6plhbdfb7nnoe.apps.googleusercontent.com";
       const scope = "openid profile email";
       const redirectUri = `${window.location.origin}/`;
       
