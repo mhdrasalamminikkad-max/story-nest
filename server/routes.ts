@@ -285,8 +285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           theme: "system", // Default theme
           coins: 0, // Start with 0 coins
           subscriptionStatus: "trial", // Default to trial
-          trialStartedAt: now,
-          trialEndsAt: trialEnd,
+          trialStartedAt: now.getTime(),
+          trialEndsAt: trialEnd.getTime(),
         });
       }
 
@@ -670,8 +670,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
           theme: settingsData.theme,
           isAdmin: isFirstUser, // First user becomes admin automatically
-          trialStartedAt: now,
-          trialEndsAt: trialEnd,
+          trialStartedAt: now.getTime(),
+          trialEndsAt: trialEnd.getTime(),
           subscriptionStatus: "trial",
         })
         .onConflictDoUpdate({
@@ -1840,8 +1840,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db
         .update(parentSettings)
         .set({
-          trialStartedAt: now,
-          trialEndsAt: trialEnd,
+          trialStartedAt: now.getTime(),
+          trialEndsAt: trialEnd.getTime(),
           subscriptionStatus: "trial",
         })
         .where(eq(parentSettings.userId, userId));
