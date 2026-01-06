@@ -312,7 +312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Verify and get user info from ID token
   // Stories endpoints - Public feed (published stories only) - requires valid subscription
-  app.get("/api/stories", authenticateUser, checkSubscriptionStatus, async (req: SubscriptionRequest, res) => {
+  // Get published stories - public endpoint
+  app.get("/api/stories", async (req, res) => {
     try {
       const { storyType, category, language } = req.query;
       
@@ -448,8 +449,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single story by ID with ALL fields (for story reader pages)
-  app.get("/api/stories/:id", authenticateUser, checkSubscriptionStatus, async (req: SubscriptionRequest, res) => {
+  // Get single story by ID - public endpoint for published stories
+  app.get("/api/stories/:id", async (req, res) => {
     try {
       const { id } = req.params;
       
