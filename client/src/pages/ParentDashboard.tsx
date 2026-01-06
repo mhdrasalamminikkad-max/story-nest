@@ -789,16 +789,13 @@ export default function ParentDashboard() {
                   <Button
                     variant="outline"
                     onClick={() => setLocation("/checkpoints")}
-                    className="rounded-xl"
+                    className="rounded-xl border-2 border-yellow-500/30 hover:bg-yellow-500/10"
                     data-testid="button-checkpoints"
-
-const formatDate = (timestamp: number) => {
-return new Date(timestamp).toLocaleDateString("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-});
-};
+                    title="Checkpoints"
+                  >
+                  <Target className="w-4 h-4 mr-2 text-yellow-500" />
+                  Checkpoints
+                </Button>
               <motion.div className="flex-1 sm:flex-initial">
                 <Button
                   onClick={() => {
@@ -842,7 +839,7 @@ return new Date(timestamp).toLocaleDateString("en-US", {
                   data-testid="button-view-plans-desktop"
                   title="View Plans"
                 >
-                  <CreditCard className="w-5 h-5 mr-2" />
+                  <CreditCard className="w-5 h-5 mr-2 text-yellow-500" />
                   Plans
                 </Button>
               </motion.div>
