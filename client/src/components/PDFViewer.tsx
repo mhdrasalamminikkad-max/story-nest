@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Loader2, Maximize, Minimize } from "lucide-react";
+import { ChevronUp, ChevronDown, Loader2, Maximize, Minimize } from "lucide-react";
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -17,16 +17,16 @@ interface PDFViewerProps {
 const pdfCache = new Map<string, any>();
 
 export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfLoaded }: PDFViewerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const canvasesRef = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const [pdf, setPdf] = useState<any>(pdfCache.get(pdfUrl) || null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(pdfCache.get(pdfUrl)?.numPages || 0);
   const [loading, setLoading] = useState(!pdfCache.has(pdfUrl));
   const [error, setError] = useState<string | null>(null);
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(1.2);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -86,7 +86,7 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
     const handleResize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const calculatedScale = Math.max(1, containerWidth / 400);
+        const calculatedScale = Math.max(1, containerWidth / 500);
         setScale(calculatedScale);
       }
     };
@@ -105,48 +105,49 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Render all pages in scrollable container
   useEffect(() => {
-    if (!pdf || !canvasRef.current) return;
+    if (!pdf) return;
 
-    const renderPage = async () => {
-      try {
-        const page = await pdf.getPage(currentPage);
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+    const renderAllPages = async () => {
+      const newRendered = new Set<number>();
+      
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        if (renderedPages.has(pageNum)) {
+          newRendered.add(pageNum);
+          continue;
+        }
 
-        const context = canvas.getContext('2d');
-        if (!context) return;
+        try {
+          const canvas = canvasesRef.current.get(pageNum);
+          if (!canvas) continue;
 
-        const viewport = page.getViewport({ scale });
+          const page = await pdf.getPage(pageNum);
+          const context = canvas.getContext('2d');
+          if (!context) continue;
 
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+          const viewport = page.getViewport({ scale });
 
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
 
-        await page.render(renderContext).promise;
-      } catch (err) {
-        console.error('Error rendering page:', err);
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport,
+          };
+
+          await page.render(renderContext).promise;
+          newRendered.add(pageNum);
+        } catch (err) {
+          console.error(`Error rendering page ${pageNum}:`, err);
+        }
       }
+
+      setRenderedPages(newRendered);
     };
 
-    renderPage();
-  }, [pdf, currentPage, scale]);
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+    renderAllPages();
+  }, [pdf, totalPages, scale]);
 
   const toggleFullscreen = useCallback(async () => {
     try {
@@ -159,6 +160,18 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
       console.error('Fullscreen error:', err);
     }
   }, []);
+
+  const scrollToTop = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: containerRef.current.scrollHeight, behavior: 'smooth' });
+    }
+  };
 
   const containerHeight = fillScreen ? 'calc(100vh - 120px)' : height;
   const containerClasses = fillScreen 
@@ -196,35 +209,31 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
       className={`${containerClasses} ${isFullscreen ? 'bg-background p-4' : ''}`} 
       data-testid="pdf-viewer"
     >
-      <div className="flex items-center justify-between gap-4 px-2 py-2">
+      <div className="flex items-center justify-between gap-4 px-2 py-2 sticky top-0 bg-background z-10 border-b">
         <div className="flex items-center gap-2">
-          {totalPages > 1 && (
-            <>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={goToPrevPage}
-                disabled={currentPage === 1}
-                data-testid="button-prev-page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              
-              <span className="text-sm text-muted-foreground min-w-[80px] text-center">
-                Page {currentPage} of {totalPages}
-              </span>
-              
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-                data-testid="button-next-page"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </>
-          )}
+          <span className="text-sm text-muted-foreground">
+            {totalPages} pages
+          </span>
+          
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={scrollToTop}
+            title="Scroll to top"
+            data-testid="button-scroll-top"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={scrollToBottom}
+            title="Scroll to bottom"
+            data-testid="button-scroll-bottom"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
         </div>
         
         <Button
@@ -243,10 +252,20 @@ export function PDFViewer({ pdfUrl, height = "600px", fillScreen = false, onPdfL
 
       <div 
         ref={containerRef} 
-        className={`w-full overflow-auto flex items-start justify-center ${fillScreen ? 'flex-1' : 'bg-muted/30 rounded-lg p-4'} ${isFullscreen ? 'flex-1' : ''}`} 
+        className={`w-full overflow-y-auto overflow-x-hidden flex flex-col items-center gap-4 ${fillScreen ? 'flex-1' : 'bg-muted/30 rounded-lg p-4'} ${isFullscreen ? 'flex-1' : ''}`} 
         style={{ height: isFullscreen ? 'calc(100vh - 80px)' : (fillScreen ? undefined : height) }}
       >
-        <canvas ref={canvasRef} className="max-w-full h-auto" />
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+          <canvas 
+            key={pageNum}
+            ref={(el) => {
+              if (el) {
+                canvasesRef.current.set(pageNum, el);
+              }
+            }}
+            className="max-w-full h-auto shadow-md border border-border rounded"
+          />
+        ))}
       </div>
     </div>
   );
