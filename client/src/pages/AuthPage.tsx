@@ -76,7 +76,7 @@ export default function AuthPage() {
       await signInWithGoogle();
       // The popup will handle navigation after successful auth
       // No need to redirect here - let the auth state change trigger it
-    } catch (error: any) {
+      } catch (error: any) {
       // Sign in failed
       console.error("Sign in error:", error);
       
@@ -86,8 +86,9 @@ export default function AuthPage() {
         errorMessage = 'Sign in was cancelled. Please try again.';
       } else if (error.code === 'auth/popup-blocked') {
         errorMessage = 'Pop-up was blocked. Please allow pop-ups for this site.';
-      } else if (error.code === 'auth/unauthorized-domain') {
-        errorMessage = 'This domain is not authorized. Please contact support.';
+      } else if (error.code === 'auth/unauthorized-domain' || error.message?.includes('auth/unauthorized-domain')) {
+        const domain = window.location.hostname;
+        errorMessage = `This domain (${domain}) is not authorized in Firebase. Please add it to your Firebase Console (Authentication > Settings > Authorized domains).`;
       } else if (error.code === 'auth/operation-not-allowed') {
         errorMessage = 'Google Sign-In is not enabled. Please contact support.';
       } else if (error.message.includes('initial state') || error.code === 'auth/missing-auth-event') {

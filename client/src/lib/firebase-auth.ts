@@ -33,8 +33,10 @@ export const signInWithGoogle = async (): Promise<AuthUser> => {
     const user = convertFirebaseUser(result.user);
     if (!user) throw new Error("Failed to get user data");
     return user;
-  } catch (error) {
-    throw new Error(`Google sign-in failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+  } catch (error: any) {
+    console.error("Full Firebase Auth Error:", error);
+    // Include original error info for better UI handling
+    throw error;
   }
 };
 
