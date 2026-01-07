@@ -1,32 +1,7 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut as firebaseSignOut, onAuthStateChanged, User } from "firebase/auth";
-import { FIREBASE_CONFIG } from "./google-oauth-config";
+import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "./firebase";
 
-// Validate Firebase config before initializing
-if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId) {
-  console.error("❌ Firebase configuration is missing. Please check your environment variables.", FIREBASE_CONFIG);
-  throw new Error("Firebase configuration is incomplete. Missing apiKey or projectId.");
-}
-
-console.log("🔧 Initializing Firebase with config:", {
-  projectId: FIREBASE_CONFIG.projectId,
-  authDomain: FIREBASE_CONFIG.authDomain,
-  appId: FIREBASE_CONFIG.appId,
-});
-
-// Initialize Firebase
-const app = initializeApp(FIREBASE_CONFIG);
-export const auth = getAuth(app);
-console.log("✅ Firebase Auth initialized");
-
-// Initialize Analytics
-try {
-  const analytics = getAnalytics(app);
-  console.log("✅ Firebase Analytics initialized");
-} catch (error) {
-  console.warn("⚠️ Firebase Analytics initialization failed (this is okay in development):", error);
-}
+console.log("✅ Firebase Auth loaded from shared instance");
 
 // Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
