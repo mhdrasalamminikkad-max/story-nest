@@ -14,6 +14,7 @@ interface AuthContextType {
   error: string | null;
   signInWithGoogle: () => Promise<GoogleUser>;
   signOut: () => Promise<void>;
+  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,8 +113,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleGetIdToken = async () => {
+    try {
+      const { getIdToken } = await getFirebaseAuth();
+      return await getIdToken();
+    } catch (err) {
+      console.error("Failed to get ID token:", err);
+      return null;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, signInWithGoogle: handleSignInWithGoogle, signOut: handleSignOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      error, 
+      signInWithGoogle: handleSignInWithGoogle, 
+      signOut: handleSignOut,
+      getIdToken: handleGetIdToken 
+    }}>
       {children}
     </AuthContext.Provider>
   );
