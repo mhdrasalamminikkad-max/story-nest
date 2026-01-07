@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { signInWithGoogle, signOutUser, onAuthStateChange, type AuthUser } from "../lib/firebase-auth";
 
 export interface GoogleUser {
   id: string;
@@ -19,6 +18,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Lazy load Firebase auth to prevent initialization errors from breaking the entire app
+let firebaseAuthModule: any = null;
+let firebaseAuthError: Error | null = null;
+
+const getFirebaseAuth = async () => {
+  if (firebaseAuthModule) return firebaseAuthModule;
+  if (firebaseAuthError) throw firebaseAuthError;
+  
+  try {
+    firebaseAuthModule = await import("../lib/firebase-auth");
+    return firebaseAuthModule;
+  } catch (error) {
+    firebaseAuthError = error as Error;
+    console.error("Failed to load Firebase auth:", error);
+    throw error;
+  }
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GoogleUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,24 +43,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to Firebase auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((authUser) => {
-      if (authUser) {
-        const googleUser: GoogleUser = {
-          id: authUser.id,
-          email: authUser.email,
-          displayName: authUser.displayName,
-          photoUrl: authUser.photoUrl,
-        };
-        setUser(googleUser);
-        localStorage.setItem("firebase_auth_user", JSON.stringify(googleUser));
-      } else {
-        setUser(null);
-        localStorage.removeItem("firebase_auth_user");
+    let unsubscribe: (() => void) | null = null;
+    
+    const setupAuth = async () => {
+      try {
+        const { onAuthStateChange } = await getFirebaseAuth();
+        
+        unsubscribe = onAuthStateChange((authUser) => {
+          if (authUser) {
+            const googleUser: GoogleUser = {
+              id: authUser.id,
+              email: authUser.email,
+              displayName: authUser.displayName,
+              photoUrl: authUser.photoUrl,
+            };
+            setUser(googleUser);
+            localStorage.setItem("firebase_auth_user", JSON.stringify(googleUser));
+          } else {
+            setUser(null);
+            localStorage.removeItem("firebase_auth_user");
+          }
+          setLoading(false);
+        });
+      } catch (err) {
+        console.error("Auth setup failed:", err);
+        setError(err instanceof Error ? err.message : "Authentication setup failed");
+        setLoading(false);
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    };
+    
+    setupAuth();
+    
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const handleSignInWithGoogle = async () => {
@@ -51,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     
     try {
+      const { signInWithGoogle } = await getFirebaseAuth();
       const authUser = await signInWithGoogle();
       const googleUser: GoogleUser = {
         id: authUser.id,
@@ -76,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     
     try {
+      const { signOutUser } = await getFirebaseAuth();
       await signOutUser();
       setUser(null);
       localStorage.removeItem("firebase_auth_user");
