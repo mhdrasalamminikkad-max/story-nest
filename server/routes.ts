@@ -702,7 +702,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Grant admin access with secret code
+  // Promote user to admin using secret code
+  app.post("/api/admin/promote", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { code } = req.body;
+
+      if (code !== "786786") {
+        return res.status(403).json({ error: "Invalid admin code" });
+      }
+
+      const [updated] = await db
+        .update(parentSettings)
+        .set({ isAdmin: true })
+        .where(eq(parentSettings.userId, userId))
+        .returning();
+
+      console.log(`User ${userId} promoted to admin via secret code`);
+      res.json({ success: true, isAdmin: updated.isAdmin });
+    } catch (error) {
+      console.error("Error promoting to admin:", error);
+      res.status(500).json({ error: "Failed to promote to admin" });
+    }
+  });
+
+  // Grant admin access with secret code (legacy endpoint for compatibility)
   app.post("/api/admin/grant", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;

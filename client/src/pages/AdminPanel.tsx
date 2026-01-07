@@ -16,7 +16,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw, Settings } from "lucide-react";
+import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw, Settings, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -494,31 +494,43 @@ export default function AdminPanel() {
 
   if (!adminCheck?.isAdmin) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
         <AnimatedBackground />
-        <div className="relative z-10">
-          <header className="container mx-auto px-4 py-6 flex items-center justify-between gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/dashboard")}
-              className="rounded-2xl"
-              data-testid="button-back-dashboard"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <ThemeToggle />
-          </header>
-          <main className="container mx-auto px-4 flex items-center justify-center min-h-[calc(100vh-100px)]">
-            <Card className="max-w-md">
-              <CardHeader>
-                <CardTitle>Access Denied</CardTitle>
-                <CardDescription>
-                  You do not have permission to access the admin panel.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </main>
+        <div className="relative z-10 w-full max-w-md">
+          <Card className="rounded-3xl border-2 shadow-xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+                <ShieldAlert className="w-10 h-10 text-destructive" />
+              </div>
+              <CardTitle className="font-heading text-3xl">Access Denied</CardTitle>
+              <CardDescription className="text-base">
+                You do not have permission to access the admin panel.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="p-4 bg-muted rounded-2xl border-2 border-dashed border-border text-center">
+                <p className="text-sm font-medium mb-2 text-foreground">Admin Secret Access</p>
+                <p className="text-xs text-muted-foreground">
+                  Type "786786" anywhere on the site to trigger the secret admin password dialog.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Button 
+                  className="w-full rounded-2xl h-12 text-lg font-medium" 
+                  onClick={() => setLocation("/dashboard")}
+                >
+                  Back to Dashboard
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full rounded-2xl" 
+                  onClick={() => setLocation("/")}
+                >
+                  Return Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
