@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
@@ -11,7 +11,9 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-GPLM6TS2T7"
 };
 
-export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Singleton pattern for Firebase app
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export { app };
 export const auth = getAuth(app);
 
 // Force IndexedDB persistence (more reliable for WebView redirects)
