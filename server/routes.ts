@@ -782,6 +782,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual payment proof submission
+  app.post("/api/subscription/payment-proof", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const { planId, screenshotUrl, paymentDetails, address } = req.body;
+
+      const [proof] = await db.insert(paymentProofs).values({
+        userId,
+        planId,
+        screenshotUrl,
+        paymentDetails,
+        address,
+        status: "pending",
+      }).returning();
+
+      // Update subscription status to pending_approval
+      await db.update(parentSettings)
+        .set({ subscriptionStatus: "pending_approval" })
+        .where(eq(parentSettings.userId, userId));
+
+      res.json(proof);
+    } catch (error) {
+      console.error("Error submitting payment proof:", error);
+      res.status(500).json({ error: "Failed to submit payment proof" });
+    }
+  });
+
+  // Admin: Get pending payment proofs
+  app.get("/api/admin/payment-proofs", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const [settings] = await db.select().from(parentSettings).where(eq(parentSettings.userId, userId));
+      
+      if (!settings?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const pendingProofs = await db.select().from(paymentProofs).where(eq(paymentProofs.status, "pending"));
+      res.json(pendingProofs);
+    } catch (error) {
+      console.error("Error fetching payment proofs:", error);
+      res.status(500).json({ error: "Failed to fetch payment proofs" });
+    }
+  });
+
+  // Admin: Approve/Reject payment proof
+  app.post("/api/admin/payment-proofs/:id/review", authenticateUser, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.userId!;
+      const [adminSettings] = await db.select().from(parentSettings).where(eq(parentSettings.userId, userId));
+      
+      if (!adminSettings?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const { action, rejectionReason } = req.body; // action: 'approve' | 'reject'
+
+      const [proof] = await db.select().from(paymentProofs).where(eq(paymentProofs.id, id));
+      if (!proof) {
+        return res.status(404).json({ error: "Payment proof not found" });
+      }
+
+      if (action === "approve") {
+        const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, proof.planId));
+        if (!plan) return res.status(404).json({ error: "Plan not found" });
+
+        const days = plan.billingPeriod === "yearly" ? 365 : 30;
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + days);
+
+        await db.transaction(async (tx) => {
+          await tx.update(paymentProofs)
+            .set({ status: "approved", reviewedAt: new Date() })
+            .where(eq(paymentProofs.id, id));
+
+          await tx.update(parentSettings)
+            .set({ 
+              subscriptionStatus: "active", 
+              activePlanId: proof.planId,
+              subscriptionEndsAt: endDate
+            })
+            .where(eq(parentSettings.userId, proof.userId));
+        });
+      } else {
+        await db.update(paymentProofs)
+          .set({ status: "rejected", rejectionReason, reviewedAt: new Date() })
+          .where(eq(paymentProofs.id, id));
+          
+        await db.update(parentSettings)
+          .set({ subscriptionStatus: "expired" }) // or whatever state makes sense
+          .where(eq(parentSettings.userId, proof.userId));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reviewing payment proof:", error);
+      res.status(500).json({ error: "Failed to review payment proof" });
+    }
+  });
+
   // Change PIN endpoint
   app.post("/api/change-pin", authenticateUser, async (req: AuthRequest, res) => {
     try {

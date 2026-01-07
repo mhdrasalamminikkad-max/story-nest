@@ -39,6 +39,22 @@ export const parentSettings = pgTable("parent_settings", {
   trialStartedAt: timestamp("trial_started_at"),
   trialEndsAt: timestamp("trial_ends_at"),
   subscriptionStatus: varchar("subscription_status", { length: 20 }).notNull().default("trial"),
+  activePlanId: varchar("active_plan_id", { length: 50 }),
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
+});
+
+// Manual payment proof table
+export const paymentProofs = pgTable("payment_proofs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  planId: varchar("plan_id").notNull(),
+  screenshotUrl: text("screenshot_url").notNull(),
+  paymentDetails: text("payment_details"),
+  address: text("address"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  reviewedAt: timestamp("reviewed_at"),
 });
 
 export const bookmarks = pgTable("bookmarks", {

@@ -16,7 +16,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw, Settings, ShieldAlert } from "lucide-react";
+import { BarChart3, Users, BookOpen, Bookmark, Trash2, ArrowLeft, CheckCircle, XCircle, Clock, Plus, Mic, Square, Volume2, CreditCard, Edit, DollarSign, Coins, RefreshCw, Settings, ShieldAlert, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -68,6 +68,128 @@ interface AdminUser {
   coins: number;
   isAdmin: boolean;
   isBlocked: boolean;
+}
+
+function PaymentProofList() {
+  const { data: proofs, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/payment-proofs"],
+  });
+
+  const { toast } = useToast();
+  const mutation = useMutation({
+    mutationFn: async ({ id, action, rejectionReason }: { id: string; action: 'approve' | 'reject'; rejectionReason?: string }) => {
+      await apiRequest("POST", `/api/admin/payment-proofs/${id}/review`, { action, rejectionReason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/payment-proofs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/parent-settings"] });
+      toast({ title: "Success", description: "Payment review submitted successfully" });
+    },
+  });
+
+  if (isLoading) return <div className="p-4 text-center">Loading payments...</div>;
+  if (!proofs?.length) return <div className="p-4 text-center text-muted-foreground">No pending payments</div>;
+
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      {proofs.map((proof) => (
+        <Card key={proof.id} className="p-4 rounded-2xl border bg-muted/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">User ID: <span className="font-normal">{proof.userId}</span></p>
+              <p className="text-sm font-semibold">Plan ID: <span className="font-normal">{proof.planId}</span></p>
+              <p className="text-sm font-semibold">Details: <span className="font-normal">{proof.paymentDetails || "N/A"}</span></p>
+              <p className="text-sm font-semibold">Address: <span className="font-normal">{proof.address || "N/A"}</span></p>
+              <a href={proof.screenshotUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm flex items-center gap-1">
+                View Receipt <CheckCircle className="w-3 h-3" />
+              </a>
+            </div>
+            <div className="flex flex-col gap-2 justify-center">
+              <Button 
+                onClick={() => mutation.mutate({ id: proof.id, action: 'approve' })}
+                disabled={mutation.isPending}
+                className="rounded-xl w-full"
+              >
+                Approve Plan
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const reason = window.prompt("Rejection reason?");
+                  if (reason !== null) mutation.mutate({ id: proof.id, action: 'reject', rejectionReason: reason });
+                }}
+                disabled={mutation.isPending}
+                className="rounded-xl w-full text-destructive border-destructive hover:bg-destructive/10"
+              >
+                Reject
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function PaymentProofList() {
+  const { data: proofs, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/payment-proofs"],
+  });
+
+  const { toast } = useToast();
+  const mutation = useMutation({
+    mutationFn: async ({ id, action, rejectionReason }: { id: string; action: 'approve' | 'reject'; rejectionReason?: string }) => {
+      await apiRequest("POST", `/api/admin/payment-proofs/${id}/review`, { action, rejectionReason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/payment-proofs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/parent-settings"] });
+      toast({ title: "Success", description: "Payment review submitted successfully" });
+    },
+  });
+
+  if (isLoading) return <div className="p-4 text-center">Loading payments...</div>;
+  if (!proofs?.length) return <div className="p-4 text-center text-muted-foreground">No pending payments</div>;
+
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      {proofs.map((proof) => (
+        <Card key={proof.id} className="p-4 rounded-2xl border bg-muted/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">User ID: <span className="font-normal">{proof.userId}</span></p>
+              <p className="text-sm font-semibold">Plan ID: <span className="font-normal">{proof.planId}</span></p>
+              <p className="text-sm font-semibold">Details: <span className="font-normal">{proof.paymentDetails || "N/A"}</span></p>
+              <p className="text-sm font-semibold">Address: <span className="font-normal">{proof.address || "N/A"}</span></p>
+              <a href={proof.screenshotUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm flex items-center gap-1">
+                View Receipt <CheckCircle className="w-3 h-3" />
+              </a>
+            </div>
+            <div className="flex flex-col gap-2 justify-center">
+              <Button 
+                onClick={() => mutation.mutate({ id: proof.id, action: 'approve' })}
+                disabled={mutation.isPending}
+                className="rounded-xl w-full"
+              >
+                Approve Plan
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const reason = window.prompt("Rejection reason?");
+                  if (reason !== null) mutation.mutate({ id: proof.id, action: 'reject', rejectionReason: reason });
+                }}
+                disabled={mutation.isPending}
+                className="rounded-xl w-full text-destructive border-destructive hover:bg-destructive/10"
+              >
+                Reject
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 export default function AdminPanel() {
@@ -566,6 +688,19 @@ export default function AdminPanel() {
             </div>
 
             <TrialBanner />
+
+            <Card className="rounded-3xl border-2 hover-elevate mb-8">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <CardTitle className="font-heading">Approve Plans & Payments</CardTitle>
+                </div>
+                <CardDescription>Review and approve manual payment proofs for premium plans</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PaymentProofList />
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <Card data-testid="card-stat-users">
