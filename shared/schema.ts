@@ -87,6 +87,30 @@ export type Story = z.infer<typeof storySchema>;
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type ReviewStory = z.infer<typeof reviewStorySchema>;
 
+// Manual payment proof schema
+export const paymentProofSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  planId: z.string(),
+  screenshotUrl: z.string(),
+  paymentDetails: z.string().optional(),
+  address: z.string().optional(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  rejectionReason: z.string().optional(),
+  createdAt: z.number(),
+  reviewedAt: z.number().optional(),
+});
+
+export const insertPaymentProofSchema = paymentProofSchema.omit({
+  id: true,
+  status: true,
+  createdAt: true,
+  reviewedAt: true,
+});
+
+export type PaymentProof = z.infer<typeof paymentProofSchema>;
+export type InsertPaymentProof = z.infer<typeof insertPaymentProofSchema>;
+
 // Parent settings schema for child lock and preferences
 export const parentSettingsSchema = z.object({
   userId: z.string(),
@@ -104,7 +128,9 @@ export const parentSettingsSchema = z.object({
   coins: z.number().default(0),
   trialStartedAt: z.number().optional(),
   trialEndsAt: z.number().optional(),
-  subscriptionStatus: z.enum(["trial", "active", "expired", "canceled"]).default("trial"),
+  subscriptionStatus: z.enum(["trial", "active", "expired", "canceled", "pending_approval"]).default("trial"),
+  activePlanId: z.string().optional(),
+  subscriptionEndsAt: z.number().optional(),
 });
 
 export const insertParentSettingsSchema = z.object({
