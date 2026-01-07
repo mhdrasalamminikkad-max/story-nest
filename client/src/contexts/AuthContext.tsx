@@ -18,22 +18,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Lazy load Firebase auth to prevent initialization errors from breaking the entire app
-let firebaseAuthModule: any = null;
-let firebaseAuthError: Error | null = null;
+// Use direct imports to avoid initialization races
+import * as firebaseAuthModule from "../lib/firebase-auth";
 
 const getFirebaseAuth = async () => {
-  if (firebaseAuthModule) return firebaseAuthModule;
-  if (firebaseAuthError) throw firebaseAuthError;
-  
-  try {
-    firebaseAuthModule = await import("../lib/firebase-auth");
-    return firebaseAuthModule;
-  } catch (error) {
-    firebaseAuthError = error as Error;
-    console.error("Failed to load Firebase auth:", error);
-    throw error;
-  }
+  return firebaseAuthModule;
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

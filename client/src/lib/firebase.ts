@@ -2,13 +2,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAi4MmMyAy3DXNV0HWkYx9G7aw415EJK2k",
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "tellmamma"}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "tellmamma",
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "tellmamma"}.firebasestorage.app`,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "820379114528",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:820379114528:web:479b678dfcc7ecaab07045",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-GPLM6TS2T7"
+  apiKey: "AIzaSyAi4MmMyAy3DXNV0HWkYx9G7aw415EJK2k",
+  authDomain: "tellmamma.firebaseapp.com",
+  projectId: "tellmamma",
+  storageBucket: "tellmamma.firebasestorage.app",
+  messagingSenderId: "820379114528",
+  appId: "1:820379114528:web:479b678dfcc7ecaab07045",
+  measurementId: "G-GPLM6TS2T7"
 };
 
 // Singleton pattern for Firebase app
@@ -17,7 +17,6 @@ export { app };
 export const auth = getAuth(app);
 
 // Force IndexedDB persistence (more reliable for WebView redirects)
-// Falls back to localStorage if IndexedDB is unavailable
 async function initializePersistence() {
   try {
     // Try IndexedDB first (most reliable for auth state across redirects)

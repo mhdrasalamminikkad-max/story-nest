@@ -1,10 +1,10 @@
 // Firebase Configuration
 export const FIREBASE_CONFIG = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyAi4MmMyAy3DXNV0HWkYx9G7aw415EJK2k",
+  authDomain: "tellmamma.firebaseapp.com",
+  projectId: "tellmamma",
+  storageBucket: "tellmamma.firebasestorage.app",
+  messagingSenderId: "820379114528",
+  appId: "1:820379114528:web:479b678dfcc7ecaab07045",
+  measurementId: "G-GPLM6TS2T7"
 };
