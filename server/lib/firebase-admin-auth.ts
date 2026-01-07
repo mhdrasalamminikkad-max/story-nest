@@ -1,7 +1,7 @@
-import * as admin from "firebase-admin";
+import { auth } from "../firebase-admin";
 
 // Get auth from initialized Firebase Admin app
-const adminAuth = admin.auth();
+// Note: auth is pre-initialized in ../firebase-admin.ts
 
 /**
  * Verify Firebase ID Token
@@ -10,7 +10,10 @@ const adminAuth = admin.auth();
  */
 export const verifyIdToken = async (token: string) => {
   try {
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    if (!auth) {
+      throw new Error("Firebase Auth not initialized");
+    }
+    const decodedToken = await auth.verifyIdToken(token);
     return decodedToken;
   } catch (error) {
     throw new Error(`Token verification failed: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -24,7 +27,10 @@ export const verifyIdToken = async (token: string) => {
  */
 export const getUserById = async (uid: string) => {
   try {
-    return await adminAuth.getUser(uid);
+    if (!auth) {
+      throw new Error("Firebase Auth not initialized");
+    }
+    return await auth.getUser(uid);
   } catch (error) {
     throw new Error(`Failed to get user: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
@@ -37,7 +43,10 @@ export const getUserById = async (uid: string) => {
  */
 export const createCustomToken = async (uid: string) => {
   try {
-    return await adminAuth.createCustomToken(uid);
+    if (!auth) {
+      throw new Error("Firebase Auth not initialized");
+    }
+    return await auth.createCustomToken(uid);
   } catch (error) {
     throw new Error(`Failed to create custom token: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
@@ -50,7 +59,10 @@ export const createCustomToken = async (uid: string) => {
  */
 export const setUserClaims = async (uid: string, customClaims: { [key: string]: any }) => {
   try {
-    await adminAuth.setCustomUserClaims(uid, customClaims);
+    if (!auth) {
+      throw new Error("Firebase Auth not initialized");
+    }
+    await auth.setCustomUserClaims(uid, customClaims);
   } catch (error) {
     throw new Error(`Failed to set custom claims: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
