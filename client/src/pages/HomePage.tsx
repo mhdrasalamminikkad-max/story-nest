@@ -49,7 +49,7 @@ export default function HomePage() {
 
               <div className="flex items-center gap-2 sm:gap-3">
                 <ThemeToggle />
-                {user ? (
+                {user && (
                   <Button
                     onClick={() => setLocation("/dashboard")}
                     className="rounded-2xl font-semibold bg-[#febc2d] text-[#1a1c25] hover:bg-[#febc2d]/90 hover:shadow-lg transition-all"
@@ -57,15 +57,6 @@ export default function HomePage() {
                   >
                     <User className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">Dashboard</span>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setLocation("/auth")}
-                    className="rounded-2xl font-semibold bg-[#E5683A] text-white hover:bg-[#E5683A]/90 hover:shadow-lg transition-all"
-                    data-testid="button-sign-in"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    <span>Sign In</span>
                   </Button>
                 )}
               </div>
