@@ -129,7 +129,7 @@ export const parentSettingsSchema = z.object({
   trialStartedAt: z.number().optional(),
   trialEndsAt: z.number().optional(),
   subscriptionStatus: z.enum(["trial", "active", "expired", "canceled", "pending_approval"]).default("trial"),
-  activePlanId: z.string().optional(),
+  activePlanId: z.string().optional().nullable(),
   subscriptionEndsAt: z.number().optional(),
 });
 

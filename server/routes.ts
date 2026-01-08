@@ -3,16 +3,17 @@ import { createServer, type Server } from "http";
 import { authenticateUser, checkNotBlocked, type AuthRequest } from "./middleware/auth";
 import { requireAdmin } from "./middleware/adminAuth";
 import { getSubscriptionInfo, checkSubscriptionStatus, type SubscriptionRequest } from "./middleware/subscription";
-import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema, insertStoryCategorySchema, insertStoryTypeSchema } from "@shared/schema";
-import type { Story, ParentSettings, Bookmark, SubscriptionPlan } from "@shared/schema";
+import { insertStorySchema, insertParentSettingsSchema, insertBookmarkSchema, reviewStorySchema, insertSubscriptionPlanSchema, updateSubscriptionPlanSchema, updateCoinSettingsSchema, updatePlanCoinCostSchema, insertCoinPackageSchema, updateCoinPackageSchema, insertCheckpointSchema, insertReadingSessionSchema, insertStoryCategorySchema, insertStoryTypeSchema, insertPaymentProofSchema } from "@shared/schema";
+import type { Story, ParentSettings, Bookmark, SubscriptionPlan, PaymentProof } from "@shared/schema";
 import { hashPIN, verifyPIN } from "./utils/crypto";
 import { db } from "./db";
-import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions, storyCategories, storyTypes } from "./db/schema";
+import { stories, parentSettings, bookmarks, subscriptionPlans, coinSettings, planCoinCosts, userSubscriptions, coinPackages, processedPayments, checkpoints, checkpointProgress, readingSessions, badges, gameSessions, storyCategories, storyTypes, paymentProofs } from "./db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { initializeWebSocket, wsManager } from "./websocket";
 import { verifyIdToken, setUserClaims } from "./lib/firebase-admin-auth";
+import { auth } from "./firebase-admin";
 
 // Helper function to filter out blob URLs and only allow Firebase storage URLs
 function filterBlobUrl(url: string | undefined | null): string | undefined {
@@ -530,6 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           theme: settingsData.theme,
           isAdmin: isFirstUser,
           subscriptionStatus: "trial",
+          activePlanId: null,
         })
         .onConflictDoUpdate({
           target: parentSettings.userId,
@@ -541,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             readingTimeLimit: settingsData.readingTimeLimit,
             fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
             theme: settingsData.theme,
-
+            activePlanId: null,
             // Trial fields are NOT updated on settings update - only set on first creation
           },
         })
@@ -2781,6 +2783,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize WebSocket
   initializeWebSocket(httpServer);
+
+  // Admin: Get all payment proofs
+  app.get("/api/admin/payment-proofs", authenticateUser, requireAdmin, async (req, res) => {
+    try {
+      const proofs = await db
+        .select()
+        .from(paymentProofs)
+        .where(eq(paymentProofs.status, "pending"))
+        .orderBy(desc(paymentProofs.createdAt));
+      res.json(proofs);
+    } catch (error) {
+      console.error("Error fetching payment proofs:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin: Review payment proof
+  app.post("/api/admin/payment-proofs/:id/review", authenticateUser, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { action, rejectionReason } = req.body;
+
+      const [proof] = await db
+        .select()
+        .from(paymentProofs)
+        .where(eq(paymentProofs.id, id));
+
+      if (!proof) {
+        return res.status(404).json({ error: "Payment proof not found" });
+      }
+
+      const status = action === "approve" ? "approved" : "rejected";
+      
+      await db.update(paymentProofs)
+        .set({ 
+          status, 
+          rejectionReason: action === "reject" ? rejectionReason : null,
+          reviewedAt: new Date()
+        })
+        .where(eq(paymentProofs.id, id));
+
+      if (action === "approve") {
+        // Find the plan to calculate end date
+        const [plan] = await db
+          .select()
+          .from(subscriptionPlans)
+          .where(eq(subscriptionPlans.id, proof.planId));
+
+        let durationDays = 30;
+        if (plan?.billingPeriod === "yearly") durationDays = 365;
+        else if (plan?.billingPeriod === "weekly") durationDays = 7;
+
+        const endsAt = new Date();
+        endsAt.setDate(endsAt.getDate() + durationDays);
+
+        await db.update(parentSettings)
+          .set({
+            subscriptionStatus: "active",
+            activePlanId: proof.planId,
+            subscriptionEndsAt: endsAt
+          })
+          .where(eq(parentSettings.userId, proof.userId));
+      } else {
+        await db.update(parentSettings)
+          .set({ subscriptionStatus: "expired" })
+          .where(eq(parentSettings.userId, proof.userId));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reviewing payment proof:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   return httpServer;
 }
