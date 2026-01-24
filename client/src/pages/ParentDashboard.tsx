@@ -764,7 +764,7 @@ export default function ParentDashboard() {
               </Button>
             </div>
 
-            <Card className="md:hidden rounded-3xl mb-6 overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 shadow-lg">
+            <Card className="md:hidden rounded-3xl mb-6 overflow-hidden bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518] shadow-lg">
               <CardContent className="p-5 space-y-4">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
@@ -801,7 +801,7 @@ export default function ParentDashboard() {
                   >
                     <Button
                       onClick={() => setLocation("/checkpoints")}
-                      className="w-full rounded-2xl bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-11"
+                      className="w-full rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold shadow-lg hover:shadow-xl transition-all h-11"
                       data-testid="button-checkpoints"
                       title="Checkpoints"
                     >
@@ -815,7 +815,7 @@ export default function ParentDashboard() {
                   >
                     <Button
                       onClick={() => setLocation("/pricing")}
-                      className="w-full rounded-2xl bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-11"
+                      className="w-full rounded-2xl bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-xl transition-all h-11"
                       data-testid="button-view-plans"
                       title="View Plans"
                     >
@@ -830,7 +830,7 @@ export default function ParentDashboard() {
                 >
                   <Button
                     onClick={enterChildMode}
-                    className="w-full rounded-2xl bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-12"
+                    className="w-full rounded-2xl bg-gradient-to-r from-[#E5683A] via-[#F5A962] to-[#FFB366] hover:from-[#d94f25] hover:via-[#e8915a] hover:to-[#f5a04f] text-white font-bold shadow-lg hover:shadow-xl transition-all h-12"
                     data-testid="button-child-mode"
                   >
                     <Play className="w-5 h-5 mr-2" />
@@ -865,7 +865,7 @@ export default function ParentDashboard() {
                       voiceoverUrl: undefined,
                     });
                   }}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 hover:from-pink-500 hover:via-rose-500 hover:to-red-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-add-story-desktop"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -880,7 +880,7 @@ export default function ParentDashboard() {
               >
                 <Button
                   onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-checkpoints-desktop"
                   title="Checkpoints"
                 >
@@ -896,7 +896,7 @@ export default function ParentDashboard() {
               >
                 <Button
                   onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-view-plans-desktop"
                   title="View Plans"
                 >
@@ -912,7 +912,7 @@ export default function ParentDashboard() {
               >
                 <Button
                   onClick={enterChildMode}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] via-[#F5A962] to-[#FFB366] hover:from-[#d94f25] hover:via-[#e8915a] hover:to-[#f5a04f] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-child-mode-desktop"
                 >
                   <Play className="w-5 h-5 mr-2" />
@@ -925,14 +925,14 @@ export default function ParentDashboard() {
 
           <Tabs defaultValue="published" className="space-y-6 sm:space-y-8">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <TabsList className="w-full sm:w-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 border-3 border-indigo-300 rounded-2xl p-1.5 shadow-lg" data-testid="tabs-parent-dashboard">
-                <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-published">
+              <TabsList className="w-full sm:w-auto bg-gradient-to-r from-[#FFE8CC] via-[#FFF4D6] to-[#FFF8E7] border-3 border-[#F5C518] rounded-2xl p-1.5 shadow-lg" data-testid="tabs-parent-dashboard">
+                <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#F5C518] data-[state=active]:via-[#FFD54F] data-[state=active]:to-[#FFC107] data-[state=active]:text-gray-800 data-[state=active]:shadow-lg transition-all" data-testid="tab-published">
                   📚 Published
                 </TabsTrigger>
-                <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-your-stories">
+                <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#F5C518] data-[state=active]:via-[#FFD54F] data-[state=active]:to-[#FFC107] data-[state=active]:text-gray-800 data-[state=active]:shadow-lg transition-all" data-testid="tab-your-stories">
                   ✍️ Your Stories
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-settings">
+                <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#F5C518] data-[state=active]:via-[#FFD54F] data-[state=active]:to-[#FFC107] data-[state=active]:text-gray-800 data-[state=active]:shadow-lg transition-all" data-testid="tab-settings">
                   <SettingsIcon className="w-4 h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">⚙️ Settings</span>
                 </TabsTrigger>
@@ -949,7 +949,7 @@ export default function ParentDashboard() {
                     <Button
                       variant={filterBookmarked ? "default" : "outline"}
                       onClick={() => setFilterBookmarked(!filterBookmarked)}
-                      className={`rounded-2xl font-bold border-2 transition-all shadow-md ${filterBookmarked ? "bg-gradient-to-r from-red-400 to-pink-400 text-white border-red-400 shadow-lg" : "border-red-300 text-red-600 hover:bg-red-50"}`}
+                      className={`rounded-2xl font-bold border-2 transition-all shadow-md ${filterBookmarked ? "bg-gradient-to-r from-[#E5683A] to-[#F5A962] text-white border-[#E5683A] shadow-lg" : "border-[#F5C518] text-[#E5683A] hover:bg-[#FFF8E7]"}`}
                       data-testid="button-filter-bookmarks"
                     >
                       <BookmarkCheck className="w-5 h-5 mr-2" />
@@ -973,7 +973,7 @@ export default function ParentDashboard() {
                     whileHover={{ scale: 1.02 }}
                   >
                     <Select value={languageFilter} onValueChange={setLanguageFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-blue-300 font-semibold bg-gradient-to-r from-blue-50 to-cyan-50 hover:border-blue-400" data-testid="select-language-filter">
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#F5C518] font-semibold bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] hover:border-[#FFD54F]" data-testid="select-language-filter">
                         <SelectValue placeholder="🌍 Filter language" />
                       </SelectTrigger>
                       <SelectContent>
@@ -987,7 +987,7 @@ export default function ParentDashboard() {
                     whileHover={{ scale: 1.02 }}
                   >
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-purple-300 font-semibold bg-gradient-to-r from-purple-50 to-pink-50 hover:border-purple-400" data-testid="select-category-filter">
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#E5683A] font-semibold bg-gradient-to-r from-[#FFE8CC] to-[#FFF4D6] hover:border-[#F5A962]" data-testid="select-category-filter">
                         <SelectValue placeholder="📚 Filter category" />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
@@ -1005,7 +1005,7 @@ export default function ParentDashboard() {
                     whileHover={{ scale: 1.02 }}
                   >
                     <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-amber-300 font-semibold bg-gradient-to-r from-amber-50 to-orange-50 hover:border-amber-400" data-testid="select-story-type-filter">
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#F5C518] font-semibold bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] hover:border-[#FFD54F]" data-testid="select-story-type-filter">
                         <SelectValue placeholder="🎭 Filter type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1030,7 +1030,7 @@ export default function ParentDashboard() {
                 </div>
               ) : displayedStories.length === 0 ? (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="rounded-3xl border-3 border-dashed border-indigo-300 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-center py-16 shadow-lg">
+                  <Card className="rounded-3xl border-3 border-dashed border-[#F5C518] bg-gradient-to-br from-[#FFFBF0] via-[#FFF8E7] to-[#FFE8CC] text-center py-16 shadow-lg">
                     <CardContent className="pt-8">
                       <motion.div
                         animate={{ y: [0, -10, 0] }}
@@ -1039,10 +1039,10 @@ export default function ParentDashboard() {
                       >
                         📚
                       </motion.div>
-                      <p className="text-xl font-bold text-gray-700">
+                      <p className="text-xl font-bold text-[#E5683A]">
                         {filterBookmarked ? "No bookmarked stories yet" : "No published stories yet"}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">Explore and find amazing stories! 🌟</p>
+                      <p className="text-sm text-[#d94f25] mt-2">Explore and find amazing stories! 🌟</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1115,15 +1115,15 @@ export default function ParentDashboard() {
                       transition={{ delay: idx * 0.05 }}
                       whileHover={{ x: 5, transition: { duration: 0.2 } }}
                     >
-                      <Card key={story.id} className="rounded-3xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-lg transition-all" data-testid={`card-story-${story.id}`}>
+                      <Card key={story.id} className="rounded-3xl bg-gradient-to-r from-[#FFF8E7] via-[#FFFBF0] to-[#FFE8CC] border-2 border-[#F5C518] hover:border-[#FFD54F] hover:shadow-lg transition-all" data-testid={`card-story-${story.id}`}>
                         <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-2">
                           <div className="flex-1">
-                            <CardTitle className="text-xl text-gray-800">{story.title}</CardTitle>
-                            <CardDescription className="mt-1 text-gray-600">{story.summary}</CardDescription>
+                            <CardTitle className="text-xl text-[#E5683A]">{story.title}</CardTitle>
+                            <CardDescription className="mt-1 text-[#d94f25]">{story.summary}</CardDescription>
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             {getStatusBadge(story)}
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-[#c93d1a]">
                               {formatDate(story.createdAt)}
                           </span>
                         </div>
@@ -1144,7 +1144,7 @@ export default function ParentDashboard() {
                               >
                                 <Button
                                   onClick={() => handleEditStory(story)}
-                                  className="rounded-2xl bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold shadow-md hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all"
+                                  className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#F5A962] text-white font-bold shadow-md hover:shadow-lg hover:from-[#d94f25] hover:to-[#e8915a] transition-all"
                                   data-testid={`button-edit-${story.id}`}
                                 >
                                   ✏️ Edit Draft
@@ -1157,7 +1157,7 @@ export default function ParentDashboard() {
                                 <Button
                                   onClick={() => submitStoryMutation.mutate(story.id)}
                                   disabled={submitStoryMutation.isPending}
-                                  className="rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 text-white font-bold shadow-md hover:shadow-lg hover:from-green-500 hover:to-emerald-500 transition-all disabled:opacity-50"
+                                  className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all disabled:opacity-50"
                                   data-testid={`button-submit-${story.id}`}
                                 >
                                   🚀 Submit for Review
@@ -1166,7 +1166,7 @@ export default function ParentDashboard() {
                             </>
                           )}
                           {story.status === "pending_review" && (
-                            <p className="text-sm text-indigo-700 italic font-semibold">
+                            <p className="text-sm text-[#E5683A] italic font-semibold">
                               ⏳ Your story is being reviewed by an admin
                             </p>
                           )}
@@ -1180,7 +1180,7 @@ export default function ParentDashboard() {
                                   // All stories in parent dashboard go to parent read page
                                   setLocation(`/read-story?story=${story.id}`);
                                 }}
-                                className="rounded-2xl bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold shadow-md hover:shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all"
+                                className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all"
                                 data-testid={`button-read-${story.id}`}
                               >
                                 <Play className="w-4 h-4 mr-2" />
@@ -1198,62 +1198,79 @@ export default function ParentDashboard() {
             </TabsContent>
 
             <TabsContent value="settings">
-              <Card className="rounded-3xl" data-testid="card-settings">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Account Settings</CardTitle>
-                  <CardDescription>Manage your account and preferences</CardDescription>
+              <Card className="rounded-3xl bg-gradient-to-br from-[#FFF8E7] via-[#FFFBF0] to-[#FFE8CC] border-2 border-[#F5C518] shadow-lg" data-testid="card-settings">
+                <CardHeader className="bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] rounded-t-3xl">
+                  <CardTitle className="text-3xl font-bold text-gray-800">⚙️ Settings</CardTitle>
+                  <CardDescription className="text-gray-700 font-semibold">Manage your account and preferences</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   {parentSettings ? (
                     <>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-[#1a1c25]">Current Coins Balance</p>
-                        <p className="text-3xl font-bold text-primary flex items-center gap-2">
-                          <Coins className="w-6 h-6" />
-                          {parentSettings.coins}
-                        </p>
-                      </div>
-                      <Button 
-                        onClick={() => setShowAddStory(true)}
-                        className="rounded-2xl w-full bg-[#febc2d] text-[#1a1c25]"
-                        data-testid="button-earn-coins-settings"
-                      >
-                        <Coins className="w-4 h-4 mr-2" />
-                        Earn More Coins
-                      </Button>
-                      <div className="border-t pt-6">
-                        <Button
-                          onClick={() => setShowEditPin(true)}
-                          variant="outline"
-                          className="rounded-2xl w-full bg-[#febc2d] text-[#1a1c25]"
-                          data-testid="button-edit-child-lock"
+                      <motion.div className="bg-gradient-to-r from-[#FFE8CC] to-[#FFF4D6] rounded-2xl p-6 border-2 border-[#F5C518]">
+                        <p className="text-sm font-bold text-[#E5683A] mb-2">💰 Coins Balance</p>
+                        <motion.p 
+                          className="text-4xl font-bold text-[#E5683A] flex items-center gap-2"
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
                         >
-                          <Lock className="w-4 h-4 mr-2" />
-                          Edit Child Lock PIN
-                        </Button>
-                      </div>
-                      <div className="border-t pt-6">
-                        <p className="text-sm text-[#1a1c25]">
-                          Your subscription details and preferences appear here. For more options, visit the Plans page.
-                        </p>
-                      </div>
-                      <Button 
-                        onClick={async () => {
-                          await signOut();
-                          setLocation("/");
-                          toast({
-                            title: "Signed out",
-                            description: "You have been signed out successfully",
-                            duration: 2000,
-                          });
-                        }}
-                        variant="destructive"
-                        className="rounded-2xl w-full"
-                        data-testid="button-sign-out-settings"
+                          <Coins className="w-8 h-8" />
+                          {parentSettings.coins}
+                        </motion.p>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sign Out
-                      </Button>
+                        <Button 
+                          onClick={() => setShowAddStory(true)}
+                          className="rounded-2xl w-full bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold h-11 shadow-lg hover:shadow-xl transition-all"
+                          data-testid="button-earn-coins-settings"
+                        >
+                          <Coins className="w-5 h-5 mr-2" />
+                          ⭐ Earn More Coins by Submitting Stories
+                        </Button>
+                      </motion.div>
+                      <div className="border-t-2 border-[#F5C518] pt-6">
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Button
+                            onClick={() => setShowEditPin(true)}
+                            className="rounded-2xl w-full bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold h-11 shadow-lg hover:shadow-xl transition-all"
+                            data-testid="button-edit-child-lock"
+                          >
+                            <Lock className="w-5 h-5 mr-2" />
+                            🔐 Edit Child Lock PIN
+                          </Button>
+                        </motion.div>
+                      </div>
+                      <motion.div className="bg-gradient-to-r from-[#FFE8CC] to-[#FFFBF0] rounded-2xl p-5 border-2 border-[#E5683A]">
+                        <p className="text-sm text-[#d94f25] font-semibold leading-relaxed">
+                          📝 Your subscription details and preferences are managed here. Visit the <span className="text-[#E5683A] font-bold">Plans page</span> for more options and premium features! ✨
+                        </p>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button 
+                          onClick={async () => {
+                            await signOut();
+                            setLocation("/");
+                            toast({
+                              title: "Signed out",
+                              description: "You have been signed out successfully",
+                              duration: 2000,
+                            });
+                          }}
+                          className="rounded-2xl w-full bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold h-11 shadow-lg hover:shadow-xl transition-all"
+                          data-testid="button-sign-out-settings"
+                        >
+                          <LogOut className="w-5 h-5 mr-2" />
+                          👋 Sign Out
+                        </Button>
+                      </motion.div>
                     </>
                   ) : (
                     <div className="text-center py-12">
@@ -1675,19 +1692,19 @@ export default function ParentDashboard() {
         </DialogContent>
       </Dialog>
       <Dialog open={showEditPin} onOpenChange={setShowEditPin}>
-        <DialogContent className="sm:max-w-md rounded-3xl" data-testid="dialog-edit-pin">
+        <DialogContent className="sm:max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518]" data-testid="dialog-edit-pin">
           <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <Lock className="w-8 h-8 text-primary" />
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#FFD54F] rounded-full flex items-center justify-center">
+              <Lock className="w-8 h-8 text-[#E5683A]" />
             </div>
-            <DialogTitle className="font-heading text-2xl text-center">Edit Child Lock PIN</DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogTitle className="font-heading text-2xl text-center text-[#E5683A]">Edit Child Lock PIN</DialogTitle>
+            <DialogDescription className="text-center text-[#d94f25] font-semibold">
               Change your 4-digit parental control PIN
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Current PIN</label>
+              <label className="text-sm font-bold text-[#E5683A]">Current PIN</label>
               <Input
                 type="password"
                 inputMode="numeric"
@@ -1695,12 +1712,12 @@ export default function ParentDashboard() {
                 placeholder="Enter current PIN"
                 value={oldPin}
                 onChange={(e) => setOldPin(e.target.value.replace(/\D/g, ""))}
-                className="text-center text-2xl tracking-widest rounded-2xl"
+                className="text-center text-2xl tracking-widest rounded-2xl border-2 border-[#F5C518] focus:border-[#E5683A] focus:ring-[#F5C518]"
                 data-testid="input-current-pin"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">New PIN</label>
+              <label className="text-sm font-bold text-[#E5683A]">New PIN</label>
               <Input
                 type="password"
                 inputMode="numeric"
@@ -1708,12 +1725,12 @@ export default function ParentDashboard() {
                 placeholder="Enter new PIN"
                 value={newPin}
                 onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-                className="text-center text-2xl tracking-widest rounded-2xl"
+                className="text-center text-2xl tracking-widest rounded-2xl border-2 border-[#F5C518] focus:border-[#E5683A] focus:ring-[#F5C518]"
                 data-testid="input-new-pin"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Confirm New PIN</label>
+              <label className="text-sm font-bold text-[#E5683A]">Confirm New PIN</label>
               <Input
                 type="password"
                 inputMode="numeric"
@@ -1721,7 +1738,7 @@ export default function ParentDashboard() {
                 placeholder="Confirm new PIN"
                 value={confirmNewPin}
                 onChange={(e) => setConfirmNewPin(e.target.value.replace(/\D/g, ""))}
-                className="text-center text-2xl tracking-widest rounded-2xl"
+                className="text-center text-2xl tracking-widest rounded-2xl border-2 border-[#F5C518] focus:border-[#E5683A] focus:ring-[#F5C518]"
                 data-testid="input-confirm-new-pin"
               />
             </div>
@@ -1735,7 +1752,7 @@ export default function ParentDashboard() {
                 setNewPin("");
                 setConfirmNewPin("");
               }}
-              className="rounded-2xl"
+              className="rounded-2xl border-2 border-[#F5C518] text-[#E5683A] hover:bg-[#FFF8E7]"
               data-testid="button-cancel-edit-pin"
             >
               Cancel
@@ -1743,7 +1760,7 @@ export default function ParentDashboard() {
             <Button
               onClick={handleUpdatePin}
               disabled={updatePinMutation.isPending}
-              className="rounded-2xl"
+              className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] hover:from-[#febc2d] hover:to-[#FFD166] text-gray-800 font-bold shadow-lg hover:shadow-xl"
               data-testid="button-save-new-pin"
             >
               {updatePinMutation.isPending ? (
