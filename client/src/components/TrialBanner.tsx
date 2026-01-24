@@ -3,6 +3,7 @@ import { Clock, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
+import { motion } from "framer-motion";
 
 interface SubscriptionStatus {
   status: string;
@@ -27,24 +28,24 @@ export function TrialBanner() {
   if (subscriptionStatus.hasActivePass && subscriptionStatus.status === "active") {
     return (
       <Card
-        className="mb-4 border-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30"
+        className="mb-4 border-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-[#F5C518]"
         data-testid="banner-active"
       >
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-green-500/20 animate-pulse">
-                <Sparkles className="w-5 h-5 text-green-500" />
-              </div>
+              <motion.div className="p-2 rounded-full bg-gradient-to-br from-[#F5C518] to-[#FFD54F] animate-pulse">
+                <Sparkles className="w-5 h-5 text-gray-800" />
+              </motion.div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">
+                <h3 className="font-bold text-lg mb-1 text-[#E5683A]">
                   ✨ Active Subscription
                 </h3>
-                <p className="text-sm text-white">
+                <p className="text-sm text-[#d94f25]">
                   {subscriptionStatus.activePassEndDate ? (
                     <>
                       Your subscription is active until{" "}
-                      <span className="font-bold text-foreground">
+                      <span className="font-bold text-[#E5683A]">
                         {new Date(subscriptionStatus.activePassEndDate).toLocaleDateString()}
                       </span>
                     </>
@@ -54,16 +55,20 @@ export function TrialBanner() {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => navigate("/subscription")}
-              variant="outline"
-              className="gap-2"
-              data-testid="button-manage-subscription"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Sparkles className="w-4 h-4" />
-              Manage Subscription
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+              <Button
+                onClick={() => navigate("/subscription")}
+                className="gap-2 bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-xl transition-all rounded-2xl"
+                data-testid="button-manage-subscription"
+              >
+                <Sparkles className="w-4 h-4" />
+                Manage Subscription
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </motion.div>
           </div>
         </CardContent>
       </Card>
@@ -77,49 +82,61 @@ export function TrialBanner() {
 
     return (
       <Card
-        className={`mb-4 border-2 ${
+        className={`mb-4 border-3 rounded-3xl ${
           isLastDays
-            ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/30"
-            : "bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30"
+            ? "bg-gradient-to-r from-[#FFE8CC] to-[#FFF4D6] border-[#E5683A]"
+            : "bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] border-[#F5C518]"
         }`}
         data-testid="banner-trial"
       >
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-full ${isLastDays ? "bg-orange-500/20" : "bg-blue-500/20"}`}>
-                <Clock className={`w-5 h-5 ${isLastDays ? "text-orange-500" : "text-blue-500"}`} />
-              </div>
+              <motion.div 
+                className={`p-2 rounded-full ${isLastDays ? "bg-gradient-to-br from-[#E5683A] to-[#F5A962]" : "bg-gradient-to-br from-[#F5C518] to-[#FFD54F]"}`}
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Clock className={`w-5 h-5 ${isLastDays ? "text-white" : "text-gray-800"}`} />
+              </motion.div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-white">
+                <h3 className={`font-bold text-lg mb-1 ${isLastDays ? "text-[#E5683A]" : "text-[#E5683A]"}`}>
                   {isLastDays ? "⚠️ Trial Ending Soon!" : "🎉 Free Trial Active"}
                 </h3>
-                <p className="text-sm text-white">
+                <p className={`text-sm font-semibold ${isLastDays ? "text-[#d94f25]" : "text-[#d94f25]"}`}>
                   {daysRemaining === 1 ? (
                     <>
-                      <span className="font-bold text-white">Last day</span> of your free trial!
+                      <span className="font-bold">{daysRemaining} day</span> remaining in your free trial!
                     </>
                   ) : daysRemaining === 0 ? (
-                    <>Your trial ends <span className="font-bold text-white">today</span></>
+                    <>Your trial ends <span className="font-bold">today</span></>
                   ) : (
                     <>
-                      <span className="font-bold text-white">{daysRemaining} days</span> remaining in your
+                      <span className="font-bold">{daysRemaining} days</span> remaining in your
                       free trial
                     </>
                   )}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => navigate("/subscription")}
-              variant={isLastDays ? "default" : "outline"}
-              className="gap-2"
-              data-testid="button-view-plans"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Sparkles className="w-4 h-4" />
-              View Plans
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+              <Button
+                onClick={() => navigate("/subscription")}
+                className={`gap-2 font-bold shadow-lg hover:shadow-xl transition-all rounded-2xl ${
+                  isLastDays
+                    ? "bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white"
+                    : "bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800"
+                }`}
+                data-testid="button-view-plans"
+              >
+                <Sparkles className="w-4 h-4" />
+                View Plans
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </motion.div>
           </div>
         </CardContent>
       </Card>
@@ -130,31 +147,39 @@ export function TrialBanner() {
   if (subscriptionStatus.status === "expired") {
     return (
       <Card
-        className="mb-4 border-2 bg-gradient-to-r from-destructive/10 to-orange-500/10 border-destructive/30"
+        className="mb-4 border-3 bg-gradient-to-r from-[#FFE8CC] to-[#FFFBF0] border-[#E5683A] rounded-3xl"
         data-testid="banner-expired"
       >
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-destructive/20">
-                <Clock className="w-5 h-5 text-destructive" />
-              </div>
+              <motion.div 
+                className="p-2 rounded-full bg-gradient-to-br from-[#E5683A] to-[#F5A962]"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Clock className="w-5 h-5 text-white" />
+              </motion.div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-black">Trial Expired</h3>
-                <p className="text-sm text-black">
-                  Your free trial has ended. Purchase a subscription to continue enjoying TELL MAMMA.
+                <h3 className="font-bold text-lg mb-1 text-[#E5683A]">Trial Expired</h3>
+                <p className="text-sm font-semibold text-[#d94f25]">
+                  Your free trial has ended. Purchase a subscription to continue enjoying TELL MAMMA! 🎉
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => navigate("/subscription")}
-              variant="default"
-              className="gap-2"
-              data-testid="button-subscribe-now"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Subscribe Now
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+              <Button
+                onClick={() => navigate("/subscription")}
+                className="gap-2 bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold shadow-lg hover:shadow-xl transition-all rounded-2xl"
+                data-testid="button-subscribe-now"
+              >
+                Subscribe Now
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </motion.div>
           </div>
         </CardContent>
       </Card>
