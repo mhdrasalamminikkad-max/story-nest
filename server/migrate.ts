@@ -3,13 +3,13 @@ import { sql } from 'drizzle-orm';
 
 export async function runMigrations() {
   try {
-    console.log('🔄 Checking and creating database tables...');
-    
-    // Create all tables using raw SQL
-    await db.execute(sql`
+    console.log('🔄 Checking and creating database tables for SQLite...');
+
+    // Create all tables using SQLite-compatible SQL
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS stories (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         image_url TEXT NOT NULL,
@@ -17,186 +17,214 @@ export async function runMigrations() {
         voiceover_url TEXT,
         pdf_url TEXT,
         audio_url TEXT,
-        audience VARCHAR(10) NOT NULL DEFAULT 'both',
-        language VARCHAR(20) NOT NULL DEFAULT 'english',
-        category VARCHAR(30) NOT NULL DEFAULT 'educational',
-        story_type VARCHAR(30) NOT NULL DEFAULT 'lesson',
-        status VARCHAR(20) NOT NULL DEFAULT 'draft',
-        approved_by VARCHAR,
+        audience TEXT NOT NULL DEFAULT 'both',
+        language TEXT NOT NULL DEFAULT 'english',
+        category TEXT NOT NULL DEFAULT 'educational',
+        story_type TEXT NOT NULL DEFAULT 'lesson',
+        status TEXT NOT NULL DEFAULT 'draft',
+        approved_by TEXT,
         rejection_reason TEXT,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        reviewed_at TIMESTAMP
-      );
+        coins_reward INTEGER DEFAULT 10,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        reviewed_at INTEGER,
+        is_creator_admin INTEGER DEFAULT 0
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS parent_settings (
-        user_id VARCHAR PRIMARY KEY,
+        user_id TEXT PRIMARY KEY,
         pin_hash TEXT NOT NULL,
-        parent_name VARCHAR(50),
-        child_name VARCHAR(50),
+        parent_name TEXT,
+        child_name TEXT,
         child_age INTEGER,
-        reading_time_limit INTEGER NOT NULL,
-        fullscreen_lock_enabled BOOLEAN NOT NULL,
-        theme VARCHAR(10) NOT NULL,
-        is_admin BOOLEAN NOT NULL DEFAULT false,
-        is_blocked BOOLEAN NOT NULL DEFAULT false,
-        stripe_customer_id VARCHAR,
-        stripe_subscription_id VARCHAR,
+        reading_time_limit INTEGER NOT NULL DEFAULT 30,
+        fullscreen_lock_enabled INTEGER NOT NULL DEFAULT 0,
+        theme TEXT NOT NULL DEFAULT 'system',
+        is_admin INTEGER NOT NULL DEFAULT 0,
+        is_blocked INTEGER NOT NULL DEFAULT 0,
+        stripe_customer_id TEXT,
+        stripe_subscription_id TEXT,
         coins INTEGER NOT NULL DEFAULT 0,
-        trial_started_at TIMESTAMP,
-        trial_ends_at TIMESTAMP,
-        subscription_status VARCHAR(20) NOT NULL DEFAULT 'trial'
-      );
+        trial_started_at INTEGER,
+        trial_ends_at INTEGER,
+        subscription_status TEXT NOT NULL DEFAULT 'trial',
+        active_plan_id TEXT,
+        subscription_ends_at INTEGER
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS bookmarks (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
-        story_id VARCHAR NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        story_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS subscription_plans (
-        id VARCHAR PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
-        price DECIMAL(10, 2) NOT NULL,
-        currency VARCHAR(3) NOT NULL DEFAULT 'USD',
-        billing_period VARCHAR(20) NOT NULL,
-        stripe_price_id VARCHAR,
-        features TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-        is_active BOOLEAN NOT NULL DEFAULT true,
+        price TEXT NOT NULL,
+        currency TEXT NOT NULL DEFAULT 'USD',
+        billing_period TEXT NOT NULL,
+        stripe_price_id TEXT,
+        features TEXT NOT NULL DEFAULT '[]',
+        is_active INTEGER NOT NULL DEFAULT 1,
         max_stories INTEGER,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS user_subscriptions (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
-        plan_id VARCHAR NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'active',
-        start_date TIMESTAMP NOT NULL DEFAULT NOW(),
-        end_date TIMESTAMP,
-        canceled_at TIMESTAMP,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        start_date INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        end_date INTEGER,
+        canceled_at INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS coin_settings (
-        id VARCHAR PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         coins_per_story INTEGER NOT NULL DEFAULT 10,
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS plan_coin_costs (
-        id VARCHAR PRIMARY KEY,
-        plan_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        plan_id TEXT NOT NULL,
         coin_cost INTEGER NOT NULL DEFAULT 0,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS coin_packages (
-        id VARCHAR PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
         coins INTEGER NOT NULL,
-        price DECIMAL(10, 2) NOT NULL,
-        currency VARCHAR(3) NOT NULL DEFAULT 'USD',
-        stripe_price_id VARCHAR,
-        is_active BOOLEAN NOT NULL DEFAULT true,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        price TEXT NOT NULL,
+        currency TEXT NOT NULL DEFAULT 'USD',
+        stripe_price_id TEXT,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS processed_payments (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
-        razorpay_payment_id VARCHAR NOT NULL UNIQUE,
-        razorpay_order_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        razorpay_payment_id TEXT NOT NULL UNIQUE,
+        razorpay_order_id TEXT NOT NULL,
         amount INTEGER NOT NULL,
-        currency VARCHAR(3) NOT NULL,
-        coin_package_id VARCHAR NOT NULL,
+        currency TEXT NOT NULL,
+        coin_package_id TEXT NOT NULL,
         coins_awarded INTEGER NOT NULL,
-        processed_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        processed_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS checkpoints (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
         title TEXT NOT NULL,
         description TEXT,
-        goal_type VARCHAR(30) NOT NULL,
+        goal_type TEXT NOT NULL,
         goal_target INTEGER NOT NULL,
         reward_title TEXT NOT NULL,
         reward_description TEXT,
-        status VARCHAR(20) NOT NULL DEFAULT 'active',
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS checkpoint_progress (
-        id VARCHAR PRIMARY KEY,
-        checkpoint_id VARCHAR NOT NULL,
-        user_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        checkpoint_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
         current_progress INTEGER NOT NULL DEFAULT 0,
-        completed_at TIMESTAMP,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        completed_at INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS reading_sessions (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
-        story_id VARCHAR NOT NULL,
-        reading_date TIMESTAMP NOT NULL DEFAULT NOW(),
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        story_id TEXT NOT NULL,
+        reading_date INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
         duration_minutes INTEGER NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS badges (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
         badge_name TEXT NOT NULL,
-        badge_icon VARCHAR(20) NOT NULL,
-        game_type VARCHAR(20) NOT NULL,
-        story_id VARCHAR NOT NULL,
-        earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
+        badge_icon TEXT NOT NULL,
+        game_type TEXT NOT NULL,
+        story_id TEXT NOT NULL,
+        earned_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
+    await db.run(sql`
       CREATE TABLE IF NOT EXISTS game_sessions (
-        id VARCHAR PRIMARY KEY,
-        user_id VARCHAR NOT NULL,
-        story_id VARCHAR NOT NULL,
-        game_type VARCHAR(20) NOT NULL,
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        story_id TEXT NOT NULL,
+        game_type TEXT NOT NULL,
         score INTEGER NOT NULL,
         total_score INTEGER NOT NULL,
-        passed BOOLEAN NOT NULL DEFAULT false,
-        played_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
-    `);
+        passed INTEGER NOT NULL DEFAULT 0,
+        played_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
-    // Add missing columns to existing tables (if they don't exist)
-    try {
-      await db.execute(sql`
-        ALTER TABLE stories ADD COLUMN IF NOT EXISTS pdf_url TEXT;
-        ALTER TABLE stories ADD COLUMN IF NOT EXISTS audio_url TEXT;
-        ALTER TABLE stories ADD COLUMN IF NOT EXISTS audience VARCHAR(10) NOT NULL DEFAULT 'both';
-      `);
-    } catch (e) {
-      // Column might already exist, ignore error
-    }
+    await db.run(sql`
+      CREATE TABLE IF NOT EXISTS story_categories (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
 
-    try {
-      await db.execute(sql`
-        ALTER TABLE parent_settings ADD COLUMN IF NOT EXISTS parent_name VARCHAR(50);
-        ALTER TABLE parent_settings ADD COLUMN IF NOT EXISTS child_name VARCHAR(50);
-      `);
-    } catch (e) {
-      // Column might already exist, ignore error
-    }
-    
-    console.log('✅ Database tables created successfully!');
+    await db.run(sql`
+      CREATE TABLE IF NOT EXISTS story_types (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000)
+      )`);
+
+    await db.run(sql`
+      CREATE TABLE IF NOT EXISTS payment_proofs (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        screenshot_url TEXT NOT NULL,
+        payment_details TEXT,
+        address TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        rejection_reason TEXT,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        reviewed_at INTEGER
+      )`);
+
+    console.log('✅ SQLite database tables created successfully!');
   } catch (error) {
     console.error('❌ Error creating tables:', error);
     throw error;

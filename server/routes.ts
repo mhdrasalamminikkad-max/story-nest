@@ -27,32 +27,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/verify", async (req, res) => {
     try {
       const { token } = req.body;
-      
+
       if (!token) {
         return res.status(400).json({ error: "No token provided" });
       }
-      
+
       // Verify the Firebase ID token
       const decodedToken = await verifyIdToken(token);
       const userId = decodedToken.uid;
-      
+
       // Check if user exists in parentSettings
       const [existingUser] = await db
         .select()
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
-      
+
       // If user doesn't exist, create them with default settings
       if (!existingUser) {
         const now = new Date();
         const trialEndsAt = new Date(now);
         trialEndsAt.setDate(trialEndsAt.getDate() + 7);
-        
+
         await db.insert(parentSettings).values({
           userId: userId,
           pinHash: "", // Empty PIN initially
           readingTimeLimit: 30, // Default 30 minutes
-          fullscreenLockEnabled: false,
+          fullscreenLockEnabled: 0 as any,
           theme: "system", // Default theme
           coins: 0, // Start with 0 coins
           subscriptionStatus: "trial", // Default to trial
@@ -90,20 +90,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // First check for HTTP-only cookie (web apps)
       let token = req.cookies?.auth_token;
-      
+
       // Fallback to Authorization header (mobile apps)
       if (!token) {
         const authHeader = req.headers.authorization;
         token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
       }
-      
+
       if (!token) {
         return res.status(401).json({ error: "Not authenticated" });
       }
-      
+
       // Verify Firebase ID token
       const decodedToken = await verifyIdToken(token);
-      
+
       // Return user info
       res.json({
         id: decodedToken.uid,
@@ -127,18 +127,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/test-token", async (req, res) => {
     try {
       const { token } = req.body;
-      
+
       if (!token) {
         return res.status(400).json({ error: "No token provided" });
       }
-      
+
       console.log("🧪 Testing token verification...");
       console.log("Token length:", token.length);
       console.log("Token preview:", token.substring(0, 50) + "...");
-      
+
       const decodedToken = await verifyIdToken(token);
       console.log("✅ Token verified:", decodedToken.uid);
-      
+
       res.json({
         success: true,
         uid: decodedToken.uid,
@@ -160,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stories", async (req, res) => {
     try {
       const { storyType, category, language } = req.query;
-      
+
       let query = db.select({
         id: stories.id,
         userId: stories.userId,
@@ -179,23 +179,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reviewedAt: stories.reviewedAt,
       }).from(stories);
       const conditions = [eq(stories.status, "published")];
-      
+
       if (storyType && typeof storyType === 'string') {
         conditions.push(eq(stories.storyType, storyType));
       }
-      
+
       if (category && typeof category === 'string') {
         conditions.push(eq(stories.category, category));
       }
-      
+
       if (language && typeof language === 'string') {
         conditions.push(eq(stories.language, language));
       }
-      
+
       const publishedStories = await query
         .where(and(...conditions))
         .orderBy(desc(stories.createdAt));
-      
+
       const storiesWithTimestamp = publishedStories.map(s => ({
         ...s,
         createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(stories)
         .where(eq(stories.userId, userId))
         .orderBy(desc(stories.createdAt));
-      
+
       const storiesWithTimestamp = userStories.map(s => ({
         ...s,
         createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
@@ -269,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(stories)
         .where(eq(stories.status, "published"))
         .orderBy(desc(stories.createdAt));
-      
+
       // Fetch creator admin status for each story
       const storiesWithCreatorInfo = await Promise.all(
         previewStories.map(async (s) => {
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .select({ isAdmin: parentSettings.isAdmin })
             .from(parentSettings)
             .where(eq(parentSettings.userId, s.userId));
-          
+
           return {
             ...s,
             createdAt: s.createdAt instanceof Date ? s.createdAt.getTime() : s.createdAt,
@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         })
       );
-      
+
       res.json(storiesWithCreatorInfo);
     } catch (error) {
       console.error("Error fetching preview stories:", error);
@@ -297,23 +297,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stories/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       const [story] = await db
         .select()
         .from(stories)
         .where(and(eq(stories.id, id), eq(stories.status, "published")));
-      
+
       if (!story) {
         res.status(404).json({ error: "Story not found" });
         return;
       }
-      
+
       const storyWithTimestamp = {
         ...story,
         createdAt: story.createdAt instanceof Date ? story.createdAt.getTime() : story.createdAt,
         reviewedAt: story.reviewedAt instanceof Date ? story.reviewedAt.getTime() : null,
       };
-      
+
       res.json(storyWithTimestamp);
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -346,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           reviewedAt: null,
         })
         .returning();
-      
+
       const storyWithTimestamp = {
         ...story,
         createdAt: story.createdAt instanceof Date ? story.createdAt.getTime() : story.createdAt,
@@ -478,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get userId from auth context or body
       let userId = req.userId;
-      
+
       // If not authenticated, extract from request body or headers
       if (!userId && req.headers.authorization) {
         const authHeader = req.headers.authorization;
@@ -492,25 +492,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-      
+
       // If still no userId, generate a temp one for demo/testing
       if (!userId) {
         userId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         console.log("⚠️ No authentication - using temp userId:", userId);
       }
-      
+
       // Validate input
       let settingsData;
       try {
         settingsData = insertParentSettingsSchema.parse(req.body);
       } catch (validationError: any) {
         console.error("Validation error:", validationError);
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Validation error",
-          details: validationError.errors || validationError.message 
+          details: validationError.errors || validationError.message
         });
       }
-      
+
       const pinHash = hashPIN(settingsData.pin);
 
       // Check if this is the first user (make them admin automatically)
@@ -527,9 +527,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           childName: settingsData.childName,
           childAge: settingsData.childAge,
           readingTimeLimit: settingsData.readingTimeLimit,
-          fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
+          fullscreenLockEnabled: (settingsData.fullscreenLockEnabled ? 1 : 0) as any,
           theme: settingsData.theme,
-          isAdmin: isFirstUser,
+          isAdmin: (isFirstUser ? 1 : 0) as any,
           subscriptionStatus: "trial",
           activePlanId: null,
         })
@@ -541,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             childName: settingsData.childName,
             childAge: settingsData.childAge,
             readingTimeLimit: settingsData.readingTimeLimit,
-            fullscreenLockEnabled: settingsData.fullscreenLockEnabled,
+            fullscreenLockEnabled: (settingsData.fullscreenLockEnabled ? 1 : 0) as any,
             theme: settingsData.theme,
             activePlanId: null,
             // Trial fields are NOT updated on settings update - only set on first creation
@@ -552,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(settings);
     } catch (error: any) {
       console.error("Error saving settings:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to save settings",
         message: error.message || "Unknown error"
       });
@@ -616,7 +616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const isValid = verifyPIN(pin, settings.pinHash);
-      
+
       res.json({ valid: isValid });
     } catch (error) {
       console.error("Error verifying PIN:", error);
@@ -632,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(bookmarks)
         .where(eq(bookmarks.userId, userId));
-      
+
       const storyIds: string[] = userBookmarks.map(b => b.storyId);
       res.json(storyIds);
     } catch (error) {
@@ -686,12 +686,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/check", async (req: AuthRequest, res) => {
     try {
       const userId = req.userId;
-      
+
       // Return false if not authenticated
       if (!userId) {
         return res.json({ isAdmin: false });
       }
-      
+
       const [settings] = await db
         .select()
         .from(parentSettings)
@@ -733,10 +733,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.userId!;
       const { code } = req.body;
-      
+
       // Secret code for granting admin access
       const ADMIN_SECRET_CODE = "786786";
-      
+
       if (code !== ADMIN_SECRET_CODE) {
         res.status(403).json({ error: "Invalid admin code" });
         return;
@@ -764,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only allow updating specific fields
       const allowedFields = ["childName", "childAge", "readingTimeLimit", "theme", "fullscreenLockEnabled"];
       const updateData: any = {};
-      
+
       for (const field of allowedFields) {
         if (field in updates) {
           updateData[field] = updates[field];
@@ -816,7 +816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.userId!;
       const [settings] = await db.select().from(parentSettings).where(eq(parentSettings.userId, userId));
-      
+
       if (!settings?.isAdmin) {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -834,7 +834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.userId!;
       const [adminSettings] = await db.select().from(parentSettings).where(eq(parentSettings.userId, userId));
-      
+
       if (!adminSettings?.isAdmin) {
         return res.status(403).json({ error: "Admin access required" });
       }
@@ -861,8 +861,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(paymentProofs.id, id));
 
           await tx.update(parentSettings)
-            .set({ 
-              subscriptionStatus: "active", 
+            .set({
+              subscriptionStatus: "active",
               activePlanId: proof.planId,
               subscriptionEndsAt: endDate
             })
@@ -872,7 +872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await db.update(paymentProofs)
           .set({ status: "rejected", rejectionReason, reviewedAt: new Date() })
           .where(eq(paymentProofs.id, id));
-          
+
         await db.update(parentSettings)
           .set({ subscriptionStatus: "expired" }) // or whatever state makes sense
           .where(eq(parentSettings.userId, proof.userId));
@@ -936,7 +936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(stories)
         .where(eq(stories.status, "pending_review"))
         .orderBy(desc(stories.createdAt));
-      
+
       const storiesWithTimestamp = pendingStories.map(s => ({
         ...s,
         createdAt: s.createdAt.getTime(),
@@ -981,19 +981,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (reviewData.action === "approve") {
         updateData.status = "published";
         updateData.rejectionReason = null;
-        
+
         // Award coins to the story author when approved
         const [settings] = await db
           .select()
           .from(coinSettings)
           .limit(1);
-        
+
         const coinsToAward = settings?.coinsPerStory || 10;
-        
+
         await db
           .update(parentSettings)
-          .set({ 
-            coins: sql`${parentSettings.coins} + ${coinsToAward}` 
+          .set({
+            coins: sql`${parentSettings.coins} + ${coinsToAward}`
           })
           .where(eq(parentSettings.userId, story.userId));
       } else {
@@ -1026,15 +1026,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const [userCountResult] = await db
         .select({ count: sql<number>`count(*)::int` })
         .from(parentSettings);
-      
+
       const [storyCountResult] = await db
         .select({ count: sql<number>`count(*)::int` })
         .from(stories);
-      
+
       const [bookmarkCountResult] = await db
         .select({ count: sql<number>`count(*)::int` })
         .from(bookmarks);
-      
+
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const [recentStoriesResult] = await db
         .select({ count: sql<number>`count(*)::int` })
@@ -1067,7 +1067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(stories)
         .orderBy(desc(stories.createdAt));
-      
+
       const storiesWithTimestamp = allStories.map(s => ({
         ...s,
         createdAt: s.createdAt.getTime(),
@@ -1082,14 +1082,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/users", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const allSettings = await db.select().from(parentSettings);
-      
+
       const users = await Promise.all(
         allSettings.map(async (settings) => {
           const [storyCountResult] = await db
             .select({ count: sql<number>`count(*)::int` })
             .from(stories)
             .where(eq(stories.userId, settings.userId));
-          
+
           return {
             userId: settings.userId,
             readingTimeLimit: settings.readingTimeLimit,
@@ -1105,7 +1105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         })
       );
-      
+
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -1194,12 +1194,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/stories/:storyId", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { storyId } = req.params;
-      
+
       const result = await db
         .delete(stories)
         .where(eq(stories.id, storyId))
         .returning();
-      
+
       if (result.length > 0) {
         res.json({ success: true });
       } else {
@@ -1219,7 +1219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(subscriptionPlans)
         .where(eq(subscriptionPlans.isActive, true))
         .orderBy(desc(subscriptionPlans.createdAt));
-      
+
       // Return only public-facing fields, exclude internal payment identifiers
       const publicPlans = activePlans.map(plan => ({
         id: plan.id,
@@ -1244,7 +1244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(subscriptionPlans)
         .orderBy(desc(subscriptionPlans.createdAt));
-      
+
       const plansWithTimestamp = allPlans.map(plan => ({
         ...plan,
         createdAt: plan.createdAt.getTime(),
@@ -1260,7 +1260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/subscription-plans", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const planData = insertSubscriptionPlanSchema.parse(req.body);
-      
+
       const [plan] = await db
         .insert(subscriptionPlans)
         .values({
@@ -1269,7 +1269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: planData.price.toString(),
         })
         .returning();
-      
+
       const planWithTimestamp = {
         ...plan,
         createdAt: plan.createdAt.getTime(),
@@ -1286,22 +1286,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = updateSubscriptionPlanSchema.parse(req.body);
-      
+
       const updateData: any = { ...updates, updatedAt: new Date() };
       if (updates.price !== undefined) {
         updateData.price = updates.price.toString();
       }
-      
+
       const [plan] = await db
         .update(subscriptionPlans)
         .set(updateData)
         .where(eq(subscriptionPlans.id, id))
         .returning();
-      
+
       if (!plan) {
         return res.status(404).json({ error: "Plan not found" });
       }
-      
+
       const planWithTimestamp = {
         ...plan,
         createdAt: plan.createdAt.getTime(),
@@ -1317,12 +1317,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/subscription-plans/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      
+
       const result = await db
         .delete(subscriptionPlans)
         .where(eq(subscriptionPlans.id, id))
         .returning();
-      
+
       if (result.length > 0) {
         res.json({ success: true });
       } else {
@@ -1341,7 +1341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(coinSettings)
         .limit(1);
-      
+
       // Create default settings if they don't exist
       if (!settings) {
         [settings] = await db
@@ -1352,7 +1352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .returning();
       }
-      
+
       const settingsWithTimestamp = {
         ...settings,
         updatedAt: settings.updatedAt.getTime(),
@@ -1367,13 +1367,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/coin-settings", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const updates = updateCoinSettingsSchema.parse(req.body);
-      
+
       // Get or create settings
       let [settings] = await db
         .select()
         .from(coinSettings)
         .limit(1);
-      
+
       if (!settings) {
         [settings] = await db
           .insert(coinSettings)
@@ -1392,7 +1392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(coinSettings.id, settings.id))
           .returning();
       }
-      
+
       const settingsWithTimestamp = {
         ...settings,
         updatedAt: settings.updatedAt.getTime(),
@@ -1408,37 +1408,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/grant-coins", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { userId, amount } = req.body;
-      
+
       if (!userId || typeof amount !== 'number' || amount <= 0) {
         res.status(400).json({ error: "Valid userId and positive amount required" });
         return;
       }
-      
+
       // Check if user settings exist
       const [settings] = await db
         .select()
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
-      
+
       if (!settings) {
         res.status(404).json({ error: "User settings not found. User may need to complete child lock setup first." });
         return;
       }
-      
+
       // Add coins to user
       const [updated] = await db
         .update(parentSettings)
-        .set({ 
-          coins: sql`${parentSettings.coins} + ${amount}` 
+        .set({
+          coins: sql`${parentSettings.coins} + ${amount}`
         })
         .where(eq(parentSettings.userId, userId))
         .returning();
-      
-      res.json({ 
-        success: true, 
-        userId, 
-        coinsAdded: amount, 
-        newBalance: updated.coins 
+
+      res.json({
+        success: true,
+        userId,
+        coinsAdded: amount,
+        newBalance: updated.coins
       });
     } catch (error) {
       console.error("Error granting coins:", error);
@@ -1452,7 +1452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const costs = await db
         .select()
         .from(planCoinCosts);
-      
+
       const publicCosts = costs.map(c => ({
         id: c.id,
         planId: c.planId,
@@ -1471,7 +1471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const costs = await db
         .select()
         .from(planCoinCosts);
-      
+
       const costsWithTimestamp = costs.map(c => ({
         ...c,
         createdAt: c.createdAt.getTime(),
@@ -1487,24 +1487,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/plan-coin-costs", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const updates = updatePlanCoinCostSchema.parse(req.body);
-      
+
       // Check if plan exists
       const [plan] = await db
         .select()
         .from(subscriptionPlans)
         .where(eq(subscriptionPlans.id, updates.planId));
-      
+
       if (!plan) {
         res.status(404).json({ error: "Subscription plan not found" });
         return;
       }
-      
+
       // Check if cost record exists for this plan
       const [existing] = await db
         .select()
         .from(planCoinCosts)
         .where(eq(planCoinCosts.planId, updates.planId));
-      
+
       let cost;
       if (existing) {
         [cost] = await db
@@ -1525,7 +1525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .returning();
       }
-      
+
       const costWithTimestamp = {
         ...cost,
         createdAt: cost.createdAt.getTime(),
@@ -1547,7 +1547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(coinPackages)
         .where(eq(coinPackages.isActive, true))
         .orderBy(coinPackages.coins);
-      
+
       const publicPackages = activePackages.map(pkg => ({
         id: pkg.id,
         name: pkg.name,
@@ -1570,7 +1570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(coinPackages)
         .orderBy(coinPackages.coins);
-      
+
       const packagesWithTimestamp = packages.map(pkg => ({
         ...pkg,
         price: pkg.price.toString(),
@@ -1587,7 +1587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/coin-packages", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const packageData = insertCoinPackageSchema.parse(req.body);
-      
+
       const [pkg] = await db
         .insert(coinPackages)
         .values({
@@ -1596,7 +1596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: packageData.price.toString(),
         })
         .returning();
-      
+
       const packageWithTimestamp = {
         ...pkg,
         price: pkg.price.toString(),
@@ -1614,22 +1614,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = updateCoinPackageSchema.parse(req.body);
-      
+
       const updateData: any = { ...updates, updatedAt: new Date() };
       if (updates.price !== undefined) {
         updateData.price = updates.price.toString();
       }
-      
+
       const [pkg] = await db
         .update(coinPackages)
         .set(updateData)
         .where(eq(coinPackages.id, id))
         .returning();
-      
+
       if (!pkg) {
         return res.status(404).json({ error: "Coin package not found" });
       }
-      
+
       const packageWithTimestamp = {
         ...pkg,
         price: pkg.price.toString(),
@@ -1646,12 +1646,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/coin-packages/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      
+
       const result = await db
         .delete(coinPackages)
         .where(eq(coinPackages.id, id))
         .returning();
-      
+
       if (result.length > 0) {
         res.json({ success: true });
       } else {
@@ -1668,66 +1668,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.userId!;
       const { planId } = req.body;
-      
+
       if (!planId) {
         res.status(400).json({ error: "Plan ID is required" });
         return;
       }
-      
+
       // Get plan
       const [plan] = await db
         .select()
         .from(subscriptionPlans)
         .where(eq(subscriptionPlans.id, planId));
-      
+
       if (!plan || !plan.isActive) {
         res.status(404).json({ error: "Plan not found or inactive" });
         return;
       }
-      
+
       // Get plan coin cost
       const [costRecord] = await db
         .select()
         .from(planCoinCosts)
         .where(eq(planCoinCosts.planId, planId));
-      
+
       if (!costRecord || costRecord.coinCost <= 0) {
         res.status(400).json({ error: "This plan cannot be purchased with coins" });
         return;
       }
-      
+
       // Get user's current coins
       const [settings] = await db
         .select()
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
-      
+
       if (!settings) {
         res.status(404).json({ error: "User settings not found" });
         return;
       }
-      
+
       if (settings.coins < costRecord.coinCost) {
-        res.status(400).json({ 
+        res.status(400).json({
           error: "Insufficient coins",
           required: costRecord.coinCost,
           available: settings.coins
         });
         return;
       }
-      
+
       // Deduct coins
       await db
         .update(parentSettings)
-        .set({ 
-          coins: sql`${parentSettings.coins} - ${costRecord.coinCost}` 
+        .set({
+          coins: sql`${parentSettings.coins} - ${costRecord.coinCost}`
         })
         .where(eq(parentSettings.userId, userId));
-      
+
       // Create subscription
       const now = new Date();
       let endDate: Date | null = null;
-      
+
       if (plan.billingPeriod === "monthly") {
         endDate = new Date(now);
         endDate.setMonth(endDate.getMonth() + 1);
@@ -1738,7 +1738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDate = new Date(now);
         endDate.setDate(endDate.getDate() + 7);
       }
-      
+
       const [subscription] = await db
         .insert(userSubscriptions)
         .values({
@@ -1750,7 +1750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           endDate,
         })
         .returning();
-      
+
       const subscriptionWithTimestamp = {
         ...subscription,
         startDate: subscription.startDate.getTime(),
@@ -1778,12 +1778,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/subscription/status", authenticateUser, getSubscriptionInfo, async (req: SubscriptionRequest, res) => {
     try {
       const userId = req.userId!;
-      
+
       const [settings] = await db
         .select()
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
-      
+
       if (!settings) {
         return res.status(404).json({ error: "User settings not found" });
       }
@@ -1802,12 +1802,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/subscription/activate-trial", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const userId = req.userId!;
-      
+
       const [settings] = await db
         .select()
         .from(parentSettings)
         .where(eq(parentSettings.userId, userId));
-      
+
       if (!settings) {
         return res.status(404).json({ error: "User settings not found" });
       }
@@ -1848,18 +1848,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/razorpay/create-order", authenticateUser, async (req: AuthRequest, res) => {
     try {
       if (!razorpay) {
-        return res.status(503).json({ 
-          error: "Payment system not configured. Please contact support." 
+        return res.status(503).json({
+          error: "Payment system not configured. Please contact support."
         });
       }
 
       const { coinPackageId } = req.body;
-      
+
       const [coinPackage] = await db
         .select()
         .from(coinPackages)
         .where(eq(coinPackages.id, coinPackageId));
-      
+
       if (!coinPackage || !coinPackage.isActive) {
         return res.status(404).json({ error: "Coin package not found or inactive" });
       }
@@ -1904,11 +1904,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature, coinPackageId } = req.body;
       const userId = req.userId!;
 
-      console.log("Payment verification started:", { 
-        userId, 
-        orderId: razorpay_order_id, 
+      console.log("Payment verification started:", {
+        userId,
+        orderId: razorpay_order_id,
         paymentId: razorpay_payment_id,
-        coinPackageId 
+        coinPackageId
       });
 
       // Step 1: Verify signature using HMAC SHA256
@@ -1923,9 +1923,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expected: expectedSignature,
           received: razorpay_signature
         });
-        return res.status(400).json({ 
-          success: false, 
-          error: "Invalid payment signature - potential tampering detected" 
+        return res.status(400).json({
+          success: false,
+          error: "Invalid payment signature - potential tampering detected"
         });
       }
 
@@ -1945,9 +1945,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Step 3: Verify payment is captured (NOT just authorized)
       if (payment.status !== "captured") {
-        console.error("Payment not captured:", { 
-          status: payment.status, 
-          paymentId: razorpay_payment_id 
+        console.error("Payment not captured:", {
+          status: payment.status,
+          paymentId: razorpay_payment_id
         });
         return res.status(400).json({
           success: false,
@@ -1994,9 +1994,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!coinPackage) {
         console.error("Coin package not found:", coinPackageId);
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
-          error: "Coin package not found" 
+          error: "Coin package not found"
         });
       }
 
@@ -2054,9 +2054,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error verifying payment:", error);
-      res.status(500).json({ 
-        success: false, 
-        error: "Failed to verify payment" 
+      res.status(500).json({
+        success: false,
+        error: "Failed to verify payment"
       });
     }
   });
@@ -2074,7 +2074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(checkpoints.status, "active")
         ))
         .orderBy(desc(checkpoints.createdAt));
-      
+
       const checkpointsWithTimestamp = userCheckpoints.map(c => ({
         ...c,
         createdAt: c.createdAt.getTime(),
@@ -2099,7 +2099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eq(checkpoints.status, "active")
         ))
         .orderBy(desc(checkpoints.createdAt));
-      
+
       const checkpointsWithProgress = await Promise.all(
         userCheckpoints.map(async (checkpoint) => {
           const [progress] = await db
@@ -2109,7 +2109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               eq(checkpointProgress.checkpointId, checkpoint.id),
               eq(checkpointProgress.userId, userId)
             ));
-          
+
           return {
             ...checkpoint,
             createdAt: checkpoint.createdAt.getTime(),
@@ -2120,7 +2120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         })
       );
-      
+
       res.json(checkpointsWithProgress);
     } catch (error) {
       console.error("Error fetching checkpoints with progress:", error);
@@ -2143,7 +2143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "active",
         })
         .returning();
-      
+
       // Create initial progress record
       await db.insert(checkpointProgress).values({
         id: `progress-${Date.now()}`,
@@ -2151,7 +2151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         currentProgress: 0,
       });
-      
+
       const checkpointWithTimestamp = {
         ...newCheckpoint,
         createdAt: newCheckpoint.createdAt.getTime(),
@@ -2246,7 +2246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!progress || progress.completedAt) continue;
 
         let newProgress = progress.currentProgress;
-        
+
         if (checkpoint.goalType === "stories_read") {
           newProgress += 1;
         }
@@ -2269,8 +2269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         newlyCompleted,
       });
     } catch (error) {
@@ -2317,7 +2317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!progress) continue;
 
         let newProgress = progress.currentProgress;
-        
+
         if (checkpoint.goalType === "stories_read") {
           newProgress += 1;
         } else if (checkpoint.goalType === "reading_minutes") {
@@ -2326,7 +2326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check if user already read today
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
+
           const todaySessions = await db
             .select()
             .from(readingSessions)
@@ -2342,7 +2342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Check if goal is completed
         const isCompleted = newProgress >= checkpoint.goalTarget;
-        
+
         await db
           .update(checkpointProgress)
           .set({
@@ -2367,12 +2367,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/pdf-proxy/:storyId", async (req, res) => {
     try {
       const { storyId } = req.params;
-      
+
       const [story] = await db
         .select()
         .from(stories)
         .where(eq(stories.id, storyId));
-      
+
       if (!story || !story.pdfUrl) {
         return res.status(404).json({ error: "PDF not found" });
       }
@@ -2403,7 +2403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
       res.setHeader("X-Content-Type-Options", "nosniff");
-      
+
       // Send the PDF buffer
       res.end(bufferData);
     } catch (error) {
@@ -2415,12 +2415,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/audio-proxy/:storyId", async (req, res) => {
     try {
       const { storyId } = req.params;
-      
+
       const [story] = await db
         .select()
         .from(stories)
         .where(eq(stories.id, storyId));
-      
+
       if (!story || (!story.audioUrl && !story.voiceoverUrl)) {
         return res.status(404).json({ error: "Audio not found" });
       }
@@ -2448,7 +2448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         const buffer = await audioResponse.arrayBuffer();
         bufferData = Buffer.from(buffer);
-        
+
         // Try to get content type from response
         const responseContentType = audioResponse.headers.get("content-type");
         if (responseContentType) {
@@ -2464,7 +2464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-      
+
       // Send the audio buffer
       res.end(bufferData);
     } catch (error) {
@@ -2513,8 +2513,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         passed,
         badgeId,
       });
@@ -2582,7 +2582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(storyCategories)
         .orderBy(storyCategories.name);
-      
+
       const categoriesWithTimestamp = categories.map(cat => ({
         ...cat,
         createdAt: cat.createdAt.getTime(),
@@ -2597,7 +2597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/categories", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { name, slug, isActive } = insertStoryCategorySchema.parse(req.body);
-      
+
       const [category] = await db
         .insert(storyCategories)
         .values({
@@ -2607,7 +2607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: isActive ?? true,
         })
         .returning();
-      
+
       const categoryWithTimestamp = {
         ...category,
         createdAt: category.createdAt.getTime(),
@@ -2622,11 +2622,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/categories/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      
+
       await db
         .delete(storyCategories)
         .where(eq(storyCategories.id, id));
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -2641,7 +2641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select()
         .from(storyTypes)
         .orderBy(storyTypes.name);
-      
+
       const typesWithTimestamp = types.map(type => ({
         ...type,
         createdAt: type.createdAt.getTime(),
@@ -2656,7 +2656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/story-types", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { name, slug, isActive } = insertStoryTypeSchema.parse(req.body);
-      
+
       const [type] = await db
         .insert(storyTypes)
         .values({
@@ -2666,7 +2666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: isActive ?? true,
         })
         .returning();
-      
+
       const typeWithTimestamp = {
         ...type,
         createdAt: type.createdAt.getTime(),
@@ -2681,11 +2681,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/story-types/:id", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      
+
       await db
         .delete(storyTypes)
         .where(eq(storyTypes.id, id));
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting story type:", error);
@@ -2701,7 +2701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(storyCategories)
         .where(eq(storyCategories.isActive, true))
         .orderBy(storyCategories.name);
-      
+
       const categoriesWithTimestamp = categories.map(cat => ({
         ...cat,
         createdAt: cat.createdAt.getTime(),
@@ -2720,7 +2720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(storyTypes)
         .where(eq(storyTypes.isActive, true))
         .orderBy(storyTypes.name);
-      
+
       const typesWithTimestamp = types.map(type => ({
         ...type,
         createdAt: type.createdAt.getTime(),
@@ -2780,7 +2780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   const httpServer = createServer(app);
-  
+
   // Initialize WebSocket
   initializeWebSocket(httpServer);
 
@@ -2815,10 +2815,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const status = action === "approve" ? "approved" : "rejected";
-      
+
       await db.update(paymentProofs)
-        .set({ 
-          status, 
+        .set({
+          status,
           rejectionReason: action === "reject" ? rejectionReason : null,
           reviewedAt: new Date()
         })

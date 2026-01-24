@@ -1,9 +1,9 @@
-import { pgTable, text, varchar, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
-export const stories = pgTable("stories", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+export const stories = sqliteTable("stories", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url").notNull(),
@@ -11,192 +11,194 @@ export const stories = pgTable("stories", {
   voiceoverUrl: text("voiceover_url"),
   pdfUrl: text("pdf_url"),
   audioUrl: text("audio_url"),
-  audience: varchar("audience", { length: 10 }).notNull().default("both"),
-  language: varchar("language", { length: 20 }).notNull().default("english"),
-  category: varchar("category", { length: 30 }).notNull().default("educational"),
-  storyType: varchar("story_type", { length: 30 }).notNull().default("lesson"),
-  status: varchar("status", { length: 20 }).notNull().default("draft"),
-  approvedBy: varchar("approved_by"),
+  audience: text("audience").notNull().default("both"),
+  language: text("language").notNull().default("english"),
+  category: text("category").notNull().default("educational"),
+  storyType: text("story_type").notNull().default("lesson"),
+  status: text("status").notNull().default("draft"),
+  approvedBy: text("approved_by"),
   rejectionReason: text("rejection_reason"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  reviewedAt: timestamp("reviewed_at"),
+  coinsReward: integer("coins_reward").default(10),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  reviewedAt: integer("reviewed_at", { mode: 'timestamp' }),
+  isCreatorAdmin: integer("is_creator_admin", { mode: 'boolean' }).default(false),
+  isBookmarked: integer("is_bookmarked", { mode: 'boolean' }).default(false),
 });
 
-export const parentSettings = pgTable("parent_settings", {
-  userId: varchar("user_id").primaryKey(),
+export const parentSettings = sqliteTable("parent_settings", {
+  userId: text("user_id").primaryKey(),
   pinHash: text("pin_hash").notNull(),
-  parentName: varchar("parent_name", { length: 50 }),
-  childName: varchar("child_name", { length: 50 }),
+  parentName: text("parent_name"),
+  childName: text("child_name"),
   childAge: integer("child_age"),
   readingTimeLimit: integer("reading_time_limit").notNull(),
-  fullscreenLockEnabled: boolean("fullscreen_lock_enabled").notNull(),
-  theme: varchar("theme", { length: 10 }).notNull(),
-  isAdmin: boolean("is_admin").notNull().default(false),
-  isBlocked: boolean("is_blocked").notNull().default(false),
-  stripeCustomerId: varchar("stripe_customer_id"),
-  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  fullscreenLockEnabled: integer("fullscreen_lock_enabled", { mode: 'boolean' }).notNull(),
+  theme: text("theme").notNull(),
+  isAdmin: integer("is_admin", { mode: 'boolean' }).notNull().default(false),
+  isBlocked: integer("is_blocked", { mode: 'boolean' }).notNull().default(false),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
   coins: integer("coins").notNull().default(0),
-  trialStartedAt: timestamp("trial_started_at"),
-  trialEndsAt: timestamp("trial_ends_at"),
-  subscriptionStatus: varchar("subscription_status", { length: 20 }).notNull().default("trial"),
-  activePlanId: varchar("active_plan_id", { length: 50 }),
-  subscriptionEndsAt: timestamp("subscription_ends_at"),
+  trialStartedAt: integer("trial_started_at", { mode: 'timestamp' }),
+  trialEndsAt: integer("trial_ends_at", { mode: 'timestamp' }),
+  subscriptionStatus: text("subscription_status").notNull().default("trial"),
+  activePlanId: text("active_plan_id"),
+  subscriptionEndsAt: integer("subscription_ends_at", { mode: 'timestamp' }),
 });
 
-// Manual payment proof table
-export const paymentProofs = pgTable("payment_proofs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  planId: varchar("plan_id").notNull(),
+export const paymentProofs = sqliteTable("payment_proofs", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  planId: text("plan_id").notNull(),
   screenshotUrl: text("screenshot_url").notNull(),
   paymentDetails: text("payment_details"),
   address: text("address"),
-  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  status: text("status").notNull().default("pending"),
   rejectionReason: text("rejection_reason"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  reviewedAt: timestamp("reviewed_at"),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  reviewedAt: integer("reviewed_at", { mode: 'timestamp' }),
 });
 
-export const bookmarks = pgTable("bookmarks", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  storyId: varchar("story_id").notNull(),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+export const bookmarks = sqliteTable("bookmarks", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  storyId: text("story_id").notNull(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const subscriptionPlans = pgTable("subscription_plans", {
-  id: varchar("id").primaryKey(),
+export const subscriptionPlans = sqliteTable("subscription_plans", {
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 3 }).notNull().default("USD"),
-  billingPeriod: varchar("billing_period", { length: 20 }).notNull(),
-  stripePriceId: varchar("stripe_price_id"),
-  features: text("features").array().notNull().default(sql`ARRAY[]::text[]`),
-  isActive: boolean("is_active").notNull().default(true),
+  price: text("price").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  billingPeriod: text("billing_period").notNull(),
+  stripePriceId: text("stripe_price_id"),
+  features: text("features").notNull().default('[]'), // Storing array as JSON string
+  isActive: integer("is_active", { mode: 'boolean' }).notNull().default(true),
   maxStories: integer("max_stories"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const userSubscriptions = pgTable("user_subscriptions", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  planId: varchar("plan_id").notNull(),
-  status: varchar("status", { length: 20 }).notNull().default("active"),
-  startDate: timestamp("start_date").notNull().default(sql`now()`),
-  endDate: timestamp("end_date"),
-  canceledAt: timestamp("canceled_at"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+export const userSubscriptions = sqliteTable("user_subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  planId: text("plan_id").notNull(),
+  status: text("status").notNull().default("active"),
+  startDate: integer("start_date", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  endDate: integer("end_date", { mode: 'timestamp' }),
+  canceledAt: integer("canceled_at", { mode: 'timestamp' }),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const coinSettings = pgTable("coin_settings", {
-  id: varchar("id").primaryKey(),
+export const coinSettings = sqliteTable("coin_settings", {
+  id: text("id").primaryKey(),
   coinsPerStory: integer("coins_per_story").notNull().default(10),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const planCoinCosts = pgTable("plan_coin_costs", {
-  id: varchar("id").primaryKey(),
-  planId: varchar("plan_id").notNull(),
+export const planCoinCosts = sqliteTable("plan_coin_costs", {
+  id: text("id").primaryKey(),
+  planId: text("plan_id").notNull(),
   coinCost: integer("coin_cost").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const coinPackages = pgTable("coin_packages", {
-  id: varchar("id").primaryKey(),
+export const coinPackages = sqliteTable("coin_packages", {
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   coins: integer("coins").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 3 }).notNull().default("USD"),
-  stripePriceId: varchar("stripe_price_id"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  price: text("price").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  stripePriceId: text("stripe_price_id"),
+  isActive: integer("is_active", { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const processedPayments = pgTable("processed_payments", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  razorpayPaymentId: varchar("razorpay_payment_id").notNull().unique(),
-  razorpayOrderId: varchar("razorpay_order_id").notNull(),
+export const processedPayments = sqliteTable("processed_payments", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  razorpayPaymentId: text("razorpay_payment_id").notNull().unique(),
+  razorpayOrderId: text("razorpay_order_id").notNull(),
   amount: integer("amount").notNull(),
-  currency: varchar("currency", { length: 3 }).notNull(),
-  coinPackageId: varchar("coin_package_id").notNull(),
+  currency: text("currency").notNull(),
+  coinPackageId: text("coin_package_id").notNull(),
   coinsAwarded: integer("coins_awarded").notNull(),
-  processedAt: timestamp("processed_at").notNull().default(sql`now()`),
+  processedAt: integer("processed_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const checkpoints = pgTable("checkpoints", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+export const checkpoints = sqliteTable("checkpoints", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   title: text("title").notNull(),
   description: text("description"),
-  goalType: varchar("goal_type", { length: 30 }).notNull(),
+  goalType: text("goal_type").notNull(),
   goalTarget: integer("goal_target").notNull(),
   rewardTitle: text("reward_title").notNull(),
   rewardDescription: text("reward_description"),
-  status: varchar("status", { length: 20 }).notNull().default("active"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  status: text("status").notNull().default("active"),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const checkpointProgress = pgTable("checkpoint_progress", {
-  id: varchar("id").primaryKey(),
-  checkpointId: varchar("checkpoint_id").notNull(),
-  userId: varchar("user_id").notNull(),
+export const checkpointProgress = sqliteTable("checkpoint_progress", {
+  id: text("id").primaryKey(),
+  checkpointId: text("checkpoint_id").notNull(),
+  userId: text("user_id").notNull(),
   currentProgress: integer("current_progress").notNull().default(0),
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  completedAt: integer("completed_at", { mode: 'timestamp' }),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const readingSessions = pgTable("reading_sessions", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  storyId: varchar("story_id").notNull(),
-  readingDate: timestamp("reading_date").notNull().default(sql`now()`),
+export const readingSessions = sqliteTable("reading_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  storyId: text("story_id").notNull(),
+  readingDate: integer("reading_date", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
   durationMinutes: integer("duration_minutes").notNull(),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const badges = pgTable("badges", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+export const badges = sqliteTable("badges", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   badgeName: text("badge_name").notNull(),
-  badgeIcon: varchar("badge_icon", { length: 20 }).notNull(),
-  gameType: varchar("game_type", { length: 20 }).notNull(),
-  storyId: varchar("story_id").notNull(),
-  earnedAt: timestamp("earned_at").notNull().default(sql`now()`),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  badgeIcon: text("badge_icon").notNull(),
+  gameType: text("game_type").notNull(),
+  storyId: text("story_id").notNull(),
+  earnedAt: integer("earned_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const gameSessions = pgTable("game_sessions", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  storyId: varchar("story_id").notNull(),
-  gameType: varchar("game_type", { length: 20 }).notNull(),
+export const gameSessions = sqliteTable("game_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  storyId: text("story_id").notNull(),
+  gameType: text("game_type").notNull(),
   score: integer("score").notNull(),
   totalScore: integer("total_score").notNull(),
-  passed: boolean("passed").notNull().default(false),
-  playedAt: timestamp("played_at").notNull().default(sql`now()`),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  passed: integer("passed", { mode: 'boolean' }).notNull().default(false),
+  playedAt: integer("played_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const storyCategories = pgTable("story_categories", {
-  id: varchar("id").primaryKey(),
+export const storyCategories = sqliteTable("story_categories", {
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
-  slug: varchar("slug", { length: 100 }).notNull().unique(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  slug: text("slug").notNull().unique(),
+  isActive: integer("is_active", { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
-export const storyTypes = pgTable("story_types", {
-  id: varchar("id").primaryKey(),
+export const storyTypes = sqliteTable("story_types", {
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
-  slug: varchar("slug", { length: 100 }).notNull().unique(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  slug: text("slug").notNull().unique(),
+  isActive: integer("is_active", { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now') * 1000)`),
 });

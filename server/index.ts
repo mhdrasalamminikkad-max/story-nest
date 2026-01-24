@@ -49,18 +49,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Run database migrations if DATABASE_URL is available
-  if (process.env.DATABASE_URL) {
-    try {
-      await runMigrations();
-    } catch (error) {
-      console.error('⚠️ Warning: Could not run migrations. Database may not be available.');
-      console.error('This is normal during initial deployment. The app will still run.');
-    }
-  } else {
-    console.log('ℹ️ DATABASE_URL not set. Database features will be disabled.');
+  // Run database migrations on startup
+  try {
+    console.log('🔄 Running database migrations...');
+    await runMigrations();
+  } catch (error) {
+    console.error('⚠️ Warning: Could not run migrations.');
+    console.error(error);
   }
-  
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

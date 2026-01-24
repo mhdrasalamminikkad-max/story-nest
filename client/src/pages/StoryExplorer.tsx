@@ -31,20 +31,11 @@ import type { Story } from "@shared/schema";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Badge } from "@/components/ui/badge";
 
-type StepType = "language" | "source" | "category" | "type" | "stories";
+type StepType = "category" | "stories";
 
-const languages = [
-  { value: "english", label: "English", icon: Globe },
-  { value: "malayalam", label: "Malayalam", icon: Flag },
-];
-
-const categories = [
-  { value: "islamic", label: "Islamic", icon: Star },
-  { value: "history", label: "History", icon: History },
-  { value: "moral", label: "Moral Lessons", icon: Lightbulb },
-  { value: "adventure", label: "Adventure", icon: Map },
-  { value: "educational", label: "Educational", icon: GraduationCap },
-  { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
+const categoryOptions = [
+  { value: "moral", label: "Moral Stories", icon: Lightbulb },
+  { value: "fairy-tale", label: "Folk Tales", icon: Wand2 },
 ];
 
 const storyTypes = [
@@ -61,11 +52,8 @@ const storyTypes = [
 
 export default function StoryExplorer() {
   const [, setLocation] = useLocation();
-  const [currentStep, setCurrentStep] = useState<StepType>("language");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [selectedSource, setSelectedSource] = useState<string>("");
+  const [currentStep, setCurrentStep] = useState<StepType>("category");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("");
 
   const { data: allStories = [] } = useQuery<Story[]>({
     queryKey: ["/api/stories/preview"],
@@ -84,22 +72,14 @@ export default function StoryExplorer() {
   const categories = apiCategories.length > 0 
     ? apiCategories.map(c => {
         const fallback = [
-          { value: "islamic", icon: Star },
-          { value: "history", icon: History },
           { value: "moral", icon: Lightbulb },
-          { value: "adventure", icon: Map },
-          { value: "educational", icon: GraduationCap },
           { value: "fairy-tale", icon: Wand2 },
         ].find(f => f.value === c.slug);
         return { value: c.slug, label: c.name, icon: fallback?.icon || Star };
       })
     : [
-        { value: "islamic", label: "Islamic", icon: Star },
-        { value: "history", label: "History", icon: History },
-        { value: "moral", label: "Moral Lessons", icon: Lightbulb },
-        { value: "adventure", label: "Adventure", icon: Map },
-        { value: "educational", label: "Educational", icon: GraduationCap },
-        { value: "fairy-tale", label: "Fairy Tale", icon: Wand2 },
+        { value: "moral", label: "Moral Stories", icon: Lightbulb },
+        { value: "fairy-tale", label: "Folk Tales", icon: Wand2 },
       ];
 
   const storyTypes = apiStoryTypes.length > 0
@@ -130,50 +110,19 @@ export default function StoryExplorer() {
       ];
 
   const filteredStories = allStories.filter((story) => {
-    if (selectedLanguage && story.language !== selectedLanguage) return false;
     if (selectedCategory && story.category !== selectedCategory) return false;
-    if (selectedType && story.storyType !== selectedType) return false;
-    
-    // Filter by source (main stories = admin created, parent stories = parent created)
-    if (selectedSource === "main" && !story.isCreatorAdmin) return false;
-    if (selectedSource === "parent" && story.isCreatorAdmin) return false;
-    
     return true;
   });
 
-  const handleLanguageSelect = (language: string) => {
-    setSelectedLanguage(language);
-    setCurrentStep("source");
-  };
-
-  const handleSourceSelect = (source: string) => {
-    setSelectedSource(source);
-    setCurrentStep("category");
-  };
-
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    setCurrentStep("type");
-  };
-
-  const handleTypeSelect = (type: string) => {
-    setSelectedType(type);
     setCurrentStep("stories");
   };
 
   const handleBack = () => {
-    if (currentStep === "source") {
-      setCurrentStep("language");
-      setSelectedLanguage("");
-    } else if (currentStep === "category") {
-      setCurrentStep("source");
-      setSelectedSource("");
-    } else if (currentStep === "type") {
+    if (currentStep === "stories") {
       setCurrentStep("category");
       setSelectedCategory("");
-    } else if (currentStep === "stories") {
-      setCurrentStep("type");
-      setSelectedType("");
     } else {
       setLocation("/");
     }
@@ -185,14 +134,8 @@ export default function StoryExplorer() {
 
   const getStepIcon = () => {
     switch (currentStep) {
-      case "language":
-        return <Languages className="w-6 h-6" />;
-      case "source":
-        return <Sparkles className="w-6 h-6" />;
       case "category":
         return <BookMarked className="w-6 h-6" />;
-      case "type":
-        return <Layers className="w-6 h-6" />;
       case "stories":
         return <Sparkles className="w-6 h-6" />;
     }
@@ -200,172 +143,117 @@ export default function StoryExplorer() {
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case "language":
-        return "Choose Your Language";
-      case "source":
-        return "Select Story Source";
       case "category":
         return "Pick a Category";
-      case "type":
-        return "Choose Story Type";
       case "stories":
-        return "Your Stories";
+        return "Stories";
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-purple-100/30 to-background dark:from-background dark:via-purple-950/30 dark:to-background overflow-hidden">
       <AnimatedBackground />
+
+      {/* Floating Stars Background */}
+      {[...Array(10)].map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute w-1 h-1 bg-yellow-300 rounded-full opacity-40"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [0, -25, 0],
+            opacity: [0.2, 0.6, 0.2],
+          }}
+          transition={{
+            duration: 5 + Math.random() * 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
       
       <div className="relative z-10">
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
+        <header className="sticky top-0 z-50 bg-gradient-to-r from-background/90 to-background/80 dark:from-background/90 dark:to-background/80 backdrop-blur-xl border-b border-primary/10">
           <div className="container mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="rounded-xl"
+                className="rounded-xl hover:bg-primary/20 transition-colors"
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div className="flex items-center gap-3">
                 {getStepIcon()}
-                <h1 className="text-xl font-bold">{getStepTitle()}</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-[#E5683A] to-[#F5C518] bg-clip-text text-transparent">{getStepTitle()}</h1>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 sm:px-6 py-8">
+        <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <AnimatePresence mode="wait">
-            {currentStep === "language" && (
-              <motion.div
-                key="language"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
-              >
-                {languages.map((lang) => {
-                  const IconComponent = lang.icon;
-                  return (
-                    <Card
-                      key={lang.value}
-                      className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                      onClick={() => handleLanguageSelect(lang.value)}
-                      data-testid={`card-language-${lang.value}`}
-                    >
-                      <div className="text-center space-y-4">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                          <IconComponent className="w-8 h-8 text-primary" />
-                        </div>
-                        <h3 className="text-2xl font-bold">{lang.label}</h3>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </motion.div>
-            )}
-
-            {currentStep === "source" && (
-              <motion.div
-                key="source"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto"
-              >
-                <Card
-                  className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                  onClick={() => handleSourceSelect("main")}
-                  data-testid="card-source-main"
-                >
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <Crown className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="text-2xl font-bold">Main Stories</h3>
-                    <p className="text-sm text-[#ffffff]">
-                      Curated collection of official stories
-                    </p>
-                  </div>
-                </Card>
-
-                <Card
-                  className="p-8 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                  onClick={() => handleSourceSelect("parent")}
-                  data-testid="card-source-parent"
-                >
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <Users className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="text-2xl font-bold">Parent Added Stories</h3>
-                    <p className="text-sm text-[#ffffff]">
-                      Stories created by parents in the community
-                    </p>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-
             {currentStep === "category" && (
               <motion.div
                 key="category"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
+                className="space-y-8"
               >
-                {categories.map((cat: any) => {
+                <motion.div
+                  className="text-center mb-12"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <h2 className="text-3xl sm:text-4xl font-bold text-[#E5683A] mb-3">Choose Your Adventure</h2>
+                  <p className="text-white/70 text-lg">Select a category to discover magical stories</p>
+                </motion.div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+                {categories.map((cat: any, idx: number) => {
                   const IconComponent = cat.icon || Star;
                   return (
-                    <Card
+                    <motion.div
                       key={cat.value}
-                      className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                      onClick={() => handleCategorySelect(cat.value)}
-                      data-testid={`card-category-${cat.value}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <div className="text-center space-y-3">
-                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                          <IconComponent className="w-6 h-6 text-primary" />
+                      <Card
+                        className="p-6 sm:p-8 cursor-pointer overflow-hidden border-2 border-gradient-to-br from-[#E5683A]/30 to-[#F5C518]/30 hover:from-[#E5683A]/50 hover:to-[#F5C518]/50 transition-all shadow-xl hover:shadow-2xl bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-white/0 backdrop-blur-sm"
+                        onClick={() => handleCategorySelect(cat.value)}
+                        data-testid={`card-category-${cat.value}`}
+                      >
+                        <div className="relative text-center space-y-4">
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#F5C518]/20 to-[#E5683A]/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                          
+                          <motion.div
+                            className="w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#E5683A] rounded-2xl flex items-center justify-center mx-auto shadow-xl relative z-10"
+                            whileHover={{ rotate: 10, scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <IconComponent className="w-8 h-8 text-gray-900" />
+                          </motion.div>
+                          <h3 className="text-lg sm:text-xl font-bold text-white relative z-10">{cat.label}</h3>
+                          <p className="text-xs sm:text-sm text-white/60 relative z-10 leading-relaxed">
+                            Explore amazing {cat.label.toLowerCase()} stories
+                          </p>
                         </div>
-                        <h3 className="text-lg font-semibold">{cat.label}</h3>
-                      </div>
-                    </Card>
+                      </Card>
+                    </motion.div>
                   );
                 })}
-              </motion.div>
-            )}
-
-            {currentStep === "type" && (
-              <motion.div
-                key="type"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto"
-              >
-                {storyTypes.map((type) => {
-                  const IconComponent = type.icon;
-                  return (
-                    <Card
-                      key={type.value}
-                      className="p-6 cursor-pointer hover-elevate active-elevate-2 transition-all"
-                      onClick={() => handleTypeSelect(type.value)}
-                      data-testid={`card-type-${type.value}`}
-                    >
-                      <div className="text-center space-y-3">
-                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                          <IconComponent className="w-6 h-6 text-primary" />
-                        </div>
-                        <h3 className="text-lg font-semibold">{type.label}</h3>
-                      </div>
-                    </Card>
-                  );
-                })}
+                </div>
               </motion.div>
             )}
 
@@ -375,75 +263,81 @@ export default function StoryExplorer() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div className="flex flex-wrap gap-2 justify-center mb-6">
-                  {selectedLanguage && (
-                    <Badge variant="secondary" className="text-sm px-3 py-1">
-                      {languages.find(l => l.value === selectedLanguage)?.label}
-                    </Badge>
-                  )}
-                  {selectedCategory && (
-                    <Badge variant="secondary" className="text-sm px-3 py-1">
-                      {categories.find(c => c.value === selectedCategory)?.label}
-                    </Badge>
-                  )}
-                  {selectedType && (
-                    <Badge variant="secondary" className="text-sm px-3 py-1">
-                      {storyTypes.find(t => t.value === selectedType)?.label}
-                    </Badge>
-                  )}
-                </div>
+                <motion.div
+                  className="text-center mb-8"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h2 className="text-3xl sm:text-4xl font-bold text-[#E5683A] mb-3">
+                    {categories.find(c => c.value === selectedCategory)?.label} Stories
+                  </h2>
+                  <p className="text-white/70 text-lg">{filteredStories.length} magical {categories.find(c => c.value === selectedCategory)?.label.toLowerCase()} tales waiting for you</p>
+                </motion.div>
 
                 {filteredStories.length === 0 ? (
-                  <Card className="p-12 text-center">
+                  <Card className="p-12 text-center bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border-2 border-[#E5683A]/30">
                     <div className="space-y-4">
-                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                        <BookMarked className="w-8 h-8 text-muted-foreground" />
+                      <div className="w-16 h-16 bg-[#F5C518]/20 rounded-full flex items-center justify-center mx-auto">
+                        <BookMarked className="w-8 h-8 text-[#F5C518]" />
                       </div>
-                      <h3 className="text-xl font-semibold">No Stories Found</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="text-2xl font-bold text-white">No Stories Found</h3>
+                      <p className="text-white text-lg">
                         Try selecting different options or go back to change your filters.
                       </p>
-                      <Button onClick={handleBack} variant="outline" data-testid="button-change-filters">
-                        Change Filters
+                      <Button onClick={handleBack} className="bg-[#F5C518] text-gray-900 hover:bg-[#febc2d] font-semibold rounded-xl" data-testid="button-change-filters">
+                        Go Back
                       </Button>
                     </div>
                   </Card>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredStories.map((story) => (
-                      <Card
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    {filteredStories.map((story, idx) => (
+                      <motion.div
                         key={story.id}
-                        className="overflow-hidden cursor-pointer hover-elevate active-elevate-2 transition-all"
-                        onClick={() => handleStoryClick(story.id)}
-                        data-testid={`card-story-${story.id}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        whileHover={{ y: -8 }}
                       >
-                        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900">
-                          {story.imageUrl && (
-                            <img
-                              src={story.imageUrl}
-                              alt={story.title}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          )}
-                        </div>
-                        <div className="p-4 space-y-2">
-                          <h3 className="font-semibold line-clamp-2">{story.title}</h3>
-                          <p className="text-sm text-[#ffffff] line-clamp-2">
-                            {story.summary}
-                          </p>
-                          <div className="flex gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-xs">
-                              {categories.find(c => c.value === story.category)?.label}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {storyTypes.find(t => t.value === story.storyType)?.label}
-                            </Badge>
+                        <Card
+                          className="overflow-hidden cursor-pointer border-2 border-[#E5683A]/20 hover:border-[#E5683A]/50 transition-all shadow-xl hover:shadow-2xl bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-white/0 backdrop-blur-sm group"
+                          onClick={() => handleStoryClick(story.id)}
+                          data-testid={`card-story-${story.id}`}
+                        >
+                          <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-[#E5683A]/30 to-[#F5C518]/30">
+                            {story.imageUrl && (
+                              <img
+                                src={story.imageUrl}
+                                alt={story.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                className="text-white font-semibold text-sm"
+                              >
+                                Click to Read ✨
+                              </motion.div>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
+                          <div className="p-4 sm:p-5 space-y-3">
+                            <h3 className="font-bold text-lg sm:text-xl text-white line-clamp-2 group-hover:text-[#F5C518] transition-colors">{story.title}</h3>
+                            <p className="text-sm text-white/70 line-clamp-2 leading-relaxed">
+                              {story.summary}
+                            </p>
+                            <div className="flex gap-2 flex-wrap pt-2">
+                              <Badge variant="outline" className="text-xs bg-[#F5C518]/20 text-[#F5C518] border-[#F5C518]/30">
+                                {categories.find(c => c.value === story.category)?.label}
+                              </Badge>
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
                     ))}
                   </div>
                 )}
