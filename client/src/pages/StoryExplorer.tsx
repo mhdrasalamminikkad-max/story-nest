@@ -31,7 +31,12 @@ import type { Story } from "@shared/schema";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { Badge } from "@/components/ui/badge";
 
-type StepType = "category" | "stories";
+type StepType = "language" | "category" | "stories";
+
+const languages = [
+  { value: "english", label: "English", icon: Globe },
+  { value: "malayalam", label: "Malayalam", icon: Flag },
+];
 
 const categoryOptions = [
   { value: "moral", label: "Moral Stories", icon: Lightbulb },
@@ -52,7 +57,8 @@ const storyTypes = [
 
 export default function StoryExplorer() {
   const [, setLocation] = useLocation();
-  const [currentStep, setCurrentStep] = useState<StepType>("category");
+  const [currentStep, setCurrentStep] = useState<StepType>("language");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const { data: allStories = [] } = useQuery<Story[]>({
@@ -110,9 +116,15 @@ export default function StoryExplorer() {
       ];
 
   const filteredStories = allStories.filter((story) => {
+    if (selectedLanguage && story.language !== selectedLanguage) return false;
     if (selectedCategory && story.category !== selectedCategory) return false;
     return true;
   });
+
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language);
+    setCurrentStep("category");
+  };
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
@@ -120,7 +132,10 @@ export default function StoryExplorer() {
   };
 
   const handleBack = () => {
-    if (currentStep === "stories") {
+    if (currentStep === "category") {
+      setCurrentStep("language");
+      setSelectedLanguage("");
+    } else if (currentStep === "stories") {
       setCurrentStep("category");
       setSelectedCategory("");
     } else {
@@ -134,6 +149,8 @@ export default function StoryExplorer() {
 
   const getStepIcon = () => {
     switch (currentStep) {
+      case "language":
+        return <Languages className="w-6 h-6" />;
       case "category":
         return <BookMarked className="w-6 h-6" />;
       case "stories":
@@ -143,6 +160,8 @@ export default function StoryExplorer() {
 
   const getStepTitle = () => {
     switch (currentStep) {
+      case "language":
+        return "Choose Your Language";
       case "category":
         return "Pick a Category";
       case "stories":
@@ -198,6 +217,62 @@ export default function StoryExplorer() {
 
         <main className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <AnimatePresence mode="wait">
+            {currentStep === "language" && (
+              <motion.div
+                key="language"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                <motion.div
+                  className="text-center mb-12"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <h2 className="text-3xl sm:text-4xl font-bold text-[#E5683A] mb-3">Choose Your Language</h2>
+                  <p className="text-white/70 text-lg">Select a language to explore stories</p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                {languages.map((lang, idx) => {
+                  const IconComponent = lang.icon;
+                  return (
+                    <motion.div
+                      key={lang.value}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Card
+                        className="p-8 cursor-pointer overflow-hidden border-2 border-gradient-to-br from-[#E5683A]/30 to-[#F5C518]/30 hover:from-[#E5683A]/50 hover:to-[#F5C518]/50 transition-all shadow-xl hover:shadow-2xl bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-white/0 backdrop-blur-sm"
+                        onClick={() => handleLanguageSelect(lang.value)}
+                        data-testid={`card-language-${lang.value}`}
+                      >
+                        <div className="relative text-center space-y-4">
+                          <motion.div
+                            className="w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#E5683A] rounded-2xl flex items-center justify-center mx-auto shadow-xl relative z-10"
+                            whileHover={{ rotate: 10, scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <IconComponent className="w-8 h-8 text-gray-900" />
+                          </motion.div>
+                          <h3 className="text-xl font-bold text-white relative z-10">{lang.label}</h3>
+                          <p className="text-sm text-white/60 relative z-10">
+                            Read stories in {lang.label.toLowerCase()}
+                          </p>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+                </div>
+              </motion.div>
+            )}
+
             {currentStep === "category" && (
               <motion.div
                 key="category"

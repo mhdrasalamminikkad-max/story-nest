@@ -764,65 +764,90 @@ export default function ParentDashboard() {
               </Button>
             </div>
 
-            <Card className="md:hidden rounded-2xl mb-4 overflow-hidden">
-              <CardContent className="p-4 space-y-3">
-                <Button
-                  onClick={() => {
-                    setEditingStory(null);
-                    setShowAddStory(true);
-                    setAudioUrl(null);
-                    setIsRecording(false);
-                    form.reset({
-                      title: "",
-                      content: "",
-                      summary: "",
-                      imageUrl: teddyImage,
-                      language: "english" as const,
-                      category: "educational" as const,
-                      storyType: "lesson" as const,
-                      voiceoverUrl: undefined,
-                    });
-                  }}
-                  className="w-full rounded-xl"
-                  data-testid="button-add-story"
+            <Card className="md:hidden rounded-3xl mb-6 overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100 shadow-lg">
+              <CardContent className="p-5 space-y-4">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Submit Story for Review
-                </Button>
+                  <Button
+                    onClick={() => {
+                      setEditingStory(null);
+                      setShowAddStory(true);
+                      setAudioUrl(null);
+                      setIsRecording(false);
+                      form.reset({
+                        title: "",
+                        content: "",
+                        summary: "",
+                        imageUrl: teddyImage,
+                        language: "english" as const,
+                        category: "educational" as const,
+                        storyType: "lesson" as const,
+                        voiceoverUrl: undefined,
+                      });
+                    }}
+                    className="w-full rounded-2xl bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 hover:from-pink-500 hover:via-rose-500 hover:to-red-500 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all transform h-12"
+                    data-testid="button-add-story"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    📖 Submit Story
+                  </Button>
+                </motion.div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    onClick={() => setLocation("/checkpoints")}
-                    className="rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
-                    data-testid="button-checkpoints"
-                    title="Checkpoints"
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <Target className="w-4 h-4 mr-2" />
-                    Checkpoints
-                  </Button>
-                  <Button
-                    onClick={() => setLocation("/pricing")}
-                    className="rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
-                    data-testid="button-view-plans"
-                    title="View Plans"
+                    <Button
+                      onClick={() => setLocation("/checkpoints")}
+                      className="w-full rounded-2xl bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-11"
+                      data-testid="button-checkpoints"
+                      title="Checkpoints"
+                    >
+                      <Target className="w-4 h-4 mr-1.5" />
+                      🎯 Check
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Plans
-                  </Button>
+                    <Button
+                      onClick={() => setLocation("/pricing")}
+                      className="w-full rounded-2xl bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-11"
+                      data-testid="button-view-plans"
+                      title="View Plans"
+                    >
+                      <CreditCard className="w-4 h-4 mr-1.5" />
+                      💎 Plans
+                    </Button>
+                  </motion.div>
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <Button
                     onClick={enterChildMode}
-                    className="rounded-xl col-span-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
+                    className="w-full rounded-2xl bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg hover:shadow-xl transition-all h-12"
                     data-testid="button-child-mode"
                   >
-                    <Play className="w-4 h-4 mr-2" />
-                    Enter Child Mode
+                    <Play className="w-5 h-5 mr-2" />
+                    ✨ Child Mode
                   </Button>
-                </div>
+                </motion.div>
               </CardContent>
             </Card>
           </motion.div>
 
-            <div className="hidden md:flex gap-3 flex-wrap">
-              <motion.div className="flex-1 sm:flex-initial">
+            <div className="hidden md:flex gap-5 flex-wrap py-2">
+              <motion.div 
+                className="flex-1 sm:flex-initial"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <Button
                   onClick={() => {
                     setEditingStory(null);
@@ -840,43 +865,58 @@ export default function ParentDashboard() {
                       voiceoverUrl: undefined,
                     });
                   }}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-primary to-secondary hover:shadow-xl transition-all font-bold"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 hover:from-pink-500 hover:via-rose-500 hover:to-red-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-add-story-desktop"
                 >
                   <Plus className="w-5 h-5 mr-2" />
-                  Submit Story for Review
+                  📖 Submit Story
                 </Button>
               </motion.div>
-              <motion.div className="flex-1 sm:flex-initial">
+              <motion.div 
+                className="flex-1 sm:flex-initial"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <Button
                   onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-checkpoints-desktop"
                   title="Checkpoints"
                 >
                   <Target className="w-5 h-5 mr-2" />
-                  Checkpoints
+                  🎯 Checkpoints
                 </Button>
               </motion.div>
-              <motion.div className="flex-1 sm:flex-initial">
+              <motion.div 
+                className="flex-1 sm:flex-initial"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <Button
                   onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-view-plans-desktop"
                   title="View Plans"
                 >
                   <CreditCard className="w-5 h-5 mr-2" />
-                  Plans
+                  💎 Plans
                 </Button>
               </motion.div>
-              <motion.div className="flex-1 sm:flex-initial">
+              <motion.div 
+                className="flex-1 sm:flex-initial"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <Button
                   onClick={enterChildMode}
-                  className="rounded-2xl text-sm sm:text-base bg-yellow-400 hover:bg-yellow-500 text-black font-bold shadow-md hover:shadow-lg transition-all"
+                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 hover:from-green-500 hover:via-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
                   data-testid="button-child-mode-desktop"
                 >
                   <Play className="w-5 h-5 mr-2" />
-                  Enter Child Mode
+                  ✨ Child Mode
                 </Button>
               </motion.div>
             </div>
@@ -885,16 +925,16 @@ export default function ParentDashboard() {
 
           <Tabs defaultValue="published" className="space-y-6 sm:space-y-8">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <TabsList className="w-full sm:w-auto bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-2xl p-1 shadow-lg" data-testid="tabs-parent-dashboard">
-                <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-published">
-                  Published Stories
+              <TabsList className="w-full sm:w-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 border-3 border-indigo-300 rounded-2xl p-1.5 shadow-lg" data-testid="tabs-parent-dashboard">
+                <TabsTrigger value="published" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-published">
+                  📚 Published
                 </TabsTrigger>
-                <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-your-stories">
-                  Your Stories
+                <TabsTrigger value="yours" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-your-stories">
+                  ✍️ Your Stories
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white" data-testid="tab-settings">
+                <TabsTrigger value="settings" className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-400 data-[state=active]:via-purple-400 data-[state=active]:to-pink-400 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all" data-testid="tab-settings">
                   <SettingsIcon className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Settings</span>
+                  <span className="hidden sm:inline">⚙️ Settings</span>
                 </TabsTrigger>
               </TabsList>
             </motion.div>
@@ -902,15 +942,18 @@ export default function ParentDashboard() {
             <TabsContent value="published">
               <motion.div className="mb-6 space-y-4">
                 <motion.div className="flex gap-3 flex-wrap">
-                  <motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <Button
                       variant={filterBookmarked ? "default" : "outline"}
                       onClick={() => setFilterBookmarked(!filterBookmarked)}
-                      className={`rounded-2xl font-bold border-2 ${filterBookmarked ? "bg-gradient-to-r from-primary to-secondary" : "border-primary/40"}`}
+                      className={`rounded-2xl font-bold border-2 transition-all shadow-md ${filterBookmarked ? "bg-gradient-to-r from-red-400 to-pink-400 text-white border-red-400 shadow-lg" : "border-red-300 text-red-600 hover:bg-red-50"}`}
                       data-testid="button-filter-bookmarks"
                     >
                       <BookmarkCheck className="w-5 h-5 mr-2" />
-                      {filterBookmarked ? "Show All" : "Bookmarked Only"}
+                      {filterBookmarked ? "❤️ Bookmarked" : "☆ Not Bookmarked"}
                     </Button>
                   </motion.div>
                 </motion.div>
@@ -922,51 +965,63 @@ export default function ParentDashboard() {
                       placeholder="🔍 Search stories..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded-2xl pl-12 border-2 border-primary/30 font-semibold focus:border-primary focus:shadow-lg"
+                      className="rounded-2xl pl-12 border-2 border-indigo-300 font-semibold focus:border-indigo-500 focus:shadow-lg focus:ring-indigo-300 bg-white"
                       data-testid="input-search-stories"
                     />
                   </motion.div>
-                  <Select value={languageFilter} onValueChange={setLanguageFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-primary/30 font-semibold" data-testid="select-language-filter">
-                      <SelectValue placeholder="Filter by language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Languages</SelectItem>
-                      <SelectItem value="english">English</SelectItem>
-                      <SelectItem value="malayalam">Malayalam</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-secondary/30 font-semibold" data-testid="select-category-filter">
-                      <SelectValue placeholder="Filter by category" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl">
-                      <SelectItem value="all">All Categories</SelectItem>
-                      <SelectItem value="islamic">Islamic</SelectItem>
-                      <SelectItem value="history">History</SelectItem>
-                      <SelectItem value="moral">Moral Lessons</SelectItem>
-                      <SelectItem value="adventure">Adventure</SelectItem>
-                      <SelectItem value="educational">Educational</SelectItem>
-                      <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
-                    <SelectTrigger className="rounded-2xl w-[180px] border-2 border-accent/30 font-semibold" data-testid="select-story-type-filter">
-                      <SelectValue placeholder="Filter by type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="islamic">Islamic</SelectItem>
-                      <SelectItem value="lesson">Lesson</SelectItem>
-                      <SelectItem value="history">History</SelectItem>
-                      <SelectItem value="fairy-tale">Fairy Tale</SelectItem>
-                      <SelectItem value="adventure">Adventure</SelectItem>
-                      <SelectItem value="educational">Educational</SelectItem>
-                      <SelectItem value="moral">Moral</SelectItem>
-                      <SelectItem value="mythology">Mythology</SelectItem>
-                      <SelectItem value="science">Science</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Select value={languageFilter} onValueChange={setLanguageFilter}>
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-blue-300 font-semibold bg-gradient-to-r from-blue-50 to-cyan-50 hover:border-blue-400" data-testid="select-language-filter">
+                        <SelectValue placeholder="🌍 Filter language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Languages</SelectItem>
+                        <SelectItem value="english">🇬🇧 English</SelectItem>
+                        <SelectItem value="malayalam">🇮🇳 Malayalam</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-purple-300 font-semibold bg-gradient-to-r from-purple-50 to-pink-50 hover:border-purple-400" data-testid="select-category-filter">
+                        <SelectValue placeholder="📚 Filter category" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="islamic">🕌 Islamic</SelectItem>
+                        <SelectItem value="history">📜 History</SelectItem>
+                        <SelectItem value="moral">💡 Moral Lessons</SelectItem>
+                        <SelectItem value="adventure">🗺️ Adventure</SelectItem>
+                        <SelectItem value="educational">🎓 Educational</SelectItem>
+                        <SelectItem value="fairy-tale">✨ Fairy Tale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
+                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-amber-300 font-semibold bg-gradient-to-r from-amber-50 to-orange-50 hover:border-amber-400" data-testid="select-story-type-filter">
+                        <SelectValue placeholder="🎭 Filter type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="islamic">🕌 Islamic</SelectItem>
+                        <SelectItem value="lesson">📚 Lesson</SelectItem>
+                        <SelectItem value="history">📜 History</SelectItem>
+                        <SelectItem value="fairy-tale">✨ Fairy Tale</SelectItem>
+                        <SelectItem value="adventure">🗺️ Adventure</SelectItem>
+                        <SelectItem value="educational">🎓 Educational</SelectItem>
+                        <SelectItem value="moral">💡 Moral</SelectItem>
+                        <SelectItem value="mythology">🦅 Mythology</SelectItem>
+                        <SelectItem value="science">🔬 Science</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </motion.div>
                 </div>
               </motion.div>
               {isLoading ? (
@@ -975,26 +1030,41 @@ export default function ParentDashboard() {
                 </div>
               ) : displayedStories.length === 0 ? (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 text-center py-16 shadow-lg">
+                  <Card className="rounded-3xl border-3 border-dashed border-indigo-300 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-center py-16 shadow-lg">
                     <CardContent className="pt-8">
-                      <p className="text-xl font-semibold text-white">
+                      <motion.div
+                        animate={{ y: [0, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-4xl mb-4"
+                      >
+                        📚
+                      </motion.div>
+                      <p className="text-xl font-bold text-gray-700">
                         {filterBookmarked ? "No bookmarked stories yet" : "No published stories yet"}
                       </p>
+                      <p className="text-sm text-gray-500 mt-2">Explore and find amazing stories! 🌟</p>
                     </CardContent>
                   </Card>
                 </motion.div>
               ) : (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {displayedStories.map((story) => (
-                    <StoryCard
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, staggerChildren: 0.1, delayChildren: 0.1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {displayedStories.map((story, idx) => (
+                    <motion.div
                       key={story.id}
-                      story={story}
-                      onRead={(story) => {
-                        // All stories in parent dashboard go to parent read page
-                        setLocation(`/read-story?story=${story.id}`);
-                      }}
-                      onToggleBookmark={(story) => toggleBookmarkMutation.mutate(story.id)}
-                    />
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                    >
+                      <StoryCard
+                        story={story}
+                        onRead={(story) => {
+                          // All stories in parent dashboard go to parent read page
+                          setLocation(`/read-story?story=${story.id}`);
+                        }}
+                        onToggleBookmark={(story) => toggleBookmarkMutation.mutate(story.id)}
+                      />
+                    </motion.div>
                   ))}
                 </motion.div>
               )}
@@ -1010,31 +1080,51 @@ export default function ParentDashboard() {
                 </div>
               ) : mySubmissions.length === 0 ? (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 text-center py-16 shadow-lg">
+                  <Card className="rounded-3xl border-3 border-dashed border-indigo-300 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-center py-16 shadow-lg">
                     <CardContent className="pt-8">
-                      <p className="text-xl font-semibold text-foreground mb-6">
-                        You haven't submitted any stories yet
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-5xl mb-4"
+                      >
+                        ✍️
+                      </motion.div>
+                      <p className="text-2xl font-bold text-gray-700 mb-2">
+                        No Stories Yet
                       </p>
-                      <Button onClick={() => setShowAddStory(true)} className="rounded-2xl bg-gradient-to-r from-primary to-secondary hover:shadow-lg font-bold">
-                        <Plus className="w-5 h-5 mr-2" />
-                        Submit Your First Story
-                      </Button>
+                      <p className="text-gray-500 mb-6">Time to share your amazing stories with the world! 🌍</p>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button onClick={() => setShowAddStory(true)} className="rounded-2xl bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 hover:from-pink-500 hover:via-rose-500 hover:to-red-500 text-white font-bold shadow-lg hover:shadow-xl h-11 px-6">
+                          <Plus className="w-5 h-5 mr-2" />
+                          📖 Submit Your First Story
+                        </Button>
+                      </motion.div>
                     </CardContent>
                   </Card>
                 </motion.div>
               ) : (
-                <div className="space-y-4">
-                  {mySubmissions.map((story) => (
-                    <Card key={story.id} className="rounded-3xl" data-testid={`card-story-${story.id}`}>
-                      <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-2">
-                        <div className="flex-1">
-                          <CardTitle className="text-xl">{story.title}</CardTitle>
-                          <CardDescription className="mt-1">{story.summary}</CardDescription>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          {getStatusBadge(story)}
-                          <span className="text-xs text-muted-foreground">
-                            {formatDate(story.createdAt)}
+                <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ staggerChildren: 0.1 }}>
+                  {mySubmissions.map((story, idx) => (
+                    <motion.div
+                      key={story.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                    >
+                      <Card key={story.id} className="rounded-3xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-lg transition-all" data-testid={`card-story-${story.id}`}>
+                        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 pb-2">
+                          <div className="flex-1">
+                            <CardTitle className="text-xl text-gray-800">{story.title}</CardTitle>
+                            <CardDescription className="mt-1 text-gray-600">{story.summary}</CardDescription>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            {getStatusBadge(story)}
+                            <span className="text-xs text-gray-500">
+                              {formatDate(story.createdAt)}
                           </span>
                         </div>
                       </CardHeader>
@@ -1048,46 +1138,62 @@ export default function ParentDashboard() {
                         <div className="flex gap-2 flex-wrap">
                           {story.status === "draft" && (
                             <>
-                              <Button
-                                onClick={() => handleEditStory(story)}
-                                className="rounded-2xl"
-                                data-testid={`button-edit-${story.id}`}
+                              <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                               >
-                                Edit Draft
-                              </Button>
-                              <Button
-                                onClick={() => submitStoryMutation.mutate(story.id)}
-                                disabled={submitStoryMutation.isPending}
-                                className="rounded-2xl"
-                                data-testid={`button-submit-${story.id}`}
+                                <Button
+                                  onClick={() => handleEditStory(story)}
+                                  className="rounded-2xl bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold shadow-md hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all"
+                                  data-testid={`button-edit-${story.id}`}
+                                >
+                                  ✏️ Edit Draft
+                                </Button>
+                              </motion.div>
+                              <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                               >
-                                Submit for Review
-                              </Button>
+                                <Button
+                                  onClick={() => submitStoryMutation.mutate(story.id)}
+                                  disabled={submitStoryMutation.isPending}
+                                  className="rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 text-white font-bold shadow-md hover:shadow-lg hover:from-green-500 hover:to-emerald-500 transition-all disabled:opacity-50"
+                                  data-testid={`button-submit-${story.id}`}
+                                >
+                                  🚀 Submit for Review
+                                </Button>
+                              </motion.div>
                             </>
                           )}
                           {story.status === "pending_review" && (
-                            <p className="text-sm text-white italic">
-                              Your story is being reviewed by an admin
+                            <p className="text-sm text-indigo-700 italic font-semibold">
+                              ⏳ Your story is being reviewed by an admin
                             </p>
                           )}
                           {story.status === "published" && (
-                            <Button
-                              onClick={() => {
-                                // All stories in parent dashboard go to parent read page
-                                setLocation(`/read-story?story=${story.id}`);
-                              }}
-                              className="rounded-2xl"
-                              data-testid={`button-read-${story.id}`}
+                            <motion.div
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
                             >
-                              <Play className="w-4 h-4 mr-2" />
-                              Read Story
-                            </Button>
+                              <Button
+                                onClick={() => {
+                                  // All stories in parent dashboard go to parent read page
+                                  setLocation(`/read-story?story=${story.id}`);
+                                }}
+                                className="rounded-2xl bg-gradient-to-r from-purple-400 to-pink-400 text-white font-bold shadow-md hover:shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all"
+                                data-testid={`button-read-${story.id}`}
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                📖 Read Story
+                              </Button>
+                            </motion.div>
                           )}
                         </div>
                       </CardContent>
                     </Card>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
             </TabsContent>
 
