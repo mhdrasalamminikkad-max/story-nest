@@ -127,6 +127,11 @@ function PaymentProofList() {
 export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [showPasswordDialog, setShowPasswordDialog] = useState(true);
+  
   const [reviewingStory, setReviewingStory] = useState<Story | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showAddStory, setShowAddStory] = useState(false);
@@ -140,6 +145,29 @@ export default function AdminPanel() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  // Admin credentials - change these to your secret credentials
+  const ADMIN_PASSWORD = "admin12345"; // Change this to your secret password
+
+  const handlePasswordSubmit = () => {
+    if (passwordInput.trim() === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setShowPasswordDialog(false);
+      toast({
+        title: "Success",
+        description: "Admin panel access granted!",
+        duration: 2000,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Invalid password. Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+      setPasswordInput("");
+    }
+  };
 
   const form = useForm({
     resolver: zodResolver(insertStorySchema),
@@ -173,23 +201,24 @@ export default function AdminPanel() {
 
   const { data: adminCheck, isLoading: checkingAdmin } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/admin/check"],
+    enabled: isAuthenticated,
   });
 
   const { data: stats } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: allStories = [] } = useQuery<Story[]>({
     queryKey: ["/api/admin/stories"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
     staleTime: 0,
     refetchOnMount: 'always',
   });
 
   const { data: pendingStories = [], refetch: refetchPendingStories } = useQuery<Story[]>({
     queryKey: ["/api/admin/pending-stories"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
     staleTime: 0,
     refetchOnMount: 'always',
     refetchInterval: 5000, // Auto-refresh every 5 seconds for instant updates
@@ -197,32 +226,32 @@ export default function AdminPanel() {
 
   const { data: users = [] } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: subscriptionPlans = [] } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/admin/subscription-plans"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: coinSettings } = useQuery<CoinSettings>({
     queryKey: ["/api/admin/coin-settings"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: planCoinCosts = [] } = useQuery<PlanCoinCost[]>({
     queryKey: ["/api/admin/plan-coin-costs"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: categories = [], refetch: refetchCategories } = useQuery<StoryCategory[]>({
     queryKey: ["/api/categories"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const { data: storyTypes = [], refetch: refetchStoryTypes } = useQuery<StoryType[]>({
     queryKey: ["/api/story-types"],
-    enabled: adminCheck?.isAdmin || false,
+    enabled: isAuthenticated,
   });
 
   const addCategoryMutation = useMutation({
@@ -576,6 +605,77 @@ export default function AdminPanel() {
     <div className="min-h-screen relative bg-gray-50 dark:bg-gray-950 pb-20">
       <AnimatedBackground />
       
+      {/* Password Authentication Dialog */}
+      <Dialog open={showPasswordDialog && !isAuthenticated} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518]">
+          <DialogHeader>
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#FFD54F] rounded-full flex items-center justify-center">
+              <ShieldAlert className="w-8 h-8 text-[#E5683A]" />
+            </div>
+            <DialogTitle className="text-center text-2xl text-[#E5683A] font-bold">🔐 Admin Panel Access</DialogTitle>
+            <DialogDescription className="text-center text-[#d94f25] font-semibold">
+              Enter the admin password to access the panel
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-[#E5683A]">Secret Password</label>
+              <Input
+                type="password"
+                placeholder="Enter admin password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handlePasswordSubmit();
+                  }
+                }}
+                className="rounded-2xl border-2 border-[#F5C518] focus:border-[#E5683A] focus:ring-[#F5C518]"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/")}
+              className="rounded-2xl border-2 border-[#F5C518] text-[#E5683A] hover:bg-[#FFF8E7]"
+            >
+              Cancel
+            </Button>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1"
+            >
+              <Button
+                onClick={handlePasswordSubmit}
+                className="w-full rounded-2xl bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-xl transition-all"
+              >
+                🔓 Access Admin Panel
+              </Button>
+            </motion.div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Show loading or access denied if not authenticated */}
+      {!isAuthenticated ? (
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <Card className="w-full max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518] shadow-lg">
+            <CardContent className="p-8 text-center">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-5xl mb-4"
+              >
+                🔒
+              </motion.div>
+              <p className="text-lg font-bold text-[#E5683A] mb-2">Admin Panel Locked</p>
+              <p className="text-sm text-[#d94f25]">Please enter the admin password to proceed</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
       <div className="relative z-10">
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b sticky top-0 z-20">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -1752,6 +1852,8 @@ export default function AdminPanel() {
           </Form>
         </DialogContent>
       </Dialog>
+      </div>
+      )}
     </div>
   );
 }
