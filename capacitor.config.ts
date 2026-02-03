@@ -1,13 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tellmamma.app',
-  appName: 'Tell Mamma',
-  webDir: 'dist/public',
+  appId: 'com.storynest.kidslauncher',
+  appName: 'StoryNest Kids',
+  webDir: 'dist',
+  // Removed server URL to ensure it runs from local files (offline ready)
   server: {
-    // Point to hosted production URL
-    url: 'https://tellmamma.com',
-    cleartext: false
+    androidScheme: 'https'
   },
   plugins: {
     SplashScreen: {

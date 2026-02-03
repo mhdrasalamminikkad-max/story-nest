@@ -12,7 +12,7 @@ async function getAuthToken(): Promise<string | null> {
     // Try to get token from Firebase (web and native)
     const { auth } = await import("@/lib/firebase");
     const currentUser = auth.currentUser;
-    
+
     if (currentUser) {
       try {
         return await currentUser.getIdToken();
@@ -20,7 +20,7 @@ async function getAuthToken(): Promise<string | null> {
         console.error("Error getting ID token from current user:", tokenError);
       }
     }
-    
+
     // Fallback to Preferences for native app offline state
     try {
       const { Capacitor } = await import("@capacitor/core");
@@ -46,7 +46,7 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const headers: Record<string, string> = {};
-  
+
   if (data) {
     headers["Content-Type"] = "application/json";
   }
@@ -57,7 +57,22 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, {
+  // Handle Base URL for Native Apps (Kiosk Mode)
+  let baseUrl = "";
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    if (Capacitor.isNativePlatform()) {
+      // ⚠️ UPDATE THIS URL TO YOUR PRODUCTION SERVER ⚠️
+      baseUrl = "https://story-nest.onrender.com";
+    }
+  } catch (e) {
+    // Web mode (ignores base URL)
+  }
+
+  // Ensure URL starts with / if we are appending to base, or use absolute URL
+  const targetUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
+
+  const res = await fetch(targetUrl, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
@@ -73,26 +88,38 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    // Get Firebase token
-    const token = await getAuthToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+    async ({ queryKey }) => {
+      // Get Firebase token
+      const token = await getAuthToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
 
-    const res = await fetch(queryKey.join("/") as string, {
-      headers,
-      credentials: "include", // Include cookies if set
-    });
+      // Handle Base URL for Native Apps
+      let baseUrl = "";
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (Capacitor.isNativePlatform()) {
+          baseUrl = "https://story-nest.onrender.com";
+        }
+      } catch (e) { }
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+      const url = queryKey.join("/") as string;
+      const targetUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+      const res = await fetch(targetUrl, {
+        headers,
+        credentials: "include", // Include cookies if set
+      });
+
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

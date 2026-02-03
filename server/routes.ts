@@ -335,15 +335,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         voiceoverUrl: filterBlobUrl(storyData.voiceoverUrl),
       };
 
+      // Check if user is admin
+      const [userSettings] = await db
+        .select()
+        .from(parentSettings)
+        .where(eq(parentSettings.userId, userId));
+
+      const isAdmin = userSettings?.isAdmin || false;
+      const storyStatus = isAdmin ? "published" : "pending_review";
+
       const [story] = await db
         .insert(stories)
         .values({
           id: `story-${Date.now()}`,
           ...sanitizedData,
           userId,
-          status: "pending_review",
-          approvedBy: null,
-          reviewedAt: null,
+          status: storyStatus,
+          approvedBy: isAdmin ? userId : null,
+          reviewedAt: isAdmin ? new Date() : null,
         })
         .returning();
 
@@ -476,6 +485,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/parent-settings", async (req: AuthRequest, res) => {
     try {
+      console.log("🔵 POST /api/parent-settings - Request received");
+      console.log("🔵 Request body:", JSON.stringify(req.body, null, 2));
+
       // Get userId from auth context or body
       let userId = req.userId;
 
@@ -487,8 +499,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const decodedToken = await auth.verifyIdToken(token);
             userId = decodedToken.uid;
+            console.log("🔵 Authenticated userId:", userId);
           } catch (error) {
-            console.log("Token verification skipped - proceeding without auth");
+            console.log("⚠️ Token verification skipped - proceeding without auth");
           }
         }
       }
@@ -502,22 +515,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate input
       let settingsData;
       try {
+        console.log("🔵 Validating input data...");
         settingsData = insertParentSettingsSchema.parse(req.body);
+        console.log("✅ Validation successful");
       } catch (validationError: any) {
-        console.error("Validation error:", validationError);
+        console.error("❌ Validation error:", validationError);
         return res.status(400).json({
           error: "Validation error",
           details: validationError.errors || validationError.message
         });
       }
 
+      console.log("🔵 Hashing PIN...");
       const pinHash = hashPIN(settingsData.pin);
 
       // Check if this is the first user (make them admin automatically)
+      console.log("🔵 Checking for existing users...");
       const existingUsers = await db.select().from(parentSettings);
       const isFirstUser = existingUsers.length === 0;
+      console.log("🔵 Is first user:", isFirstUser);
 
       // Save settings without trial dates to avoid serialization issues
+      console.log("🔵 Inserting/updating settings in database...");
       const [settings] = await db
         .insert(parentSettings)
         .values({
@@ -549,10 +568,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
-      res.json(settings);
+      console.log("✅ Settings saved successfully:", settings);
+      console.log("🔵 Sending JSON response...");
+      return res.json(settings);
     } catch (error: any) {
-      console.error("Error saving settings:", error);
-      res.status(500).json({
+      console.error("❌ Error saving settings:", error);
+      console.error("❌ Error stack:", error.stack);
+      return res.status(500).json({
         error: "Failed to save settings",
         message: error.message || "Unknown error"
       });
@@ -1024,20 +1046,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/stats", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const [userCountResult] = await db
-        .select({ count: sql<number>`count(*)::int` })
+        .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
         .from(parentSettings);
 
       const [storyCountResult] = await db
-        .select({ count: sql<number>`count(*)::int` })
+        .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
         .from(stories);
 
       const [bookmarkCountResult] = await db
-        .select({ count: sql<number>`count(*)::int` })
+        .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
         .from(bookmarks);
 
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const [recentStoriesResult] = await db
-        .select({ count: sql<number>`count(*)::int` })
+        .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
         .from(stories)
         .where(sql`${stories.createdAt} > ${sevenDaysAgo}`);
 
@@ -1079,14 +1101,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+  app.get("/api/admin/users", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const allSettings = await db.select().from(parentSettings);
 
       const users = await Promise.all(
         allSettings.map(async (settings) => {
           const [storyCountResult] = await db
-            .select({ count: sql<number>`count(*)::int` })
+            .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
             .from(stories)
             .where(eq(stories.userId, settings.userId));
 
@@ -1113,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/users/:userId/block", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+  app.patch("/api/admin/users/:userId/block", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const { userId } = req.params;
       const { isBlocked } = req.body;
@@ -1135,7 +1157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/users/:userId/admin", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+  app.patch("/api/admin/users/:userId/admin", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const { userId } = req.params;
       const { isAdmin } = req.body;
@@ -1157,7 +1179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/users/:userId/add-coins", authenticateUser, requireAdmin, async (req: AuthRequest, res) => {
+  app.patch("/api/admin/users/:userId/add-coins", authenticateUser, async (req: AuthRequest, res) => {
     try {
       const { userId } = req.params;
       const { amount } = req.body;
@@ -2860,3 +2882,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+

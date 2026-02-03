@@ -38,7 +38,7 @@ export default function ChildLockSetupPage() {
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("📝 Submitting child lock settings:", data);
-      
+
       const res = await fetch("/api/parent-settings", {
         method: "POST",
         headers: {
@@ -46,15 +46,33 @@ export default function ChildLockSetupPage() {
         },
         body: JSON.stringify(data),
       });
-      
+
       console.log("📡 Response status:", res.status);
-      
+      console.log("📡 Response headers:", Object.fromEntries(res.headers.entries()));
+
+      // Get the response text first
+      const responseText = await res.text();
+      console.log("📡 Response text:", responseText);
+
       if (!res.ok) {
-        const errorData = await res.json();
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch (e) {
+          console.error("❌ Failed to parse error response as JSON:", responseText);
+          throw new Error(`Server error (${res.status}): ${responseText || 'Empty response'}`);
+        }
         console.error("❌ API Error response:", errorData);
         throw new Error(errorData.message || errorData.details || errorData.error || "Failed to save settings");
       }
-      return await res.json();
+
+      // Parse success response
+      try {
+        return JSON.parse(responseText);
+      } catch (e) {
+        console.error("❌ Failed to parse success response as JSON:", responseText);
+        throw new Error(`Invalid JSON response: ${responseText || 'Empty response'}`);
+      }
     },
     onSuccess: () => {
       console.log("Settings saved successfully");
@@ -84,7 +102,7 @@ export default function ChildLockSetupPage() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <AnimatedBackground />
-      
+
       <div className="relative z-10">
         <header className="container mx-auto px-4 py-6 flex justify-between items-center">
           <Button

@@ -147,7 +147,7 @@ export default function AdminPanel() {
   const audioChunksRef = useRef<Blob[]>([]);
 
   // Admin credentials - change these to your secret credentials
-  const ADMIN_PASSWORD = "admin12345"; // Change this to your secret password
+  const ADMIN_PASSWORD = "caliph786786"; // Change this to your secret password
 
   const handlePasswordSubmit = () => {
     if (passwordInput.trim() === ADMIN_PASSWORD) {
@@ -570,46 +570,15 @@ export default function AdminPanel() {
     );
   }
 
-  if (!adminCheck?.isAdmin) {
-    return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-        <AnimatedBackground />
-        <div className="relative z-10 w-full max-w-md">
-          <Card className="rounded-3xl border-2 shadow-xl">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <ShieldAlert className="w-8 h-8 text-red-600 dark:text-red-400" />
-              </div>
-              <CardTitle className="text-2xl font-heading text-red-600 dark:text-red-400">Access Denied</CardTitle>
-              <CardDescription>
-                You do not have permission to access the administrative panel.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <Button 
-                onClick={() => setLocation("/")}
-                variant="outline"
-                className="rounded-2xl"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen relative bg-gray-50 dark:bg-gray-950 pb-20">
+    <div className="min-h-screen relative bg-gradient-to-br from-[#FFF8E7] via-white to-[#FFE8CC] dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 pb-20">
       <AnimatedBackground />
       
       {/* Password Authentication Dialog */}
       <Dialog open={showPasswordDialog && !isAuthenticated} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="sm:max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518]">
           <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#FFD54F] rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-[#F5C518] to-[#FFD54F] rounded-full flex items-center justify-center shadow-lg">
               <ShieldAlert className="w-8 h-8 text-[#E5683A]" />
             </div>
             <DialogTitle className="text-center text-2xl text-[#E5683A] font-bold">🔐 Admin Panel Access</DialogTitle>
@@ -661,7 +630,7 @@ export default function AdminPanel() {
       {/* Show loading or access denied if not authenticated */}
       {!isAuthenticated ? (
         <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <Card className="w-full max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518] shadow-lg">
+          <Card className="w-full max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518] shadow-2xl">
             <CardContent className="p-8 text-center">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
@@ -676,19 +645,19 @@ export default function AdminPanel() {
           </Card>
         </div>
       ) : (
-      <div className="relative z-10">
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b sticky top-0 z-20">
+        <div className="relative z-10">
+        <header className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] shadow-xl sticky top-0 z-20">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setLocation("/")}
-                className="rounded-full"
+                className="rounded-full text-white hover:bg-white/20"
               >
                 <ArrowLeft className="w-6 h-6" />
               </Button>
-              <h1 className="font-heading text-2xl text-purple-600 dark:text-purple-400 flex items-center gap-2">
+              <h1 className="font-heading text-2xl text-white flex items-center gap-2">
                 <ShieldAlert className="w-6 h-6" />
                 Admin Panel
               </h1>
@@ -702,114 +671,124 @@ export default function AdminPanel() {
         <main className="container mx-auto px-4 py-8">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <Card className="rounded-2xl border-2 bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-900/30">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-800/30 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total Users</p>
-                  <p className="text-2xl font-heading">{stats?.totalUsers || 0}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Users</p>
+                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalUsers || 0}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="rounded-2xl border-2 bg-pink-50/50 dark:bg-pink-900/10 border-pink-100 dark:border-pink-900/30">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-pink-100 dark:bg-pink-800/30 rounded-xl flex items-center justify-center text-pink-600 dark:text-pink-400">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total Stories</p>
-                  <p className="text-2xl font-heading">{stats?.totalStories || 0}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Stories</p>
+                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalStories || 0}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="rounded-2xl border-2 bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-800/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
-                  <Bookmark className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total Bookmarks</p>
-                  <p className="text-2xl font-heading">{stats?.totalBookmarks || 0}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                    <Bookmark className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Bookmarks</p>
+                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalBookmarks || 0}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="rounded-2xl border-2 bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-800/30 rounded-xl flex items-center justify-center text-amber-600 dark:text-amber-400">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Avg Stories/User</p>
-                  <p className="text-2xl font-heading">{stats?.averageStoriesPerUser || "0"}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Avg Stories/User</p>
+                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.averageStoriesPerUser || "0"}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="rounded-2xl border-2 bg-green-50/50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-800/30 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Recent Stories</p>
-                  <p className="text-2xl font-heading">{stats?.recentStoriesCount || 0}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                    <Plus className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Recent Stories</p>
+                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.recentStoriesCount || 0}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
           <Tabs defaultValue="stories" className="space-y-6">
-            <TabsList className="bg-white dark:bg-gray-900 border-2 rounded-2xl p-1 h-auto flex flex-wrap gap-1">
-              <TabsTrigger value="stories" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+            <TabsList className="bg-white shadow-md border-2 border-[#F5C518] rounded-3xl p-2 h-auto flex flex-wrap gap-2 w-full">
+              <TabsTrigger value="stories" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Manage Stories
               </TabsTrigger>
-              <TabsTrigger value="pending" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400 relative">
+              <TabsTrigger value="pending" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all relative">
                 <ShieldAlert className="w-4 h-4 mr-2" />
                 Review Pending
                 {pendingStories.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center animate-pulse border-2 border-white dark:border-gray-950">
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-lg font-bold">
                     {pendingStories.length}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="payments" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+              <TabsTrigger value="payments" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Payment Proofs
               </TabsTrigger>
-              <TabsTrigger value="users" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+              <TabsTrigger value="users" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <Users className="w-4 h-4 mr-2" />
                 User Management
               </TabsTrigger>
-              <TabsTrigger value="plans" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+              <TabsTrigger value="plans" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <DollarSign className="w-4 h-4 mr-2" />
                 Subscription Plans
               </TabsTrigger>
-              <TabsTrigger value="coins" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+              <TabsTrigger value="coins" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <Coins className="w-4 h-4 mr-2" />
                 Coin System
               </TabsTrigger>
-              <TabsTrigger value="content" className="rounded-xl flex-1 py-3 data-[state=active]:bg-purple-100 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400">
+              <TabsTrigger value="content" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
                 <Settings className="w-4 h-4 mr-2" />
                 Content Options
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="stories">
-              <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between bg-muted/30 pb-4">
+              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
                   <div>
-                    <CardTitle className="font-heading text-xl">Published Stories</CardTitle>
-                    <CardDescription>All stories currently visible on the platform</CardDescription>
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📚 Published Stories</CardTitle>
+                    <CardDescription className="text-[#d94f25]">All stories currently visible on the platform</CardDescription>
                   </div>
                   <Button 
                     onClick={() => setShowAddStory(true)}
-                    className="rounded-xl bg-purple-600 hover:bg-purple-700"
+                    className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Story
@@ -819,15 +798,15 @@ export default function AdminPanel() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead>Story</TableHead>
-                          <TableHead>Language</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Author</TableHead>
-                          <TableHead>Audience</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                        <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                          <TableHead className="text-[#E5683A] font-bold">Story</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Language</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Category</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Type</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Author</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Audience</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
+                          <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -838,49 +817,49 @@ export default function AdminPanel() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          allStories.map((story) => (
-                            <TableRow key={story.id}>
+                          allStories.map((story, idx) => (
+                            <TableRow key={story.id} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
                               <TableCell>
                                 <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-lg overflow-hidden border">
+                                  <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#F5C518] shadow-md">
                                     <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
                                   </div>
-                                  <span className="font-medium line-clamp-1">{story.title}</span>
+                                  <span className="font-medium line-clamp-1 text-[#E5683A]">{story.title}</span>
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline" className="capitalize rounded-lg">
+                                <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
                                   {story.language}
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="secondary" className="capitalize rounded-lg">
+                                <Badge variant="secondary" className="capitalize rounded-lg bg-[#FFE8CC] text-[#d94f25]">
                                   {story.category}
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <span className="text-sm text-muted-foreground capitalize">{story.storyType}</span>
+                                <span className="text-sm text-[#E5683A] font-medium capitalize">{story.storyType}</span>
                               </TableCell>
                               <TableCell>
                                 <div className="flex flex-col">
-                                  <span className="text-xs font-mono truncate max-w-[100px]">{story.userId}</span>
+                                  <span className="text-xs font-mono truncate max-w-[100px] text-[#E5683A]">{story.userId.substring(0, 8)}</span>
                                   {story.isCreatorAdmin && (
-                                    <Badge variant="default" className="w-fit text-[10px] h-4 py-0 rounded-full">Admin</Badge>
+                                    <Badge variant="default" className="w-fit text-[10px] h-4 py-0 rounded-full bg-[#E5683A]">Admin</Badge>
                                   )}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline" className="capitalize rounded-lg">
+                                <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
                                   {story.audience}
                                 </Badge>
                               </TableCell>
                               <TableCell>
                                 <Badge 
-                                  className={`capitalize rounded-lg ${
-                                    story.status === 'published' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                    story.status === 'pending_review' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                    story.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                                    'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                                  className={`capitalize rounded-lg font-bold ${
+                                    story.status === 'published' ? 'bg-green-100 text-green-700' :
+                                    story.status === 'pending_review' ? 'bg-[#FFE8CC] text-[#d94f25]' :
+                                    story.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                    'bg-gray-100 text-gray-700'
                                   }`}
                                 >
                                   {story.status}
@@ -892,7 +871,7 @@ export default function AdminPanel() {
                                   size="icon"
                                   onClick={() => deleteStoryMutation.mutate(story.id)}
                                   disabled={deleteStoryMutation.isPending}
-                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -908,65 +887,66 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="pending">
-              <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="font-heading text-xl">Pending Review</CardTitle>
-                  <CardDescription>Review and approve user-submitted stories</CardDescription>
+              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                  <CardTitle className="font-heading text-2xl text-[#E5683A]">⏳ Pending Review</CardTitle>
+                  <CardDescription className="text-[#d94f25]">Review and approve user-submitted stories</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                   {pendingStories.length === 0 ? (
                     <div className="text-center py-20 flex flex-col items-center gap-4">
-                      <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
+                        <CheckCircle className="w-8 h-8 text-green-600" />
                       </div>
-                      <p className="text-lg font-medium">All caught up!</p>
-                      <p className="text-muted-foreground">There are no pending stories to review right now.</p>
+                      <p className="text-lg font-bold text-[#E5683A]">All caught up!</p>
+                      <p className="text-[#d94f25]">There are no pending stories to review right now.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {pendingStories.map((story) => (
-                        <Card key={story.id} className="rounded-2xl border bg-muted/20 overflow-hidden hover:border-purple-300 transition-colors">
-                          <div className="aspect-video relative overflow-hidden">
-                            <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
-                            <div className="absolute top-2 right-2 flex gap-2">
-                              <Badge className="bg-white/80 dark:bg-gray-900/80 backdrop-blur text-purple-600">
-                                {story.language}
-                              </Badge>
+                        <motion.div key={story.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                          <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
+                            <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-[#FFE8CC] to-[#FFF8E7]">
+                              <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
+                              <div className="absolute top-2 right-2 flex gap-2">
+                                <Badge className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white shadow-lg">
+                                  {story.language}
+                                </Badge>
+                              </div>
                             </div>
-                          </div>
-                          <CardContent className="p-4 space-y-4">
-                            <div>
-                              <h3 className="font-heading text-lg leading-tight mb-1">{story.title}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">{story.summary}</p>
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-2">
-                              <Badge variant="outline" className="text-[10px]">{story.category}</Badge>
-                              <Badge variant="outline" className="text-[10px]">{story.storyType}</Badge>
-                              <Badge variant="outline" className="text-[10px]">Author: {story.userId.substring(0, 8)}...</Badge>
-                            </div>
+                            <CardContent className="p-4 space-y-4">
+                              <div>
+                                <h3 className="font-heading text-lg text-[#E5683A] leading-tight mb-1">{story.title}</h3>
+                                <p className="text-sm text-[#d94f25] line-clamp-2">{story.summary}</p>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">{story.category}</Badge>
+                                <Badge variant="outline" className="text-[10px] bg-[#FFE8CC] border-[#F5C518] text-[#d94f25]">{story.storyType}</Badge>
+                                <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">By: {story.userId.substring(0, 8)}...</Badge>
+                              </div>
 
-                            <div className="pt-2 flex gap-2">
-                              <Button 
-                                onClick={() => setReviewingStory(story)}
-                                className="flex-1 rounded-xl bg-purple-600 hover:bg-purple-700"
-                              >
-                                Review Story
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                onClick={() => {
-                                  // Quick preview
-                                  window.open(`/story/${story.id}`, '_blank');
-                                }}
-                                className="rounded-xl"
-                              >
-                                <BookOpen className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
+                              <div className="pt-2 flex gap-2">
+                                <Button 
+                                  onClick={() => setReviewingStory(story)}
+                                  className="flex-1 rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
+                                >
+                                  Review Story
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="icon"
+                                  onClick={() => {
+                                    window.open(`/story/${story.id}`, '_blank');
+                                  }}
+                                  className="rounded-2xl border-[#F5C518] hover:bg-[#FFF8E7]"
+                                >
+                                  <BookOpen className="w-4 h-4 text-[#E5683A]" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
                       ))}
                     </div>
                   )}
@@ -975,10 +955,10 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="payments">
-              <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="font-heading text-xl">Payment Reviews</CardTitle>
-                  <CardDescription>Approve or reject manual subscription payments</CardDescription>
+              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                  <CardTitle className="font-heading text-2xl text-[#E5683A]">💳 Payment Reviews</CardTitle>
+                  <CardDescription className="text-[#d94f25]">Approve or reject manual subscription payments</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                   <PaymentProofList />
@@ -987,50 +967,50 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="users">
-              <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                <CardHeader className="bg-muted/30 pb-4">
-                  <CardTitle className="font-heading text-xl">User Management</CardTitle>
-                  <CardDescription>Manage user accounts, admin status, and blocks</CardDescription>
+              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                  <CardTitle className="font-heading text-2xl text-[#E5683A]">👥 User Management</CardTitle>
+                  <CardDescription className="text-[#d94f25]">Manage user accounts, admin status, and blocks</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-muted/30">
-                          <TableHead>User</TableHead>
-                          <TableHead>Subscription</TableHead>
-                          <TableHead>Coins</TableHead>
-                          <TableHead>Stories</TableHead>
-                          <TableHead>Trial Ends</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                        <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                          <TableHead className="text-[#E5683A] font-bold">User</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Subscription</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Coins</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Stories</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Trial Ends</TableHead>
+                          <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
+                          <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {users.map((user) => (
-                          <TableRow key={user.userId}>
-                            <TableCell className="font-mono text-xs max-w-[150px] truncate">
-                              {user.userId}
+                        {users.map((user, idx) => (
+                          <TableRow key={user.userId} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
+                            <TableCell className="font-mono text-xs max-w-[150px] truncate text-[#E5683A]">
+                              {user.userId.substring(0, 8)}...
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="capitalize rounded-lg">
+                              <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
                                 {user.subscriptionStatus}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Coins className="w-3 h-3 text-amber-500" />
+                              <div className="flex items-center gap-1 text-[#E5683A] font-bold">
+                                <Coins className="w-4 h-4 text-[#FFD54F]" />
                                 <span>{user.coins}</span>
                               </div>
                             </TableCell>
-                            <TableCell>{user.storyCount}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-[#E5683A] font-bold">{user.storyCount}</TableCell>
+                            <TableCell className="text-[#d94f25]">
                               {user.trialEndsAt ? formatDate(user.trialEndsAt) : "N/A"}
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                {user.isAdmin && <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Admin</Badge>}
-                                {user.isBlocked && <Badge variant="destructive">Blocked</Badge>}
+                                {user.isAdmin && <Badge className="bg-[#E5683A] text-white rounded-full">Admin</Badge>}
+                                {user.isBlocked && <Badge variant="destructive" className="rounded-full">Blocked</Badge>}
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
@@ -1039,7 +1019,7 @@ export default function AdminPanel() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleToggleAdmin(user.userId, user.isAdmin)}
-                                  className="h-8 rounded-lg"
+                                  className="h-8 rounded-lg text-[#E5683A] hover:bg-[#FFF8E7]"
                                 >
                                   {user.isAdmin ? "Remove Admin" : "Make Admin"}
                                 </Button>
@@ -1047,7 +1027,7 @@ export default function AdminPanel() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleToggleBlockUser(user.userId, user.isBlocked)}
-                                  className={`h-8 rounded-lg ${user.isBlocked ? 'text-green-600' : 'text-red-600'}`}
+                                  className={`h-8 rounded-lg ${user.isBlocked ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
                                 >
                                   {user.isBlocked ? "Unblock" : "Block"}
                                 </Button>
@@ -1063,11 +1043,11 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="plans">
-              <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between bg-muted/30 pb-4">
+              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
                   <div>
-                    <CardTitle className="font-heading text-xl">Subscription Plans</CardTitle>
-                    <CardDescription>Manage available subscription tiers</CardDescription>
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">🎯 Subscription Plans</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Manage available subscription tiers</CardDescription>
                   </div>
                   <Button 
                     onClick={() => {
@@ -1076,7 +1056,7 @@ export default function AdminPanel() {
                       setFeatures([""]);
                       setShowPlanDialog(true);
                     }}
-                    className="rounded-xl bg-purple-600 hover:bg-purple-700"
+                    className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     New Plan
@@ -1085,71 +1065,73 @@ export default function AdminPanel() {
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {subscriptionPlans.map((plan) => (
-                      <Card key={plan.id} className="rounded-2xl border-2 overflow-hidden flex flex-col">
-                        <div className="bg-muted/50 p-4 border-b flex justify-between items-start">
-                          <div>
-                            <h3 className="font-heading text-lg">{plan.name}</h3>
-                            <p className="text-2xl font-bold">{plan.currency} {plan.price}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{plan.billingPeriod}</p>
+                      <motion.div key={plan.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                        <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
+                          <div className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] p-4 border-b-2 border-[#F5C518] flex justify-between items-start">
+                            <div>
+                              <h3 className="font-heading text-lg text-[#E5683A]">{plan.name}</h3>
+                              <p className="text-3xl font-bold text-[#d94f25]">{plan.currency} {plan.price}</p>
+                              <p className="text-xs text-[#d94f25] capitalize font-bold">{plan.billingPeriod}</p>
+                            </div>
+                            <Badge variant={plan.isActive ? "default" : "outline"} className={`rounded-full ${plan.isActive ? 'bg-green-100 text-green-700' : ''}`}>
+                              {plan.isActive ? "✓ Active" : "Inactive"}
+                            </Badge>
                           </div>
-                          <Badge variant={plan.isActive ? "default" : "outline"} className="rounded-full">
-                            {plan.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                        <CardContent className="p-4 flex-1">
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{plan.description}</p>
-                          <div className="space-y-2">
-                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Features:</p>
-                            <ul className="space-y-1">
-                              {plan.features.slice(0, 3).map((f, i) => (
-                                <li key={i} className="text-sm flex items-center gap-2">
-                                  <CheckCircle className="w-3 h-3 text-green-500" />
-                                  {f}
-                                </li>
-                              ))}
-                              {plan.features.length > 3 && (
-                                <li className="text-xs text-muted-foreground">+{plan.features.length - 3} more</li>
-                              )}
-                            </ul>
+                          <CardContent className="p-4 flex-1">
+                            <p className="text-sm text-[#d94f25] mb-4 line-clamp-2">{plan.description}</p>
+                            <div className="space-y-2">
+                              <p className="text-xs font-bold uppercase tracking-wider text-[#E5683A]">Features:</p>
+                              <ul className="space-y-1">
+                                {plan.features.slice(0, 3).map((f, i) => (
+                                  <li key={i} className="text-sm text-[#E5683A] flex items-center gap-2">
+                                    <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                    {f}
+                                  </li>
+                                ))}
+                                {plan.features.length > 3 && (
+                                  <li className="text-xs text-[#d94f25] font-bold">+{plan.features.length - 3} more</li>
+                                )}
+                              </ul>
+                            </div>
+                          </CardContent>
+                          <div className="p-4 border-t-2 border-[#F5C518] bg-[#FFF8E7] flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 rounded-2xl border-[#F5C518] text-[#E5683A] hover:bg-white"
+                              onClick={() => {
+                                setEditingPlan(plan);
+                                planForm.reset({
+                                  name: plan.name,
+                                  description: plan.description,
+                                  price: parseFloat(plan.price as string),
+                                  currency: plan.currency,
+                                  billingPeriod: plan.billingPeriod,
+                                  stripePriceId: plan.stripePriceId || "",
+                                  isActive: plan.isActive,
+                                  maxStories: plan.maxStories || undefined,
+                                });
+                                setFeatures(plan.features);
+                                setShowPlanDialog(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="rounded-2xl text-red-500 hover:bg-red-50"
+                              onClick={() => {
+                                if (confirm("Are you sure you want to delete this plan?")) {
+                                  deletePlanMutation.mutate(plan.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                        </CardContent>
-                        <div className="p-4 border-t bg-muted/20 flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            className="flex-1 rounded-xl"
-                            onClick={() => {
-                              setEditingPlan(plan);
-                              planForm.reset({
-                                name: plan.name,
-                                description: plan.description,
-                                price: parseFloat(plan.price as string),
-                                currency: plan.currency,
-                                billingPeriod: plan.billingPeriod,
-                                stripePriceId: plan.stripePriceId || "",
-                                isActive: plan.isActive,
-                                maxStories: plan.maxStories || undefined,
-                              });
-                              setFeatures(plan.features);
-                              setShowPlanDialog(true);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="rounded-xl text-red-500"
-                            onClick={() => {
-                              if (confirm("Are you sure you want to delete this plan?")) {
-                                deletePlanMutation.mutate(plan.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </Card>
+                        </Card>
+                      </motion.div>
                     ))}
                   </div>
                 </CardContent>
@@ -1158,10 +1140,10 @@ export default function AdminPanel() {
 
             <TabsContent value="coins">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                  <CardHeader className="bg-muted/30">
-                    <CardTitle className="font-heading text-xl">Coin Settings</CardTitle>
-                    <CardDescription>Configure the story unlock cost</CardDescription>
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">🪙 Coin Settings</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Configure the story unlock cost</CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
                     <form 
@@ -1178,36 +1160,36 @@ export default function AdminPanel() {
                       }}
                     >
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Coins required to unlock one story</label>
+                        <label className="text-sm font-bold text-[#E5683A]">Coins required to unlock one story</label>
                         <div className="flex gap-4">
                           <Input 
                             name="coinsPerStory" 
                             type="number" 
                             defaultValue={coinSettings?.coinsPerStory || 10} 
                             min={1}
-                            className="rounded-xl"
+                            className="rounded-2xl border-[#F5C518] border-2 focus:border-[#E5683A] text-[#E5683A]"
                           />
-                          <Button type="submit" className="rounded-xl">Save</Button>
+                          <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Save</Button>
                         </div>
                       </div>
                     </form>
                   </CardContent>
                 </Card>
 
-                <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                  <CardHeader className="bg-muted/30">
-                    <CardTitle className="font-heading text-xl">Plan Coin Costs</CardTitle>
-                    <CardDescription>Cost in coins for each subscription plan</CardDescription>
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📋 Plan Coin Costs</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Cost in coins for each subscription plan</CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="space-y-4">
                       {subscriptionPlans.map((plan) => {
                         const coinCost = planCoinCosts.find(c => c.planId === plan.id)?.coinCost || 0;
                         return (
-                          <div key={plan.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border">
+                          <div key={plan.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
                             <div>
-                              <p className="font-bold">{plan.name}</p>
-                              <p className="text-xs text-muted-foreground capitalize">{plan.billingPeriod}</p>
+                              <p className="font-bold text-[#E5683A]">{plan.name}</p>
+                              <p className="text-xs text-[#d94f25] capitalize">{plan.billingPeriod}</p>
                             </div>
                             <div className="flex items-center gap-4">
                               <Input 
@@ -1218,9 +1200,9 @@ export default function AdminPanel() {
                                   apiRequest("POST", "/api/admin/plan-coin-costs", { planId: plan.id, coinCost: val })
                                     .then(() => queryClient.invalidateQueries({ queryKey: ["/api/admin/plan-coin-costs"] }));
                                 }}
-                                className="w-24 rounded-xl"
+                                className="w-24 rounded-xl border-[#F5C518] text-[#E5683A] font-bold"
                               />
-                              <Coins className="w-5 h-5 text-amber-500" />
+                              <Coins className="w-5 h-5 text-[#FFD54F]" />
                             </div>
                           </div>
                         );
@@ -1234,11 +1216,11 @@ export default function AdminPanel() {
             <TabsContent value="content">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Categories */}
-                <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4 flex flex-row items-center justify-between">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
                     <div>
-                      <CardTitle className="font-heading text-xl">Categories</CardTitle>
-                      <CardDescription>Story categories for grouping</CardDescription>
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">🏷️ Categories</CardTitle>
+                      <CardDescription className="text-[#d94f25]">Story categories for grouping</CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
@@ -1253,19 +1235,19 @@ export default function AdminPanel() {
                         e.currentTarget.reset();
                       }}
                     >
-                      <Input name="name" placeholder="New category name" className="rounded-xl flex-1" required />
-                      <Button type="submit" className="rounded-xl">Add</Button>
+                      <Input name="name" placeholder="New category name" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
+                      <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
                     </form>
 
                     <div className="space-y-2">
                       {categories.map((cat) => (
-                        <div key={cat.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border">
-                          <span className="font-medium">{cat.name}</span>
+                        <div key={cat.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
+                          <span className="font-bold text-[#E5683A]">{cat.name}</span>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => deleteCategoryMutation.mutate(cat.id)}
-                            className="text-red-500 h-8 w-8"
+                            className="text-red-500 h-8 w-8 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -1276,10 +1258,10 @@ export default function AdminPanel() {
                 </Card>
 
                 {/* Story Types */}
-                <Card className="rounded-3xl border-2 shadow-sm overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="font-heading text-xl">Story Types</CardTitle>
-                    <CardDescription>Types of stories (lesson, fable, etc)</CardDescription>
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📖 Story Types</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Types of stories (lesson, fable, etc)</CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <form 
@@ -1293,19 +1275,19 @@ export default function AdminPanel() {
                         e.currentTarget.reset();
                       }}
                     >
-                      <Input name="name" placeholder="New story type" className="rounded-xl flex-1" required />
-                      <Button type="submit" className="rounded-xl">Add</Button>
+                      <Input name="name" placeholder="New story type" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
+                      <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
                     </form>
 
                     <div className="space-y-2">
                       {storyTypes.map((type) => (
-                        <div key={type.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border">
-                          <span className="font-medium">{type.name}</span>
+                        <div key={type.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
+                          <span className="font-bold text-[#E5683A]">{type.name}</span>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => deleteTypeMutation.mutate(type.id)}
-                            className="text-red-500 h-8 w-8"
+                            className="text-red-500 h-8 w-8 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -1318,9 +1300,8 @@ export default function AdminPanel() {
             </TabsContent>
           </Tabs>
         </main>
-      </div>
 
-      {/* Review Dialog */}
+        {/* Review Dialog */}
       <Dialog open={!!reviewingStory} onOpenChange={() => setReviewingStory(null)}>
         <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
           <DialogHeader className="p-6 bg-purple-600 text-white">

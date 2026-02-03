@@ -15,4 +15,5 @@ ext {
     cordovaAndroidVersion = '10.1.1'
     javaSourceCompatibility = JavaVersion.VERSION_17
     javaTargetCompatibility = JavaVersion.VERSION_17
+    playServicesAuthVersion = '21.0.0'
 }

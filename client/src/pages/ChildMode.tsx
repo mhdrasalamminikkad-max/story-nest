@@ -28,7 +28,7 @@ export default function ChildMode() {
     queryKey: ["/api/stories"],
   });
 
-  const { data: apiCategories = [] } = useQuery<{id: string, name: string, slug: string}[]>({
+  const { data: apiCategories = [] } = useQuery<{ id: string, name: string, slug: string }[]>({
     queryKey: ["/api/admin/categories"],
   });
 
@@ -44,7 +44,7 @@ export default function ChildMode() {
       });
     }
     setHasEntered(true);
-    
+
     // Enter Child Mode on Electron first
     if (window.electron?.ipcRenderer) {
       try {
@@ -81,7 +81,7 @@ export default function ChildMode() {
               title: "Exiting Child Mode",
               description: "Returning to normal operation.",
             });
-            
+
             if (document.exitFullscreen) {
               document.exitFullscreen().catch(err => {
                 console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
@@ -107,8 +107,8 @@ export default function ChildMode() {
         console.warn("Native exit failed, falling back to web validation:", nativeErr);
         const res = await apiRequest("POST", "/api/verify-pin", { pin: password });
         const response = await res.json();
-        if (!response.valid && password !== "1234") {
-           throw new Error("Invalid password");
+        if (!response.valid) {
+          throw new Error("Invalid password");
         }
         if (window.androidChildMode?.exitChildMode) {
           window.androidChildMode.exitChildMode(password);
@@ -119,7 +119,7 @@ export default function ChildMode() {
         title: "Exiting Child Mode",
         description: "Returning to normal operation.",
       });
-      
+
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(err => {
           console.warn(`Error attempting to exit full-screen mode: ${err.message}`);
@@ -151,14 +151,14 @@ export default function ChildMode() {
       setHasEntered(false);
       setSelectedStory(null);
       setPassword("");
-      
+
       // Exit fullscreen if active
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(err => {
           console.warn(`Error exiting fullscreen: ${err.message}`);
         });
       }
-      
+
       return false;
     };
 
@@ -187,7 +187,7 @@ export default function ChildMode() {
       window.history.pushState(null, '', window.location.href);
       console.log('[Child Mode] Browser back prevented');
     };
-    
+
     // Push current state to prevent going back
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', preventBack);
@@ -216,7 +216,7 @@ export default function ChildMode() {
       const now = Date.now();
       if (now - lastBlockedTime < 300) return; // Throttle to once per 300ms
       lastBlockedTime = now;
-      
+
       // Create temporary overlay
       const overlay = document.createElement('div');
       overlay.style.cssText = `
@@ -258,10 +258,10 @@ export default function ChildMode() {
         showBlockedFeedback();
         return false;
       }
-      
-      const isSystemShortcut = 
-        (e.altKey && (e.key === 'F4' || e.key === 'Tab')) || 
-        ((e.ctrlKey || e.metaKey) && ['w', 'r', 'n', 't', 'p', 'l', 'f'].includes(e.key.toLowerCase()));
+
+      const isSystemShortcut =
+        (e.altKey && (e.key === 'F4' || e.key === 'Tab')) ||
+        ((e.ctrlKey || e.metaKey) && ['w', 'r', 'n', 't', 'p', 'l', 'f', 'i', 'j', 'c', 'u', 's', 'h'].includes(e.key.toLowerCase()));
 
       if (isSystemShortcut) {
         e.preventDefault();
@@ -305,7 +305,7 @@ export default function ChildMode() {
     // Enforce fullscreen function
     const enforceFullscreen = async () => {
       const currentScreenArea = window.innerWidth * window.innerHeight;
-      
+
       // Check if screen area has reduced (ESC/F11 exit indicator)
       if (currentScreenArea < minScreenArea * 0.95) { // 95% threshold to account for minor resizing
         console.log('[Child Mode] Screen area reduced from', minScreenArea, 'to', currentScreenArea, '- Forcing fullscreen!');
@@ -326,7 +326,7 @@ export default function ChildMode() {
           console.error('[Child Mode] Failed to re-enter fullscreen:', err);
         }
       }
-      
+
       // Keep window focused
       if (document.hidden) {
         console.log('[Child Mode] Document hidden, focusing window...');
@@ -336,7 +336,7 @@ export default function ChildMode() {
 
     // Aggressive polling - checks every 10ms (ultra-fast)
     let pollInterval: ReturnType<typeof setInterval> | null = null;
-    
+
     const startFullscreenPolling = () => {
       pollInterval = setInterval(enforceFullscreen, 10); // Check every 10ms for instant re-entry
       // Run immediately on start
@@ -391,18 +391,18 @@ export default function ChildMode() {
     document.addEventListener('touchstart', handleUserInteraction, true);
     document.addEventListener('mousedown', handleUserInteraction, true);
     document.addEventListener('touchend', handleUserInteraction, true);
-    
+
     // Handle visibility and focus changes
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowBlur);
-    
+
     // Add screen area detector - listens for window resizing
     window.addEventListener('resize', handleWindowResize);
 
     // Start aggressive polling
     startFullscreenPolling();
-    
+
     return () => {
       // Stop polling
       if (pollInterval) {
@@ -415,12 +415,12 @@ export default function ChildMode() {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
-      
+
       document.removeEventListener('click', handleUserInteraction, true);
       document.removeEventListener('touchstart', handleUserInteraction, true);
       document.removeEventListener('mousedown', handleUserInteraction, true);
       document.removeEventListener('touchend', handleUserInteraction, true);
-      
+
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('blur', handleWindowBlur);
@@ -428,7 +428,7 @@ export default function ChildMode() {
       window.removeEventListener('popstate', preventBack);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('unload', handleUnload);
-      
+
       // Cleanup Capacitor listeners
       if (backButtonSubscription) {
         backButtonSubscription.remove?.();
@@ -458,7 +458,7 @@ export default function ChildMode() {
     <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-purple-950 dark:via-pink-950 dark:to-blue-950 overflow-hidden z-[9999] w-screen h-screen" style={{ background: '#f3e8ff' }}>
       <AnimatePresence mode="wait">
         {!hasEntered ? (
-          <motion.div 
+          <motion.div
             key="splash"
             className="fixed inset-0 bg-white dark:bg-gray-900 z-[10005] flex items-center justify-center p-4"
             initial={{ opacity: 0 }}

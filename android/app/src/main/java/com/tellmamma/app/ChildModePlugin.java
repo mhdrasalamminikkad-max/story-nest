@@ -31,11 +31,10 @@ public class ChildModePlugin extends Plugin {
             // Method 1: Try startLockTask (Android 5.0+)
             // This requires the activity to be explicitly pinned
             try {
-                ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
-                if (activityManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     // This will fail with permission denied for non-system apps
                     // But we try anyway in case device allows it
-                    activityManager.startLockTask();
+                    activity.startLockTask();
                     
                     JSObject result = new JSObject();
                     result.put("success", true);
@@ -85,9 +84,8 @@ public class ChildModePlugin extends Plugin {
         try {
             // Try to exit lock task mode
             try {
-                ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
-                if (activityManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    activityManager.stopLockTask();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    activity.stopLockTask();
                 }
             } catch (Exception e) {
                 android.util.Log.w("ChildMode", "stopLockTask failed: " + e.getMessage());

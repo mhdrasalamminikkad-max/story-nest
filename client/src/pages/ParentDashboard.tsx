@@ -49,14 +49,14 @@ export default function ParentDashboard() {
   const [oldPin, setOldPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmNewPin, setConfirmNewPin] = useState("");
-  
+
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [voiceoverBase64, setVoiceoverBase64] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  
+
   // File upload states
   const [pdfFile, setPdfFile] = useState<{ name: string; data: string } | null>(null);
   const [pdfUploading, setPdfUploading] = useState(false);
@@ -101,7 +101,7 @@ export default function ParentDashboard() {
   useEffect(() => {
     // If we're already checking settings or they exist, don't redirect
     if (settingsLoading) return;
-    
+
     if (!parentSettings) {
       console.log("No parent settings found, redirecting to setup...");
       setLocation("/setup");
@@ -121,16 +121,16 @@ export default function ParentDashboard() {
     .filter(s => {
       // Filter by bookmark
       if (filterBookmarked && !s.isBookmarked) return false;
-      
+
       // Filter by language
       if (languageFilter !== "all" && s.language !== languageFilter) return false;
-      
+
       // Filter by category
       if (categoryFilter !== "all" && s.category !== categoryFilter) return false;
-      
+
       // Filter by story type
       if (storyTypeFilter !== "all" && s.storyType !== storyTypeFilter) return false;
-      
+
       // Filter by search query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -140,7 +140,7 @@ export default function ParentDashboard() {
           s.content.toLowerCase().includes(query)
         );
       }
-      
+
       return true;
     });
 
@@ -257,11 +257,11 @@ export default function ParentDashboard() {
       // First verify old PIN
       const verifyRes = await apiRequest("POST", "/api/verify-pin", { pin: oldPin });
       const verifyData = await verifyRes.json();
-      
+
       if (!verifyData.valid) {
         throw new Error("Invalid current PIN");
       }
-      
+
       // Then update to new PIN
       const updateRes = await apiRequest("POST", "/api/parent-settings", {
         pin: newPin,
@@ -295,11 +295,7 @@ export default function ParentDashboard() {
   });
 
   const enterChildMode = () => {
-    toast({
-      title: "Coming Soon! 🎉",
-      description: "Child Mode is under construction. Stay tuned!",
-      duration: 3000,
-    });
+    setLocation("/child-fun-zone");
   };
 
   const handleSignOut = () => {
@@ -317,7 +313,7 @@ export default function ParentDashboard() {
       });
       return;
     }
-    
+
     if (!newPin || newPin.length !== 4) {
       toast({
         title: "Invalid PIN",
@@ -327,7 +323,7 @@ export default function ParentDashboard() {
       });
       return;
     }
-    
+
     if (newPin !== confirmNewPin) {
       toast({
         title: "PIN Mismatch",
@@ -337,7 +333,7 @@ export default function ParentDashboard() {
       });
       return;
     }
-    
+
     updatePinMutation.mutate({ oldPin, newPin });
   };
 
@@ -358,7 +354,7 @@ export default function ParentDashboard() {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
-        
+
         // Upload to Firebase Storage and get download URL
         try {
           const userId = user?.id || `temp-${Date.now()}`;
@@ -373,7 +369,7 @@ export default function ParentDashboard() {
             duration: 4000,
           });
         }
-        
+
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -420,12 +416,12 @@ export default function ParentDashboard() {
       return;
     }
 
-    // Check file size (limit to 5MB for base64 storage)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Check file size (limit to 50MB for base64 storage)
+    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: "PDF must be smaller than 5MB",
+        description: "PDF must be smaller than 50MB",
         variant: "destructive",
         duration: 4000,
       });
@@ -552,7 +548,7 @@ export default function ParentDashboard() {
     setEditingStory(story);
     setAudioUrl(story.voiceoverUrl || null);
     setVoiceoverBase64(story.voiceoverUrl || null);
-    
+
     // Set existing file states
     if (story.pdfUrl) {
       setPdfFile({ name: "Existing PDF", data: story.pdfUrl });
@@ -561,7 +557,7 @@ export default function ParentDashboard() {
       setPdfFile(null);
       setPdfProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     }
-    
+
     if (story.audioUrl) {
       setAudioFile({ name: "Existing Audio", data: story.audioUrl });
       setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
@@ -569,7 +565,7 @@ export default function ParentDashboard() {
       setAudioFile(null);
       setAudioProgress({ bytesTransferred: 0, totalBytes: 0, percentage: 0 });
     }
-    
+
     form.reset({
       title: story.title,
       content: story.content,
@@ -589,7 +585,7 @@ export default function ParentDashboard() {
     // Check if either voice recording or audio file is present (only for non-draft submissions)
     const hasVoiceover = voiceoverBase64 || data.voiceoverUrl;
     const hasAudio = audioFile || data.audioUrl;
-    
+
     if (!isDraft && !hasVoiceover && !hasAudio) {
       toast({
         title: "Audio Required",
@@ -599,7 +595,7 @@ export default function ParentDashboard() {
       });
       return;
     }
-    
+
     // Wait for uploads to complete if they're in progress
     // Show loading indicator on button but don't block with toast
     if (pdfUploading || audioUploading) {
@@ -613,21 +609,21 @@ export default function ParentDashboard() {
         }, 100);
       });
     }
-    
+
     // Filter out blob URLs - only allow Firebase download URLs
     const filterBlobUrl = (url: string | undefined) => {
       if (!url) return undefined;
       if (url.startsWith('blob:')) return undefined;
       return url;
     };
-    
+
     const submissionData = {
       ...data,
       pdfUrl: filterBlobUrl(data.pdfUrl),
       audioUrl: filterBlobUrl(data.audioUrl),
       voiceoverUrl: voiceoverBase64 || data.voiceoverUrl,
     };
-    
+
     // Close dialog immediately for instant feedback
     setShowAddStory(false);
     toast({
@@ -635,7 +631,7 @@ export default function ParentDashboard() {
       description: isDraft ? "Your draft has been saved" : "Your story has been saved successfully",
       duration: 2000,
     });
-    
+
     // Submit mutation
     if (editingStory) {
       updateStoryMutation.mutate({ id: editingStory.id, data: submissionData });
@@ -649,7 +645,7 @@ export default function ParentDashboard() {
     if (story.status === "draft" && story.rejectionReason) {
       return <Badge variant="destructive" data-testid={`badge-rejected`}><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
     }
-    
+
     switch (story.status) {
       case "draft":
         return <Badge variant="secondary" data-testid={`badge-draft`}><FileText className="w-3 h-3 mr-1" />Draft</Badge>;
@@ -682,18 +678,18 @@ export default function ParentDashboard() {
       <AnimatedBackground />
       <div className="relative z-10">
         <MobileHeader title="Dashboard" />
-        
+
         <header className="hidden md:block border-b-2 border-primary/20 bg-gradient-to-r from-background via-primary/5 to-background dark:from-background dark:via-primary/10 dark:to-background backdrop-blur-xl sticky top-0 z-20 shadow-lg">
           <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-5 flex justify-between items-center gap-2 sm:gap-4 flex-wrap">
             <div className="flex items-center gap-4">
-              <motion.div 
+              <motion.div
                 className="cursor-pointer hover-elevate active-elevate-2 rounded-2xl transition-all"
                 onClick={() => setLocation("/")}
                 data-testid="button-home-logo"
               >
-                <img 
-                  src={tellMammaLogo} 
-                  alt="TELL MAMMA" 
+                <img
+                  src={tellMammaLogo}
+                  alt="TELL MAMMA"
                   className="h-10 sm:h-12 w-auto object-contain rounded-xl"
                 />
               </motion.div>
@@ -787,7 +783,7 @@ export default function ParentDashboard() {
                         voiceoverUrl: undefined,
                       });
                     }}
-                    className="w-full rounded-2xl bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 hover:from-pink-500 hover:via-rose-500 hover:to-red-500 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all transform h-12"
+                    className="w-full rounded-2xl bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold text-base shadow-lg hover:shadow-xl transition-all transform h-12"
                     data-testid="button-add-story"
                   >
                     <Plus className="w-5 h-5 mr-2" />
@@ -841,85 +837,85 @@ export default function ParentDashboard() {
             </Card>
           </motion.div>
 
-            <div className="hidden md:flex gap-5 flex-wrap py-2">
-              <motion.div 
-                className="flex-1 sm:flex-initial"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          <div className="hidden md:flex gap-5 flex-wrap py-2">
+            <motion.div
+              className="flex-1 sm:flex-initial"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Button
+                onClick={() => {
+                  setEditingStory(null);
+                  setShowAddStory(true);
+                  setAudioUrl(null);
+                  setIsRecording(false);
+                  form.reset({
+                    title: "",
+                    content: "",
+                    summary: "",
+                    imageUrl: teddyImage,
+                    language: "english" as const,
+                    category: "educational" as const,
+                    storyType: "lesson" as const,
+                    voiceoverUrl: undefined,
+                  });
+                }}
+                className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                data-testid="button-add-story-desktop"
               >
-                <Button
-                  onClick={() => {
-                    setEditingStory(null);
-                    setShowAddStory(true);
-                    setAudioUrl(null);
-                    setIsRecording(false);
-                    form.reset({
-                      title: "",
-                      content: "",
-                      summary: "",
-                      imageUrl: teddyImage,
-                      language: "english" as const,
-                      category: "educational" as const,
-                      storyType: "lesson" as const,
-                      voiceoverUrl: undefined,
-                    });
-                  }}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
-                  data-testid="button-add-story-desktop"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  📖 Submit Story
-                </Button>
-              </motion.div>
-              <motion.div 
-                className="flex-1 sm:flex-initial"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                <Plus className="w-5 h-5 mr-2" />
+                📖 Submit Story
+              </Button>
+            </motion.div>
+            <motion.div
+              className="flex-1 sm:flex-initial"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Button
+                onClick={() => setLocation("/checkpoints")}
+                className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                data-testid="button-checkpoints-desktop"
+                title="Checkpoints"
               >
-                <Button
-                  onClick={() => setLocation("/checkpoints")}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] to-[#F5A962] hover:from-[#d94f25] hover:to-[#e8915a] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
-                  data-testid="button-checkpoints-desktop"
-                  title="Checkpoints"
-                >
-                  <Target className="w-5 h-5 mr-2" />
-                  🎯 Checkpoints
-                </Button>
-              </motion.div>
-              <motion.div 
-                className="flex-1 sm:flex-initial"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                <Target className="w-5 h-5 mr-2" />
+                🎯 Checkpoints
+              </Button>
+            </motion.div>
+            <motion.div
+              className="flex-1 sm:flex-initial"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Button
+                onClick={() => setLocation("/pricing")}
+                className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                data-testid="button-view-plans-desktop"
+                title="View Plans"
               >
-                <Button
-                  onClick={() => setLocation("/pricing")}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
-                  data-testid="button-view-plans-desktop"
-                  title="View Plans"
-                >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  💎 Plans
-                </Button>
-              </motion.div>
-              <motion.div 
-                className="flex-1 sm:flex-initial"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                <CreditCard className="w-5 h-5 mr-2" />
+                💎 Plans
+              </Button>
+            </motion.div>
+            <motion.div
+              className="flex-1 sm:flex-initial"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Button
+                onClick={enterChildMode}
+                className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] via-[#F5A962] to-[#FFB366] hover:from-[#d94f25] hover:via-[#e8915a] hover:to-[#f5a04f] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
+                data-testid="button-child-mode-desktop"
               >
-                <Button
-                  onClick={enterChildMode}
-                  className="rounded-2xl text-sm sm:text-base bg-gradient-to-r from-[#E5683A] via-[#F5A962] to-[#FFB366] hover:from-[#d94f25] hover:via-[#e8915a] hover:to-[#f5a04f] text-white font-bold shadow-lg hover:shadow-2xl transition-all h-11 px-6"
-                  data-testid="button-child-mode-desktop"
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  ✨ Child Mode
-                </Button>
-              </motion.div>
-            </div>
+                <Play className="w-5 h-5 mr-2" />
+                ✨ Child Mode
+              </Button>
+            </motion.div>
+          </div>
 
           <TrialBanner />
 
@@ -957,41 +953,41 @@ export default function ParentDashboard() {
                     </Button>
                   </motion.div>
                 </motion.div>
-                
-                <div className="flex gap-3 flex-wrap">
+
+                <div className="flex gap-3 flex-wrap lg:flex-nowrap items-center bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] p-4 rounded-2xl border-2 border-[#F5C518] shadow-lg">
                   <motion.div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#E5683A]" />
                     <Input
                       placeholder="🔍 Search stories..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded-2xl pl-12 border-2 border-indigo-300 font-semibold focus:border-indigo-500 focus:shadow-lg focus:ring-indigo-300 bg-white"
+                      className="rounded-2xl pl-12 border-2 border-[#E5683A] font-bold text-gray-900 placeholder:text-gray-500 focus:border-[#F5C518] focus:shadow-lg focus:ring-[#F5C518] bg-white text-lg"
                       data-testid="input-search-stories"
                     />
                   </motion.div>
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.05 }}
                   >
                     <Select value={languageFilter} onValueChange={setLanguageFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#F5C518] font-semibold bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] hover:border-[#FFD54F]" data-testid="select-language-filter">
-                        <SelectValue placeholder="🌍 Filter language" />
+                      <SelectTrigger className="rounded-2xl w-full sm:w-[200px] border-2 border-[#F5C518] font-bold bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-900 hover:border-[#FFD700] shadow-md" data-testid="select-language-filter">
+                        <SelectValue placeholder="🌍 All Languages" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Languages</SelectItem>
+                        <SelectItem value="all">🌍 All Languages</SelectItem>
                         <SelectItem value="english">🇬🇧 English</SelectItem>
                         <SelectItem value="malayalam">🇮🇳 Malayalam</SelectItem>
                       </SelectContent>
                     </Select>
                   </motion.div>
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.05 }}
                   >
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#E5683A] font-semibold bg-gradient-to-r from-[#FFE8CC] to-[#FFF4D6] hover:border-[#F5A962]" data-testid="select-category-filter">
-                        <SelectValue placeholder="📚 Filter category" />
+                      <SelectTrigger className="rounded-2xl w-full sm:w-[200px] border-2 border-[#E5683A] font-bold bg-gradient-to-r from-[#E5683A] to-[#F5A962] text-white hover:border-[#FFB347] shadow-md" data-testid="select-category-filter">
+                        <SelectValue placeholder="📚 All Categories" />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">📚 All Categories</SelectItem>
                         <SelectItem value="islamic">🕌 Islamic</SelectItem>
                         <SelectItem value="history">📜 History</SelectItem>
                         <SelectItem value="moral">💡 Moral Lessons</SelectItem>
@@ -1002,14 +998,14 @@ export default function ParentDashboard() {
                     </Select>
                   </motion.div>
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.05 }}
                   >
                     <Select value={storyTypeFilter} onValueChange={setStoryTypeFilter}>
-                      <SelectTrigger className="rounded-2xl w-[180px] border-2 border-[#F5C518] font-semibold bg-gradient-to-r from-[#FFF8E7] to-[#FFFBF0] hover:border-[#FFD54F]" data-testid="select-story-type-filter">
-                        <SelectValue placeholder="🎭 Filter type" />
+                      <SelectTrigger className="rounded-2xl w-full sm:w-[200px] border-2 border-[#F5C518] font-bold bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-900 hover:border-[#FFD700] shadow-md" data-testid="select-story-type-filter">
+                        <SelectValue placeholder="🎭 All Types" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="all">🎭 All Types</SelectItem>
                         <SelectItem value="islamic">🕌 Islamic</SelectItem>
                         <SelectItem value="lesson">📚 Lesson</SelectItem>
                         <SelectItem value="history">📜 History</SelectItem>
@@ -1125,72 +1121,72 @@ export default function ParentDashboard() {
                             {getStatusBadge(story)}
                             <span className="text-xs text-[#c93d1a]">
                               {formatDate(story.createdAt)}
-                          </span>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {story.status === "draft" && story.rejectionReason && (
-                          <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                            <p className="text-sm font-medium text-destructive mb-1">Rejection Reason:</p>
-                            <p className="text-sm text-muted-foreground">{story.rejectionReason}</p>
+                            </span>
                           </div>
-                        )}
-                        <div className="flex gap-2 flex-wrap">
-                          {story.status === "draft" && (
-                            <>
+                        </CardHeader>
+                        <CardContent>
+                          {story.status === "draft" && story.rejectionReason && (
+                            <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                              <p className="text-sm font-medium text-destructive mb-1">Rejection Reason:</p>
+                              <p className="text-sm text-muted-foreground">{story.rejectionReason}</p>
+                            </div>
+                          )}
+                          <div className="flex gap-2 flex-wrap">
+                            {story.status === "draft" && (
+                              <>
+                                <motion.div
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                >
+                                  <Button
+                                    onClick={() => handleEditStory(story)}
+                                    className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#F5A962] text-white font-bold shadow-md hover:shadow-lg hover:from-[#d94f25] hover:to-[#e8915a] transition-all"
+                                    data-testid={`button-edit-${story.id}`}
+                                  >
+                                    ✏️ Edit Draft
+                                  </Button>
+                                </motion.div>
+                                <motion.div
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                >
+                                  <Button
+                                    onClick={() => submitStoryMutation.mutate(story.id)}
+                                    disabled={submitStoryMutation.isPending}
+                                    className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all disabled:opacity-50"
+                                    data-testid={`button-submit-${story.id}`}
+                                  >
+                                    🚀 Submit for Review
+                                  </Button>
+                                </motion.div>
+                              </>
+                            )}
+                            {story.status === "pending_review" && (
+                              <p className="text-sm text-[#E5683A] italic font-semibold">
+                                ⏳ Your story is being reviewed by an admin
+                              </p>
+                            )}
+                            {story.status === "published" && (
                               <motion.div
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                               >
                                 <Button
-                                  onClick={() => handleEditStory(story)}
-                                  className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#F5A962] text-white font-bold shadow-md hover:shadow-lg hover:from-[#d94f25] hover:to-[#e8915a] transition-all"
-                                  data-testid={`button-edit-${story.id}`}
+                                  onClick={() => {
+                                    // All stories in parent dashboard go to parent read page
+                                    setLocation(`/read-story?story=${story.id}`);
+                                  }}
+                                  className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all"
+                                  data-testid={`button-read-${story.id}`}
                                 >
-                                  ✏️ Edit Draft
+                                  <Play className="w-4 h-4 mr-2" />
+                                  📖 Read Story
                                 </Button>
                               </motion.div>
-                              <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                              >
-                                <Button
-                                  onClick={() => submitStoryMutation.mutate(story.id)}
-                                  disabled={submitStoryMutation.isPending}
-                                  className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all disabled:opacity-50"
-                                  data-testid={`button-submit-${story.id}`}
-                                >
-                                  🚀 Submit for Review
-                                </Button>
-                              </motion.div>
-                            </>
-                          )}
-                          {story.status === "pending_review" && (
-                            <p className="text-sm text-[#E5683A] italic font-semibold">
-                              ⏳ Your story is being reviewed by an admin
-                            </p>
-                          )}
-                          {story.status === "published" && (
-                            <motion.div
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <Button
-                                onClick={() => {
-                                  // All stories in parent dashboard go to parent read page
-                                  setLocation(`/read-story?story=${story.id}`);
-                                }}
-                                className="rounded-2xl bg-gradient-to-r from-[#F5C518] to-[#FFD54F] text-gray-800 font-bold shadow-md hover:shadow-lg hover:from-[#febc2d] hover:to-[#FFD166] transition-all"
-                                data-testid={`button-read-${story.id}`}
-                              >
-                                <Play className="w-4 h-4 mr-2" />
-                                📖 Read Story
-                              </Button>
-                            </motion.div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -1208,7 +1204,7 @@ export default function ParentDashboard() {
                     <>
                       <motion.div className="bg-gradient-to-r from-[#FFE8CC] to-[#FFF4D6] rounded-2xl p-6 border-2 border-[#F5C518]">
                         <p className="text-sm font-bold text-[#E5683A] mb-2">💰 Coins Balance</p>
-                        <motion.p 
+                        <motion.p
                           className="text-4xl font-bold text-[#E5683A] flex items-center gap-2"
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
@@ -1221,7 +1217,7 @@ export default function ParentDashboard() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <Button 
+                        <Button
                           onClick={() => setShowAddStory(true)}
                           className="rounded-2xl w-full bg-gradient-to-r from-[#F5C518] via-[#FFD54F] to-[#FFC107] hover:from-[#febc2d] hover:via-[#FFD166] hover:to-[#FFBF00] text-gray-800 font-bold h-11 shadow-lg hover:shadow-xl transition-all"
                           data-testid="button-earn-coins-settings"
@@ -1254,7 +1250,7 @@ export default function ParentDashboard() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <Button 
+                        <Button
                           onClick={async () => {
                             await signOut();
                             setLocation("/");
@@ -1311,7 +1307,7 @@ export default function ParentDashboard() {
               {editingStory ? "Edit Draft Story" : "Submit Story for Review"}
             </DialogTitle>
             <DialogDescription>
-              {editingStory 
+              {editingStory
                 ? "Make changes to your draft story"
                 : "Create a magical bedtime story. It will be reviewed by an admin before publishing."}
             </DialogDescription>
@@ -1457,7 +1453,7 @@ export default function ParentDashboard() {
                           className="hidden"
                           data-testid="input-pdf-file"
                         />
-                        
+
                         {!pdfFile && (
                           <Button
                             type="button"
@@ -1470,7 +1466,7 @@ export default function ParentDashboard() {
                             Upload PDF Document
                           </Button>
                         )}
-                        
+
                         {pdfFile && (
                           <div className="p-4 border-2 rounded-2xl bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
@@ -1517,7 +1513,7 @@ export default function ParentDashboard() {
                           className="hidden"
                           data-testid="input-audio-file"
                         />
-                        
+
                         {!audioFile && (
                           <Button
                             type="button"
@@ -1530,7 +1526,7 @@ export default function ParentDashboard() {
                             Upload Audio Narration
                           </Button>
                         )}
-                        
+
                         {audioFile && (
                           <div className="p-4 border-2 rounded-2xl bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
                             <div className="flex items-center justify-between">
@@ -1593,9 +1589,8 @@ export default function ParentDashboard() {
                             key={option.url}
                             type="button"
                             onClick={() => field.onChange(option.url)}
-                            className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
-                              field.value === option.url ? "border-primary" : "border-transparent"
-                            }`}
+                            className={`relative rounded-2xl overflow-hidden border-4 transition-all ${field.value === option.url ? "border-primary" : "border-transparent"
+                              }`}
                             data-testid={`button-image-${option.label.toLowerCase()}`}
                           >
                             <img src={option.url} alt={option.label} className="w-full aspect-[4/3] object-cover" loading="lazy" />
@@ -1621,9 +1616,8 @@ export default function ParentDashboard() {
                             };
                             input.click();
                           }}
-                          className={`relative rounded-2xl overflow-hidden border-4 border-dashed transition-all flex flex-col items-center justify-center gap-2 aspect-[4/3] bg-muted/50 ${
-                            !imageOptions.some(opt => opt.url === field.value) ? "border-primary" : "border-muted-foreground/20"
-                          }`}
+                          className={`relative rounded-2xl overflow-hidden border-4 border-dashed transition-all flex flex-col items-center justify-center gap-2 aspect-[4/3] bg-muted/50 ${!imageOptions.some(opt => opt.url === field.value) ? "border-primary" : "border-muted-foreground/20"
+                            }`}
                           data-testid="button-image-custom"
                         >
                           {!imageOptions.some(opt => opt.url === field.value) && field.value && field.value.startsWith('data:image') ? (
@@ -1648,11 +1642,11 @@ export default function ParentDashboard() {
               />
 
               <DialogFooter className="flex gap-2">
-                <Button 
+                <Button
                   type="button"
                   variant="outline"
                   onClick={form.handleSubmit((data) => handleFormSubmit(data, true))}
-                  className="rounded-2xl" 
+                  className="rounded-2xl"
                   data-testid="button-create-draft"
                   disabled={pdfUploading || audioUploading}
                 >
@@ -1668,9 +1662,9 @@ export default function ParentDashboard() {
                     </>
                   )}
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="rounded-2xl" 
+                <Button
+                  type="submit"
+                  className="rounded-2xl"
                   data-testid="button-submit-story"
                   disabled={pdfUploading || audioUploading}
                 >
