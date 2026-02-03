@@ -23,6 +23,111 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Story, SubscriptionPlan, InsertSubscriptionPlan, CoinSettings, PlanCoinCost, StoryCategory, StoryType, PaymentProof } from "@shared/schema";
 import { insertStorySchema, insertSubscriptionPlanSchema, updateCoinSettingsSchema } from "@shared/schema";
+import { Upload, X, File, Loader2, Image as ImageIcon, Music } from "lucide-react";
+import { uploadFileToStorage } from "@/lib/firebase-storage";
+import { Progress } from "@/components/ui/progress";
+
+interface FileUploadProps {
+  label: string;
+  accept: string;
+  onUploadComplete: (url: string) => void;
+  previewUrl?: string;
+}
+
+function FileUploadField({ label, accept, onUploadComplete, previewUrl }: FileUploadProps) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset state
+    setUploading(true);
+    setProgress(0);
+    setError(null);
+
+    try {
+      // Determine folder based on file type
+      let folder = "others";
+      if (accept.includes("image")) folder = "images";
+      else if (accept.includes("pdf")) folder = "pdfs";
+      else if (accept.includes("audio")) folder = "audio";
+
+      const path = `uploads/${folder}/${Date.now()}_${file.name}`;
+
+      const url = await uploadFileToStorage(file, path, (p) => {
+        setProgress(p.percentage);
+      });
+
+      onUploadComplete(url);
+      toast({ title: "Upload successful", description: `${file.name} uploaded successfully` });
+    } catch (err: any) {
+      console.error("Upload failed:", err);
+      setError(err.message || "Upload failed");
+      toast({
+        title: "Upload failed",
+        description: err.message || "Could not upload file",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <FormLabel>{label}</FormLabel>
+      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-4 transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50">
+        <div className="flex flex-col items-center justify-center gap-4">
+          {previewUrl && !uploading && (
+            <div className="relative w-full max-w-[200px] aspect-video rounded-lg overflow-hidden border bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              {accept.includes("image") ? (
+                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              ) : accept.includes("pdf") ? (
+                <div className="flex flex-col items-center text-red-500">
+                  <File className="w-8 h-8" />
+                  <span className="text-xs truncate max-w-full px-2">PDF Uploaded</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center text-purple-500">
+                  <Music className="w-8 h-8" />
+                  <span className="text-xs truncate max-w-full px-2">Audio Uploaded</span>
+                </div>
+              )}
+              <div className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-1 shadow-md">
+                <CheckCircle className="w-3 h-3" />
+              </div>
+            </div>
+          )}
+
+          {uploading ? (
+            <div className="w-full space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Uploading...</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 w-full">
+              <Input
+                type="file"
+                accept={accept}
+                onChange={handleFileChange}
+                className="cursor-pointer file:cursor-pointer file:text-primary file:border-0 file:bg-primary/10 file:rounded-full file:px-4 file:py-1 file:text-sm file:mr-4 file:font-semibold hover:file:bg-primary/20 text-sm"
+              />
+            </div>
+          )}
+
+          {error && <p className="text-xs text-destructive">{error}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface CategoryMutationData {
   name: string;
@@ -98,15 +203,15 @@ function PaymentProofList() {
               </a>
             </div>
             <div className="flex flex-col gap-2 justify-center">
-              <Button 
+              <Button
                 onClick={() => mutation.mutate({ id: proof.id, action: 'approve' })}
                 disabled={mutation.isPending}
                 className="rounded-xl w-full"
               >
                 Approve Plan
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   const reason = window.prompt("Rejection reason?");
                   if (reason !== null) mutation.mutate({ id: proof.id, action: 'reject', rejectionReason: reason });
@@ -131,7 +236,7 @@ export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPasswordDialog, setShowPasswordDialog] = useState(true);
-  
+
   const [reviewingStory, setReviewingStory] = useState<Story | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showAddStory, setShowAddStory] = useState(false);
@@ -140,7 +245,7 @@ export default function AdminPanel() {
   const [features, setFeatures] = useState<string[]>([""]);
   const [approvingStory, setApprovingStory] = useState<Story | null>(null);
   const [coinsToReward, setCoinsToReward] = useState<number>(10);
-  
+
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -333,8 +438,8 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({
         title: variables.action === "approve" ? "Story approved!" : "Story rejected",
-        description: variables.action === "approve" 
-          ? "The story is now published and visible to all users." 
+        description: variables.action === "approve"
+          ? "The story is now published and visible to all users."
           : "The story has been sent back to the author for revision.",
       });
       setReviewingStory(null);
@@ -358,9 +463,9 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
-      toast({ 
-        title: "Story created and published!", 
-        description: "Your story has been published and is now visible to all users." 
+      toast({
+        title: "Story created and published!",
+        description: "Your story has been published and is now visible to all users."
       });
       setShowAddStory(false);
       form.reset({
@@ -389,7 +494,7 @@ export default function AdminPanel() {
 
   const savePlanMutation = useMutation({
     mutationFn: async (data: InsertSubscriptionPlan) => {
-      const endpoint = editingPlan 
+      const endpoint = editingPlan
         ? `/api/admin/subscription-plans/${editingPlan.id}`
         : "/api/admin/subscription-plans";
       const method = editingPlan ? "PATCH" : "POST";
@@ -402,8 +507,8 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/subscription-plans/public"] });
       toast({
         title: editingPlan ? "Plan updated!" : "Plan created!",
-        description: editingPlan 
-          ? "The subscription plan has been updated successfully." 
+        description: editingPlan
+          ? "The subscription plan has been updated successfully."
           : "The new subscription plan is now available.",
       });
       setShowPlanDialog(false);
@@ -452,8 +557,8 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: variables.isBlocked ? "User unblocked" : "User blocked",
-        description: variables.isBlocked 
-          ? "The user can now access their account." 
+        description: variables.isBlocked
+          ? "The user can now access their account."
           : "The user has been blocked from accessing their account.",
       });
     },
@@ -475,8 +580,8 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: variables.isAdmin ? "Admin access revoked" : "Admin access granted",
-        description: variables.isAdmin 
-          ? "The user no longer has admin privileges." 
+        description: variables.isAdmin
+          ? "The user no longer has admin privileges."
           : "The user now has admin privileges.",
       });
     },
@@ -514,14 +619,14 @@ export default function AdminPanel() {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
-        
+
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64data = reader.result as string;
           (form.setValue as any)('voiceoverUrl', base64data);
         };
         reader.readAsDataURL(audioBlob);
-        
+
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -529,8 +634,8 @@ export default function AdminPanel() {
       setIsRecording(true);
       toast({ title: "Recording started", description: "Start reading your story!" });
     } catch (error) {
-      toast({ 
-        title: "Microphone error", 
+      toast({
+        title: "Microphone error",
         description: "Could not access your microphone. Please check permissions.",
         variant: "destructive"
       });
@@ -573,7 +678,7 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-[#FFF8E7] via-white to-[#FFE8CC] dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 pb-20">
       <AnimatedBackground />
-      
+
       {/* Password Authentication Dialog */}
       <Dialog open={showPasswordDialog && !isAuthenticated} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="sm:max-w-md rounded-3xl bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] border-2 border-[#F5C518]">
@@ -646,855 +751,1055 @@ export default function AdminPanel() {
         </div>
       ) : (
         <div className="relative z-10">
-        <header className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] shadow-xl sticky top-0 z-20">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setLocation("/")}
-                className="rounded-full text-white hover:bg-white/20"
-              >
-                <ArrowLeft className="w-6 h-6" />
-              </Button>
-              <h1 className="font-heading text-2xl text-white flex items-center gap-2">
-                <ShieldAlert className="w-6 h-6" />
-                Admin Panel
-              </h1>
+          <header className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] shadow-xl sticky top-0 z-20">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setLocation("/")}
+                  className="rounded-full text-white hover:bg-white/20"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </Button>
+                <h1 className="font-heading text-2xl text-white flex items-center gap-2">
+                  <ShieldAlert className="w-6 h-6" />
+                  Admin Panel
+                </h1>
+              </div>
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
+          </header>
+
+          <main className="container mx-auto px-4 py-8">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Users</p>
+                      <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalUsers || 0}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Stories</p>
+                      <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalStories || 0}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                      <Bookmark className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Bookmarks</p>
+                      <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalBookmarks || 0}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                      <Clock className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Avg Stories/User</p>
+                      <p className="text-3xl font-heading text-[#E5683A]">{stats?.averageStoriesPerUser || "0"}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
+                      <Plus className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Recent Stories</p>
+                      <p className="text-3xl font-heading text-[#E5683A]">{stats?.recentStoriesCount || 0}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
-          </div>
-        </header>
 
-        <main className="container mx-auto px-4 py-8">
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Users</p>
-                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalUsers || 0}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <Tabs defaultValue="stories" className="space-y-6">
+              <TabsList className="bg-white shadow-md border-2 border-[#F5C518] rounded-3xl p-2 h-auto flex flex-wrap gap-2 w-full">
+                <TabsTrigger value="stories" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Manage Stories
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all relative">
+                  <ShieldAlert className="w-4 h-4 mr-2" />
+                  Review Pending
+                  {pendingStories.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-lg font-bold">
+                      {pendingStories.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="payments" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Payment Proofs
+                </TabsTrigger>
+                <TabsTrigger value="users" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <Users className="w-4 h-4 mr-2" />
+                  User Management
+                </TabsTrigger>
+                <TabsTrigger value="plans" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Subscription Plans
+                </TabsTrigger>
+                <TabsTrigger value="coins" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <Coins className="w-4 h-4 mr-2" />
+                  Coin System
+                </TabsTrigger>
+                <TabsTrigger value="content" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Content Options
+                </TabsTrigger>
+              </TabsList>
 
-            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    <BookOpen className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Stories</p>
-                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalStories || 0}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    <Bookmark className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Total Bookmarks</p>
-                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.totalBookmarks || 0}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#E5683A] to-[#d94f25] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    <Clock className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Avg Stories/User</p>
-                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.averageStoriesPerUser || "0"}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-              <Card className="rounded-3xl border-2 border-[#F5C518] bg-gradient-to-br from-[#FFF8E7] to-[#FFE8CC] shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#FFD54F] to-[#FFC107] rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                    <Plus className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#d94f25] uppercase tracking-wider font-bold">Recent Stories</p>
-                    <p className="text-3xl font-heading text-[#E5683A]">{stats?.recentStoriesCount || 0}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          <Tabs defaultValue="stories" className="space-y-6">
-            <TabsList className="bg-white shadow-md border-2 border-[#F5C518] rounded-3xl p-2 h-auto flex flex-wrap gap-2 w-full">
-              <TabsTrigger value="stories" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Manage Stories
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all relative">
-                <ShieldAlert className="w-4 h-4 mr-2" />
-                Review Pending
-                {pendingStories.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center animate-pulse border-2 border-white shadow-lg font-bold">
-                    {pendingStories.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Payment Proofs
-              </TabsTrigger>
-              <TabsTrigger value="users" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <Users className="w-4 h-4 mr-2" />
-                User Management
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <DollarSign className="w-4 h-4 mr-2" />
-                Subscription Plans
-              </TabsTrigger>
-              <TabsTrigger value="coins" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <Coins className="w-4 h-4 mr-2" />
-                Coin System
-              </TabsTrigger>
-              <TabsTrigger value="content" className="rounded-2xl flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#E5683A] data-[state=active]:to-[#d94f25] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                <Settings className="w-4 h-4 mr-2" />
-                Content Options
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="stories">
-              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
-                  <div>
-                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📚 Published Stories</CardTitle>
-                    <CardDescription className="text-[#d94f25]">All stories currently visible on the platform</CardDescription>
-                  </div>
-                  <Button 
-                    onClick={() => setShowAddStory(true)}
-                    className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Story
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                          <TableHead className="text-[#E5683A] font-bold">Story</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Language</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Category</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Type</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Author</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Audience</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
-                          <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {allStories.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                              No stories found.
-                            </TableCell>
+              <TabsContent value="stories">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                    <div>
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">📚 Published Stories</CardTitle>
+                      <CardDescription className="text-[#d94f25]">All stories currently visible on the platform</CardDescription>
+                    </div>
+                    <Button
+                      onClick={() => setShowAddStory(true)}
+                      className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Story
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                            <TableHead className="text-[#E5683A] font-bold">Story</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Language</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Category</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Type</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Author</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Audience</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
+                            <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
                           </TableRow>
-                        ) : (
-                          allStories.map((story, idx) => (
-                            <TableRow key={story.id} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
-                              <TableCell>
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#F5C518] shadow-md">
-                                    <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
-                                  </div>
-                                  <span className="font-medium line-clamp-1 text-[#E5683A]">{story.title}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
-                                  {story.language}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="secondary" className="capitalize rounded-lg bg-[#FFE8CC] text-[#d94f25]">
-                                  {story.category}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm text-[#E5683A] font-medium capitalize">{story.storyType}</span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex flex-col">
-                                  <span className="text-xs font-mono truncate max-w-[100px] text-[#E5683A]">{story.userId.substring(0, 8)}</span>
-                                  {story.isCreatorAdmin && (
-                                    <Badge variant="default" className="w-fit text-[10px] h-4 py-0 rounded-full bg-[#E5683A]">Admin</Badge>
-                                  )}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
-                                  {story.audience}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge 
-                                  className={`capitalize rounded-lg font-bold ${
-                                    story.status === 'published' ? 'bg-green-100 text-green-700' :
-                                    story.status === 'pending_review' ? 'bg-[#FFE8CC] text-[#d94f25]' :
-                                    story.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                    'bg-gray-100 text-gray-700'
-                                  }`}
-                                >
-                                  {story.status}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => deleteStoryMutation.mutate(story.id)}
-                                  disabled={deleteStoryMutation.isPending}
-                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                        </TableHeader>
+                        <TableBody>
+                          {allStories.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                                No stories found.
                               </TableCell>
                             </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="pending">
-              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                  <CardTitle className="font-heading text-2xl text-[#E5683A]">⏳ Pending Review</CardTitle>
-                  <CardDescription className="text-[#d94f25]">Review and approve user-submitted stories</CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  {pendingStories.length === 0 ? (
-                    <div className="text-center py-20 flex flex-col items-center gap-4">
-                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
-                        <CheckCircle className="w-8 h-8 text-green-600" />
-                      </div>
-                      <p className="text-lg font-bold text-[#E5683A]">All caught up!</p>
-                      <p className="text-[#d94f25]">There are no pending stories to review right now.</p>
+                          ) : (
+                            allStories.map((story, idx) => (
+                              <TableRow key={story.id} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#F5C518] shadow-md">
+                                      <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
+                                    </div>
+                                    <span className="font-medium line-clamp-1 text-[#E5683A]">{story.title}</span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
+                                    {story.language}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="secondary" className="capitalize rounded-lg bg-[#FFE8CC] text-[#d94f25]">
+                                    {story.category}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-sm text-[#E5683A] font-medium capitalize">{story.storyType}</span>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex flex-col">
+                                    <span className="text-xs font-mono truncate max-w-[100px] text-[#E5683A]">{story.userId.substring(0, 8)}</span>
+                                    {story.isCreatorAdmin && (
+                                      <Badge variant="default" className="w-fit text-[10px] h-4 py-0 rounded-full bg-[#E5683A]">Admin</Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
+                                    {story.audience}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    className={`capitalize rounded-lg font-bold ${story.status === 'published' ? 'bg-green-100 text-green-700' :
+                                      story.status === 'pending_review' ? 'bg-[#FFE8CC] text-[#d94f25]' :
+                                        story.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                          'bg-gray-100 text-gray-700'
+                                      }`}
+                                  >
+                                    {story.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => deleteStoryMutation.mutate(story.id)}
+                                    disabled={deleteStoryMutation.isPending}
+                                    className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {pendingStories.map((story) => (
-                        <motion.div key={story.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-                          <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
-                            <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-[#FFE8CC] to-[#FFF8E7]">
-                              <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
-                              <div className="absolute top-2 right-2 flex gap-2">
-                                <Badge className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white shadow-lg">
-                                  {story.language}
-                                </Badge>
-                              </div>
-                            </div>
-                            <CardContent className="p-4 space-y-4">
-                              <div>
-                                <h3 className="font-heading text-lg text-[#E5683A] leading-tight mb-1">{story.title}</h3>
-                                <p className="text-sm text-[#d94f25] line-clamp-2">{story.summary}</p>
-                              </div>
-                              
-                              <div className="flex flex-wrap gap-2">
-                                <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">{story.category}</Badge>
-                                <Badge variant="outline" className="text-[10px] bg-[#FFE8CC] border-[#F5C518] text-[#d94f25]">{story.storyType}</Badge>
-                                <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">By: {story.userId.substring(0, 8)}...</Badge>
-                              </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                              <div className="pt-2 flex gap-2">
-                                <Button 
-                                  onClick={() => setReviewingStory(story)}
-                                  className="flex-1 rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
-                                >
-                                  Review Story
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="icon"
-                                  onClick={() => {
-                                    window.open(`/story/${story.id}`, '_blank');
-                                  }}
-                                  className="rounded-2xl border-[#F5C518] hover:bg-[#FFF8E7]"
-                                >
-                                  <BookOpen className="w-4 h-4 text-[#E5683A]" />
-                                </Button>
+              <TabsContent value="pending">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">⏳ Pending Review</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Review and approve user-submitted stories</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {pendingStories.length === 0 ? (
+                      <div className="text-center py-20 flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
+                          <CheckCircle className="w-8 h-8 text-green-600" />
+                        </div>
+                        <p className="text-lg font-bold text-[#E5683A]">All caught up!</p>
+                        <p className="text-[#d94f25]">There are no pending stories to review right now.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {pendingStories.map((story) => (
+                          <motion.div key={story.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                            <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
+                              <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-[#FFE8CC] to-[#FFF8E7]">
+                                <img src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
+                                <div className="absolute top-2 right-2 flex gap-2">
+                                  <Badge className="bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white shadow-lg">
+                                    {story.language}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <CardContent className="p-4 space-y-4">
+                                <div>
+                                  <h3 className="font-heading text-lg text-[#E5683A] leading-tight mb-1">{story.title}</h3>
+                                  <p className="text-sm text-[#d94f25] line-clamp-2">{story.summary}</p>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">{story.category}</Badge>
+                                  <Badge variant="outline" className="text-[10px] bg-[#FFE8CC] border-[#F5C518] text-[#d94f25]">{story.storyType}</Badge>
+                                  <Badge variant="outline" className="text-[10px] bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">By: {story.userId.substring(0, 8)}...</Badge>
+                                </div>
+
+                                <div className="pt-2 flex gap-2">
+                                  <Button
+                                    onClick={() => setReviewingStory(story)}
+                                    className="flex-1 rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
+                                  >
+                                    Review Story
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => {
+                                      window.open(`/story/${story.id}`, '_blank');
+                                    }}
+                                    className="rounded-2xl border-[#F5C518] hover:bg-[#FFF8E7]"
+                                  >
+                                    <BookOpen className="w-4 h-4 text-[#E5683A]" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="payments">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">💳 Payment Reviews</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Approve or reject manual subscription payments</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <PaymentProofList />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="users">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                    <CardTitle className="font-heading text-2xl text-[#E5683A]">👥 User Management</CardTitle>
+                    <CardDescription className="text-[#d94f25]">Manage user accounts, admin status, and blocks</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                            <TableHead className="text-[#E5683A] font-bold">User</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Subscription</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Coins</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Stories</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Trial Ends</TableHead>
+                            <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
+                            <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {users.map((user, idx) => (
+                            <TableRow key={user.userId} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
+                              <TableCell className="font-mono text-xs max-w-[150px] truncate text-[#E5683A]">
+                                {user.userId.substring(0, 8)}...
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
+                                  {user.subscriptionStatus}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-1 text-[#E5683A] font-bold">
+                                  <Coins className="w-4 h-4 text-[#FFD54F]" />
+                                  <span>{user.coins}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-[#E5683A] font-bold">{user.storyCount}</TableCell>
+                              <TableCell className="text-[#d94f25]">
+                                {user.trialEndsAt ? formatDate(user.trialEndsAt) : "N/A"}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  {user.isAdmin && <Badge className="bg-[#E5683A] text-white rounded-full">Admin</Badge>}
+                                  {user.isBlocked && <Badge variant="destructive" className="rounded-full">Blocked</Badge>}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleToggleAdmin(user.userId, user.isAdmin)}
+                                    className="h-8 rounded-lg text-[#E5683A] hover:bg-[#FFF8E7]"
+                                  >
+                                    {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleToggleBlockUser(user.userId, user.isBlocked)}
+                                    className={`h-8 rounded-lg ${user.isBlocked ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
+                                  >
+                                    {user.isBlocked ? "Unblock" : "Block"}
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="plans">
+                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                  <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                    <div>
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">🎯 Subscription Plans</CardTitle>
+                      <CardDescription className="text-[#d94f25]">Manage available subscription tiers</CardDescription>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setEditingPlan(null);
+                        planForm.reset();
+                        setFeatures([""]);
+                        setShowPlanDialog(true);
+                      }}
+                      className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Plan
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {subscriptionPlans.map((plan) => (
+                        <motion.div key={plan.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
+                          <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
+                            <div className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] p-4 border-b-2 border-[#F5C518] flex justify-between items-start">
+                              <div>
+                                <h3 className="font-heading text-lg text-[#E5683A]">{plan.name}</h3>
+                                <p className="text-3xl font-bold text-[#d94f25]">{plan.currency} {plan.price}</p>
+                                <p className="text-xs text-[#d94f25] capitalize font-bold">{plan.billingPeriod}</p>
+                              </div>
+                              <Badge variant={plan.isActive ? "default" : "outline"} className={`rounded-full ${plan.isActive ? 'bg-green-100 text-green-700' : ''}`}>
+                                {plan.isActive ? "✓ Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <CardContent className="p-4 flex-1">
+                              <p className="text-sm text-[#d94f25] mb-4 line-clamp-2">{plan.description}</p>
+                              <div className="space-y-2">
+                                <p className="text-xs font-bold uppercase tracking-wider text-[#E5683A]">Features:</p>
+                                <ul className="space-y-1">
+                                  {plan.features.slice(0, 3).map((f, i) => (
+                                    <li key={i} className="text-sm text-[#E5683A] flex items-center gap-2">
+                                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                      {f}
+                                    </li>
+                                  ))}
+                                  {plan.features.length > 3 && (
+                                    <li className="text-xs text-[#d94f25] font-bold">+{plan.features.length - 3} more</li>
+                                  )}
+                                </ul>
                               </div>
                             </CardContent>
+                            <div className="p-4 border-t-2 border-[#F5C518] bg-[#FFF8E7] flex gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 rounded-2xl border-[#F5C518] text-[#E5683A] hover:bg-white"
+                                onClick={() => {
+                                  setEditingPlan(plan);
+                                  planForm.reset({
+                                    name: plan.name,
+                                    description: plan.description,
+                                    price: parseFloat(plan.price as string),
+                                    currency: plan.currency,
+                                    billingPeriod: plan.billingPeriod,
+                                    stripePriceId: plan.stripePriceId || "",
+                                    isActive: plan.isActive,
+                                    maxStories: plan.maxStories || undefined,
+                                  });
+                                  setFeatures(plan.features);
+                                  setShowPlanDialog(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-2xl text-red-500 hover:bg-red-50"
+                                onClick={() => {
+                                  if (confirm("Are you sure you want to delete this plan?")) {
+                                    deletePlanMutation.mutate(plan.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </Card>
                         </motion.div>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            <TabsContent value="payments">
-              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                  <CardTitle className="font-heading text-2xl text-[#E5683A]">💳 Payment Reviews</CardTitle>
-                  <CardDescription className="text-[#d94f25]">Approve or reject manual subscription payments</CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <PaymentProofList />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="users">
-              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
-                  <CardTitle className="font-heading text-2xl text-[#E5683A]">👥 User Management</CardTitle>
-                  <CardDescription className="text-[#d94f25]">Manage user accounts, admin status, and blocks</CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                          <TableHead className="text-[#E5683A] font-bold">User</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Subscription</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Coins</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Stories</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Trial Ends</TableHead>
-                          <TableHead className="text-[#E5683A] font-bold">Status</TableHead>
-                          <TableHead className="text-right text-[#E5683A] font-bold">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {users.map((user, idx) => (
-                          <TableRow key={user.userId} className={idx % 2 === 0 ? 'bg-[#FFF8E7]/30' : ''}>
-                            <TableCell className="font-mono text-xs max-w-[150px] truncate text-[#E5683A]">
-                              {user.userId.substring(0, 8)}...
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="capitalize rounded-lg bg-[#FFF8E7] border-[#F5C518] text-[#E5683A]">
-                                {user.subscriptionStatus}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 text-[#E5683A] font-bold">
-                                <Coins className="w-4 h-4 text-[#FFD54F]" />
-                                <span>{user.coins}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-[#E5683A] font-bold">{user.storyCount}</TableCell>
-                            <TableCell className="text-[#d94f25]">
-                              {user.trialEndsAt ? formatDate(user.trialEndsAt) : "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                {user.isAdmin && <Badge className="bg-[#E5683A] text-white rounded-full">Admin</Badge>}
-                                {user.isBlocked && <Badge variant="destructive" className="rounded-full">Blocked</Badge>}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleToggleAdmin(user.userId, user.isAdmin)}
-                                  className="h-8 rounded-lg text-[#E5683A] hover:bg-[#FFF8E7]"
-                                >
-                                  {user.isAdmin ? "Remove Admin" : "Make Admin"}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleToggleBlockUser(user.userId, user.isBlocked)}
-                                  className={`h-8 rounded-lg ${user.isBlocked ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
-                                >
-                                  {user.isBlocked ? "Unblock" : "Block"}
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="plans">
-              <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
-                  <div>
-                    <CardTitle className="font-heading text-2xl text-[#E5683A]">🎯 Subscription Plans</CardTitle>
-                    <CardDescription className="text-[#d94f25]">Manage available subscription tiers</CardDescription>
-                  </div>
-                  <Button 
-                    onClick={() => {
-                      setEditingPlan(null);
-                      planForm.reset();
-                      setFeatures([""]);
-                      setShowPlanDialog(true);
-                    }}
-                    className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white hover:shadow-lg transition-all"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Plan
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {subscriptionPlans.map((plan) => (
-                      <motion.div key={plan.id} whileHover={{ translateY: -4 }} transition={{ duration: 0.2 }}>
-                        <Card className="rounded-3xl border-2 border-[#F5C518] overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-[#FFF8E7]">
-                          <div className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] p-4 border-b-2 border-[#F5C518] flex justify-between items-start">
-                            <div>
-                              <h3 className="font-heading text-lg text-[#E5683A]">{plan.name}</h3>
-                              <p className="text-3xl font-bold text-[#d94f25]">{plan.currency} {plan.price}</p>
-                              <p className="text-xs text-[#d94f25] capitalize font-bold">{plan.billingPeriod}</p>
-                            </div>
-                            <Badge variant={plan.isActive ? "default" : "outline"} className={`rounded-full ${plan.isActive ? 'bg-green-100 text-green-700' : ''}`}>
-                              {plan.isActive ? "✓ Active" : "Inactive"}
-                            </Badge>
+              <TabsContent value="coins">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                    <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">🪙 Coin Settings</CardTitle>
+                      <CardDescription className="text-[#d94f25]">Configure the story unlock cost</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <form
+                        className="space-y-4"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.currentTarget);
+                          const coins = parseInt(formData.get("coinsPerStory") as string);
+                          apiRequest("PATCH", "/api/admin/coin-settings", { coinsPerStory: coins })
+                            .then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/admin/coin-settings"] });
+                              toast({ title: "Settings updated" });
+                            });
+                        }}
+                      >
+                        <div className="space-y-2">
+                          <label className="text-sm font-bold text-[#E5683A]">Coins required to unlock one story</label>
+                          <div className="flex gap-4">
+                            <Input
+                              name="coinsPerStory"
+                              type="number"
+                              defaultValue={coinSettings?.coinsPerStory || 10}
+                              min={1}
+                              className="rounded-2xl border-[#F5C518] border-2 focus:border-[#E5683A] text-[#E5683A]"
+                            />
+                            <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Save</Button>
                           </div>
-                          <CardContent className="p-4 flex-1">
-                            <p className="text-sm text-[#d94f25] mb-4 line-clamp-2">{plan.description}</p>
-                            <div className="space-y-2">
-                              <p className="text-xs font-bold uppercase tracking-wider text-[#E5683A]">Features:</p>
-                              <ul className="space-y-1">
-                                {plan.features.slice(0, 3).map((f, i) => (
-                                  <li key={i} className="text-sm text-[#E5683A] flex items-center gap-2">
-                                    <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
-                                    {f}
-                                  </li>
-                                ))}
-                                {plan.features.length > 3 && (
-                                  <li className="text-xs text-[#d94f25] font-bold">+{plan.features.length - 3} more</li>
-                                )}
-                              </ul>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                    <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">📋 Plan Coin Costs</CardTitle>
+                      <CardDescription className="text-[#d94f25]">Cost in coins for each subscription plan</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {subscriptionPlans.map((plan) => {
+                          const coinCost = planCoinCosts.find(c => c.planId === plan.id)?.coinCost || 0;
+                          return (
+                            <div key={plan.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
+                              <div>
+                                <p className="font-bold text-[#E5683A]">{plan.name}</p>
+                                <p className="text-xs text-[#d94f25] capitalize">{plan.billingPeriod}</p>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <Input
+                                  type="number"
+                                  value={coinCost}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    apiRequest("POST", "/api/admin/plan-coin-costs", { planId: plan.id, coinCost: val })
+                                      .then(() => queryClient.invalidateQueries({ queryKey: ["/api/admin/plan-coin-costs"] }));
+                                  }}
+                                  className="w-24 rounded-xl border-[#F5C518] text-[#E5683A] font-bold"
+                                />
+                                <Coins className="w-5 h-5 text-[#FFD54F]" />
+                              </div>
                             </div>
-                          </CardContent>
-                          <div className="p-4 border-t-2 border-[#F5C518] bg-[#FFF8E7] flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              className="flex-1 rounded-2xl border-[#F5C518] text-[#E5683A] hover:bg-white"
-                              onClick={() => {
-                                setEditingPlan(plan);
-                                planForm.reset({
-                                  name: plan.name,
-                                  description: plan.description,
-                                  price: parseFloat(plan.price as string),
-                                  currency: plan.currency,
-                                  billingPeriod: plan.billingPeriod,
-                                  stripePriceId: plan.stripePriceId || "",
-                                  isActive: plan.isActive,
-                                  maxStories: plan.maxStories || undefined,
-                                });
-                                setFeatures(plan.features);
-                                setShowPlanDialog(true);
-                              }}
-                            >
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
-                            </Button>
-                            <Button 
-                              variant="ghost" 
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="content">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Categories */}
+                  <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                    <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                      <div>
+                        <CardTitle className="font-heading text-2xl text-[#E5683A]">🏷️ Categories</CardTitle>
+                        <CardDescription className="text-[#d94f25]">Story categories for grouping</CardDescription>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      <form
+                        className="flex gap-2"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.currentTarget);
+                          const name = formData.get("name") as string;
+                          const slug = name.toLowerCase().replace(/ /g, "-");
+                          addCategoryMutation.mutate({ name, slug });
+                          e.currentTarget.reset();
+                        }}
+                      >
+                        <Input name="name" placeholder="New category name" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
+                        <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
+                      </form>
+
+                      <div className="space-y-2">
+                        {categories.map((cat) => (
+                          <div key={cat.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
+                            <span className="font-bold text-[#E5683A]">{cat.name}</span>
+                            <Button
+                              variant="ghost"
                               size="icon"
-                              className="rounded-2xl text-red-500 hover:bg-red-50"
-                              onClick={() => {
-                                if (confirm("Are you sure you want to delete this plan?")) {
-                                  deletePlanMutation.mutate(plan.id);
-                                }
-                              }}
+                              onClick={() => deleteCategoryMutation.mutate(cat.id)}
+                              className="text-red-500 h-8 w-8 hover:bg-red-50"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
-                        </Card>
-                      </motion.div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Story Types */}
+                  <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
+                    <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
+                      <CardTitle className="font-heading text-2xl text-[#E5683A]">📖 Story Types</CardTitle>
+                      <CardDescription className="text-[#d94f25]">Types of stories (lesson, fable, etc)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      <form
+                        className="flex gap-2"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.currentTarget);
+                          const name = formData.get("name") as string;
+                          const slug = name.toLowerCase().replace(/ /g, "-");
+                          addTypeMutation.mutate({ name, slug });
+                          e.currentTarget.reset();
+                        }}
+                      >
+                        <Input name="name" placeholder="New story type" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
+                        <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
+                      </form>
+
+                      <div className="space-y-2">
+                        {storyTypes.map((type) => (
+                          <div key={type.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
+                            <span className="font-bold text-[#E5683A]">{type.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteTypeMutation.mutate(type.id)}
+                              className="text-red-500 h-8 w-8 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </main>
+
+          {/* Review Dialog */}
+          <Dialog open={!!reviewingStory} onOpenChange={() => setReviewingStory(null)}>
+            <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
+              <DialogHeader className="p-6 bg-purple-600 text-white">
+                <DialogTitle className="font-heading text-2xl">Review: {reviewingStory?.title}</DialogTitle>
+                <DialogDescription className="text-purple-100">
+                  Check the story content and decide its status
+                </DialogDescription>
+              </DialogHeader>
+              <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Language</p>
+                    <p className="font-medium capitalize">{reviewingStory?.language}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Audience</p>
+                    <p className="font-medium capitalize">{reviewingStory?.audience}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</p>
+                    <p className="font-medium capitalize">{reviewingStory?.category}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</p>
+                    <p className="font-medium capitalize">{reviewingStory?.storyType}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Summary</p>
+                  <p className="text-sm bg-muted/50 p-3 rounded-xl">{reviewingStory?.summary}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Preview</p>
+                  <div className="text-sm bg-muted/50 p-4 rounded-xl border prose dark:prose-invert max-w-none">
+                    {reviewingStory?.content.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
 
-            <TabsContent value="coins">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                    <CardTitle className="font-heading text-2xl text-[#E5683A]">🪙 Coin Settings</CardTitle>
-                    <CardDescription className="text-[#d94f25]">Configure the story unlock cost</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <form 
-                      className="space-y-4"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        const coins = parseInt(formData.get("coinsPerStory") as string);
-                        apiRequest("PATCH", "/api/admin/coin-settings", { coinsPerStory: coins })
-                          .then(() => {
-                            queryClient.invalidateQueries({ queryKey: ["/api/admin/coin-settings"] });
-                            toast({ title: "Settings updated" });
-                          });
-                      }}
-                    >
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#E5683A]">Coins required to unlock one story</label>
-                        <div className="flex gap-4">
-                          <Input 
-                            name="coinsPerStory" 
-                            type="number" 
-                            defaultValue={coinSettings?.coinsPerStory || 10} 
-                            min={1}
-                            className="rounded-2xl border-[#F5C518] border-2 focus:border-[#E5683A] text-[#E5683A]"
-                          />
-                          <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Save</Button>
+                <div className="space-y-4">
+                  <h4 className="font-bold flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-purple-600" />
+                    Review Actions
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Approval Bonus (Coins)</p>
+                    <Input
+                      type="number"
+                      value={coinsToReward}
+                      onChange={(e) => setCoinsToReward(parseInt(e.target.value) || 0)}
+                      className="rounded-xl"
+                      placeholder="Reward coins for quality"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Rejection Reason (if rejecting)</p>
+                    <Textarea
+                      placeholder="Tell the author why the story was rejected..."
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      className="rounded-xl resize-none"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="p-6 bg-muted/30 flex flex-col sm:flex-row gap-2">
+                <Button
+                  variant="destructive"
+                  className="flex-1 rounded-xl"
+                  onClick={() => {
+                    if (!rejectionReason) {
+                      toast({ title: "Error", description: "Please provide a rejection reason.", variant: "destructive" });
+                      return;
+                    }
+                    reviewStoryMutation.mutate({
+                      id: reviewingStory!.id,
+                      action: "reject",
+                      rejectionReason,
+                    });
+                  }}
+                  disabled={reviewStoryMutation.isPending}
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Reject Story
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    reviewStoryMutation.mutate({
+                      id: reviewingStory!.id,
+                      action: "approve",
+                      coinsReward: coinsToReward,
+                    });
+                  }}
+                  disabled={reviewStoryMutation.isPending}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve & Publish
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Story Dialog */}
+          <Dialog open={showAddStory} onOpenChange={setShowAddStory}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="font-heading text-2xl text-purple-600">Create Admin Story</DialogTitle>
+                <DialogDescription>
+                  Create and publish a high-quality story directly to the platform.
+                </DialogDescription>
+              </DialogHeader>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit((data) => addStoryMutation.mutate(data))} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Story Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter a magical title..." className="rounded-xl" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="summary"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Short Summary</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="What is this story about? (Max 200 chars)"
+                                className="rounded-xl resize-none"
+                                rows={3}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Language</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder="Select language" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="english">English</SelectItem>
+                                  <SelectItem value="malayalam">Malayalam</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="audience"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Audience</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder="Select audience" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="parent">Parent Only</SelectItem>
+                                  <SelectItem value="child">Child Only</SelectItem>
+                                  <SelectItem value="both">Both</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder="Select category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {categories.map((cat) => (
+                                    <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="storyType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Story Type</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="rounded-xl">
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {storyTypes.map((type) => (
+                                    <SelectItem key={type.id} value={type.slug}>{type.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FileUploadField
+                        label="Cover Image"
+                        accept="image/*"
+                        onUploadComplete={(url) => form.setValue("imageUrl", url)}
+                        previewUrl={form.watch("imageUrl")}
+                      />
+
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-900/30 space-y-4">
+                        <h4 className="font-heading text-purple-600 flex items-center gap-2">
+                          <Mic className="w-4 h-4" />
+                          Voice Narration
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {!audioUrl ? (
+                            <Button
+                              type="button"
+                              onClick={isRecording ? stopRecording : startRecording}
+                              variant={isRecording ? "destructive" : "outline"}
+                              className="rounded-xl flex-1"
+                            >
+                              {isRecording ? (
+                                <><Square className="w-4 h-4 mr-2" /> Stop Recording</>
+                              ) : (
+                                <><Mic className="w-4 h-4 mr-2" /> Start Recording</>
+                              )}
+                            </Button>
+                          ) : (
+                            <div className="w-full space-y-3">
+                              <audio src={audioUrl} controls className="w-full h-10" />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={deleteRecording}
+                                className="w-full text-red-500 rounded-xl"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete Narration
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </form>
-                  </CardContent>
-                </Card>
+                    </div>
 
-                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518]">
-                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📋 Plan Coin Costs</CardTitle>
-                    <CardDescription className="text-[#d94f25]">Cost in coins for each subscription plan</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      {subscriptionPlans.map((plan) => {
-                        const coinCost = planCoinCosts.find(c => c.planId === plan.id)?.coinCost || 0;
-                        return (
-                          <div key={plan.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
-                            <div>
-                              <p className="font-bold text-[#E5683A]">{plan.name}</p>
-                              <p className="text-xs text-[#d94f25] capitalize">{plan.billingPeriod}</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <Input 
-                                type="number" 
-                                value={coinCost} 
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value);
-                                  apiRequest("POST", "/api/admin/plan-coin-costs", { planId: plan.id, coinCost: val })
-                                    .then(() => queryClient.invalidateQueries({ queryKey: ["/api/admin/plan-coin-costs"] }));
-                                }}
-                                className="w-24 rounded-xl border-[#F5C518] text-[#E5683A] font-bold"
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="content"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Story Content</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Once upon a time..."
+                                className="rounded-2xl min-h-[500px] leading-relaxed resize-none"
+                                {...field}
                               />
-                              <Coins className="w-5 h-5 text-[#FFD54F]" />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            <TabsContent value="content">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Categories */}
-                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
-                    <div>
-                      <CardTitle className="font-heading text-2xl text-[#E5683A]">🏷️ Categories</CardTitle>
-                      <CardDescription className="text-[#d94f25]">Story categories for grouping</CardDescription>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FileUploadField
+                          label="PDF File (Optional)"
+                          accept="application/pdf"
+                          onUploadComplete={(url) => form.setValue("pdfUrl", url)}
+                          previewUrl={form.watch("pdfUrl")}
+                        />
+                        <FileUploadField
+                          label="Audio File (Optional)"
+                          accept="audio/*"
+                          onUploadComplete={(url) => form.setValue("audioUrl", url)}
+                          previewUrl={form.watch("audioUrl")}
+                        />
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <form 
-                      className="flex gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        const name = formData.get("name") as string;
-                        const slug = name.toLowerCase().replace(/ /g, "-");
-                        addCategoryMutation.mutate({ name, slug });
-                        e.currentTarget.reset();
-                      }}
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      className="w-full py-6 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90"
+                      disabled={addStoryMutation.isPending}
                     >
-                      <Input name="name" placeholder="New category name" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
-                      <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
-                    </form>
+                      {addStoryMutation.isPending ? (
+                        <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Publishing...</>
+                      ) : (
+                        "Publish Admin Story"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
 
-                    <div className="space-y-2">
-                      {categories.map((cat) => (
-                        <div key={cat.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
-                          <span className="font-bold text-[#E5683A]">{cat.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteCategoryMutation.mutate(cat.id)}
-                            className="text-red-500 h-8 w-8 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Plan Dialog */}
+          <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
+            <DialogContent className="max-w-2xl rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="font-heading text-2xl text-purple-600">
+                  {editingPlan ? "Edit Subscription Plan" : "Create New Plan"}
+                </DialogTitle>
+              </DialogHeader>
 
-                {/* Story Types */}
-                <Card className="rounded-3xl border-2 border-[#F5C518] shadow-xl overflow-hidden bg-white">
-                  <CardHeader className="bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] border-b-2 border-[#F5C518] pb-4">
-                    <CardTitle className="font-heading text-2xl text-[#E5683A]">📖 Story Types</CardTitle>
-                    <CardDescription className="text-[#d94f25]">Types of stories (lesson, fable, etc)</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <form 
-                      className="flex gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        const name = formData.get("name") as string;
-                        const slug = name.toLowerCase().replace(/ /g, "-");
-                        addTypeMutation.mutate({ name, slug });
-                        e.currentTarget.reset();
-                      }}
-                    >
-                      <Input name="name" placeholder="New story type" className="rounded-2xl border-[#F5C518] border-2 flex-1" required />
-                      <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#E5683A] to-[#d94f25] text-white">Add</Button>
-                    </form>
-
-                    <div className="space-y-2">
-                      {storyTypes.map((type) => (
-                        <div key={type.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FFF8E7] to-[#FFE8CC] rounded-2xl border-2 border-[#F5C518]">
-                          <span className="font-bold text-[#E5683A]">{type.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteTypeMutation.mutate(type.id)}
-                            className="text-red-500 h-8 w-8 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </main>
-
-        {/* Review Dialog */}
-      <Dialog open={!!reviewingStory} onOpenChange={() => setReviewingStory(null)}>
-        <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
-          <DialogHeader className="p-6 bg-purple-600 text-white">
-            <DialogTitle className="font-heading text-2xl">Review: {reviewingStory?.title}</DialogTitle>
-            <DialogDescription className="text-purple-100">
-              Check the story content and decide its status
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Language</p>
-                <p className="font-medium capitalize">{reviewingStory?.language}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Audience</p>
-                <p className="font-medium capitalize">{reviewingStory?.audience}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</p>
-                <p className="font-medium capitalize">{reviewingStory?.category}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</p>
-                <p className="font-medium capitalize">{reviewingStory?.storyType}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Summary</p>
-              <p className="text-sm bg-muted/50 p-3 rounded-xl">{reviewingStory?.summary}</p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Preview</p>
-              <div className="text-sm bg-muted/50 p-4 rounded-xl border prose dark:prose-invert max-w-none">
-                {reviewingStory?.content.split('\n').map((line, i) => (
-                  <p key={i}>{line}</p>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-purple-600" />
-                Review Actions
-              </h4>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Approval Bonus (Coins)</p>
-                <Input 
-                  type="number" 
-                  value={coinsToReward}
-                  onChange={(e) => setCoinsToReward(parseInt(e.target.value) || 0)}
-                  className="rounded-xl"
-                  placeholder="Reward coins for quality"
-                />
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Rejection Reason (if rejecting)</p>
-                <Textarea 
-                  placeholder="Tell the author why the story was rejected..."
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  className="rounded-xl resize-none"
-                  rows={3}
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="p-6 bg-muted/30 flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="destructive"
-              className="flex-1 rounded-xl"
-              onClick={() => {
-                if (!rejectionReason) {
-                  toast({ title: "Error", description: "Please provide a rejection reason.", variant: "destructive" });
-                  return;
-                }
-                reviewStoryMutation.mutate({
-                  id: reviewingStory!.id,
-                  action: "reject",
-                  rejectionReason,
-                });
-              }}
-              disabled={reviewStoryMutation.isPending}
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Reject Story
-            </Button>
-            <Button
-              className="flex-1 rounded-xl bg-green-600 hover:bg-green-700"
-              onClick={() => {
-                reviewStoryMutation.mutate({
-                  id: reviewingStory!.id,
-                  action: "approve",
-                  coinsReward: coinsToReward,
-                });
-              }}
-              disabled={reviewStoryMutation.isPending}
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Approve & Publish
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Story Dialog */}
-      <Dialog open={showAddStory} onOpenChange={setShowAddStory}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-2xl text-purple-600">Create Admin Story</DialogTitle>
-            <DialogDescription>
-              Create and publish a high-quality story directly to the platform.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => addStoryMutation.mutate(data))} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Story Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter a magical title..." className="rounded-xl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="summary"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Short Summary</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="What is this story about? (Max 200 chars)" 
-                            className="rounded-xl resize-none" 
-                            rows={3}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
+              <Form {...planForm}>
+                <form
+                  onSubmit={planForm.handleSubmit((data) => {
+                    const finalData = { ...data, features };
+                    savePlanMutation.mutate(finalData as any);
+                  })}
+                  className="space-y-4"
+                >
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
-                      control={form.control}
-                      name="language"
+                      control={planForm.control}
+                      name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Language</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="rounded-xl">
-                                <SelectValue placeholder="Select language" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="english">English</SelectItem>
-                              <SelectItem value="malayalam">Malayalam</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <FormLabel>Plan Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Monthly Pass" className="rounded-xl" {...field} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
-                      control={form.control}
-                      name="audience"
+                      control={planForm.control}
+                      name="billingPeriod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Audience</FormLabel>
+                          <FormLabel>Billing Period</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger className="rounded-xl">
-                                <SelectValue placeholder="Select audience" />
+                                <SelectValue placeholder="Select period" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="parent">Parent Only</SelectItem>
-                              <SelectItem value="child">Child Only</SelectItem>
-                              <SelectItem value="both">Both</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                              <SelectItem value="lifetime">Lifetime</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1503,48 +1808,42 @@ export default function AdminPanel() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <FormField
-                      control={form.control}
-                      name="category"
+                      control={planForm.control}
+                      name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="rounded-xl">
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormLabel>Price</FormLabel>
+                          <FormControl>
+                            <Input type="number" className="rounded-xl" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
-                      control={form.control}
-                      name="storyType"
+                      control={planForm.control}
+                      name="currency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Story Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="rounded-xl">
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {storyTypes.map((type) => (
-                                <SelectItem key={type.id} value={type.slug}>{type.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormLabel>Currency</FormLabel>
+                          <FormControl>
+                            <Input placeholder="INR" className="rounded-xl" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={planForm.control}
+                      name="maxStories"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Stories (Optional)</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="Unlimited" className="rounded-xl" {...field} onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)} />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1552,288 +1851,72 @@ export default function AdminPanel() {
                   </div>
 
                   <FormField
-                    control={form.control}
-                    name="imageUrl"
+                    control={planForm.control}
+                    name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cover Image URL</FormLabel>
+                        <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Input placeholder="Unsplash URL or other..." className="rounded-xl" {...field} />
+                          <Textarea placeholder="What's included in this plan?" className="rounded-xl resize-none" rows={2} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-900/30 space-y-4">
-                    <h4 className="font-heading text-purple-600 flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      Voice Narration
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {!audioUrl ? (
+                  <div className="space-y-2">
+                    <FormLabel>Features List</FormLabel>
+                    {features.map((feature, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={feature}
+                          onChange={(e) => {
+                            const newFeatures = [...features];
+                            newFeatures[index] = e.target.value;
+                            setFeatures(newFeatures);
+                          }}
+                          placeholder="Enter feature..."
+                          className="rounded-xl flex-1"
+                        />
                         <Button
                           type="button"
-                          onClick={isRecording ? stopRecording : startRecording}
-                          variant={isRecording ? "destructive" : "outline"}
-                          className="rounded-xl flex-1"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (features.length > 1) {
+                              setFeatures(features.filter((_, i) => i !== index));
+                            }
+                          }}
+                          className="rounded-xl text-red-500"
                         >
-                          {isRecording ? (
-                            <><Square className="w-4 h-4 mr-2" /> Stop Recording</>
-                          ) : (
-                            <><Mic className="w-4 h-4 mr-2" /> Start Recording</>
-                          )}
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      ) : (
-                        <div className="w-full space-y-3">
-                          <audio src={audioUrl} controls className="w-full h-10" />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={deleteRecording}
-                            className="w-full text-red-500 rounded-xl"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete Narration
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Story Content</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Once upon a time..." 
-                            className="rounded-2xl min-h-[500px] leading-relaxed resize-none" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="pdfUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>PDF File URL (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." className="rounded-xl" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="audioUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Audio File URL (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." className="rounded-xl" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full py-6 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90"
-                  disabled={addStoryMutation.isPending}
-                >
-                  {addStoryMutation.isPending ? (
-                    <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Publishing...</>
-                  ) : (
-                    "Publish Admin Story"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Plan Dialog */}
-      <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
-        <DialogContent className="max-w-2xl rounded-3xl">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-2xl text-purple-600">
-              {editingPlan ? "Edit Subscription Plan" : "Create New Plan"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <Form {...planForm}>
-            <form 
-              onSubmit={planForm.handleSubmit((data) => {
-                const finalData = { ...data, features };
-                savePlanMutation.mutate(finalData as any);
-              })} 
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={planForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Plan Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Monthly Pass" className="rounded-xl" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={planForm.control}
-                  name="billingPeriod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Billing Period</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="rounded-xl">
-                            <SelectValue placeholder="Select period" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
-                          <SelectItem value="lifetime">Lifetime</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <FormField
-                  control={planForm.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <Input type="number" className="rounded-xl" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={planForm.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <FormControl>
-                        <Input placeholder="INR" className="rounded-xl" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={planForm.control}
-                  name="maxStories"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Max Stories (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="Unlimited" className="rounded-xl" {...field} onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={planForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="What's included in this plan?" className="rounded-xl resize-none" rows={2} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <FormLabel>Features List</FormLabel>
-                {features.map((feature, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input 
-                      value={feature} 
-                      onChange={(e) => {
-                        const newFeatures = [...features];
-                        newFeatures[index] = e.target.value;
-                        setFeatures(newFeatures);
-                      }}
-                      placeholder="Enter feature..."
-                      className="rounded-xl flex-1"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => {
-                        if (features.length > 1) {
-                          setFeatures(features.filter((_, i) => i !== index));
-                        }
-                      }}
-                      className="rounded-xl text-red-500"
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setFeatures([...features, ""])}
+                      className="w-full rounded-xl border-dashed"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-4 h-4 mr-2" /> Add Feature
                     </Button>
                   </div>
-                ))}
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setFeatures([...features, ""])}
-                  className="w-full rounded-xl border-dashed"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Feature
-                </Button>
-              </div>
 
-              <DialogFooter className="pt-4">
-                <Button 
-                  type="submit" 
-                  className="w-full rounded-2xl bg-purple-600 hover:bg-purple-700"
-                  disabled={savePlanMutation.isPending}
-                >
-                  {savePlanMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : (editingPlan ? "Update Plan" : "Create Plan")}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-      </div>
+                  <DialogFooter className="pt-4">
+                    <Button
+                      type="submit"
+                      className="w-full rounded-2xl bg-purple-600 hover:bg-purple-700"
+                      disabled={savePlanMutation.isPending}
+                    >
+                      {savePlanMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : (editingPlan ? "Update Plan" : "Create Plan")}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       )}
     </div>
   );
