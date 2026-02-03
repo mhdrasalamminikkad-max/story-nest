@@ -2880,6 +2880,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get pending stories for review
+  app.get("/api/admin/pending-stories", authenticateUser, requireAdmin, async (req, res) => {
+    try {
+      console.log("🔍 Fetching pending stories...");
+      const pendingStories = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.status, "pending"))
+        .orderBy(desc(stories.createdAt));
+
+      const storiesWithTimestamp = pendingStories.map(story => ({
+        ...story,
+        createdAt: story.createdAt.getTime(),
+        reviewedAt: story.reviewedAt?.getTime(),
+      }));
+
+      console.log(`✅ Found ${storiesWithTimestamp.length} pending stories`);
+      res.json(storiesWithTimestamp);
+    } catch (error) {
+      console.error("Error fetching pending stories:", error);
+      res.status(500).json({ error: "Failed to fetch pending stories" });
+    }
+  });
+
   return httpServer;
 }
 

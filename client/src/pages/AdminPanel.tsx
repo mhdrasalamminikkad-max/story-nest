@@ -254,10 +254,21 @@ export default function AdminPanel() {
   // Admin credentials - change these to your secret credentials
   const ADMIN_PASSWORD = "caliph786786"; // Change this to your secret password
 
+  // Auto-login if password is saved
+  if (!isAuthenticated && localStorage.getItem("admin_password") === ADMIN_PASSWORD) {
+    setIsAuthenticated(true);
+    setShowPasswordDialog(false);
+  }
+
   const handlePasswordSubmit = () => {
     if (passwordInput.trim() === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       setShowPasswordDialog(false);
+      localStorage.setItem("admin_password", ADMIN_PASSWORD);
+
+      // Force reload to apply headers if needed, or queryClient will pick it up
+      queryClient.invalidateQueries();
+
       toast({
         title: "Success",
         description: "Admin panel access granted!",

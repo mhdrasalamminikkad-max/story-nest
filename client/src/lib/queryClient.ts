@@ -57,6 +57,12 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  // Add Admin Password Header if exists (for Admin Panel)
+  const adminPassword = localStorage.getItem("admin_password");
+  if (adminPassword) {
+    headers["x-admin-password"] = adminPassword;
+  }
+
   // Handle Base URL for Native Apps (Kiosk Mode)
   let baseUrl = "";
   try {
@@ -94,6 +100,12 @@ export const getQueryFn: <T>(options: {
       const headers: Record<string, string> = {};
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      // Add Admin Password Header if exists (for Admin Panel)
+      const adminPassword = localStorage.getItem("admin_password");
+      if (adminPassword) {
+        headers["x-admin-password"] = adminPassword;
       }
 
       // Handle Base URL for Native Apps

